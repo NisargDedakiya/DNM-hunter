@@ -1,0 +1,228 @@
+"""
+Memory-aware admission control for scan containers (Part 1 of the memory governor).
+
+The orchestrator spawns scan jobs (full/partial recon, ai-attack, gvm, github,
+trufflehog), each of which also spawns sibling tool containers. This ledger
+decides whether there is room to start another one WITHOUT risking host OOM.
+
+It reserves each job's expected peak (its "envelope"), not its current usage,
+because containers allocate lazily: reading instantaneous free RAM would let many
+jobs each see "plenty free" and then grow into a joint OOM. A job is admitted only
+when its envelope still fits the scan pool AND live MemAvailable has headroom AND
+we are not already in a critical-pressure state.
+
+Pure and dependency-light (only resource_governor + stdlib) so it is unit-testable
+without Docker. The mem/pressure sources are injectable for tests.
+"""
+
+import asyncio
+import os
+from typing import Callable, Dict, Optional, Tuple
+
+import resource_governor as rg
+
+# Built-in fallback baseline if neither env nor profile provides one: assume the
+# always-on core services need ~6 GB. Deliberately generous (safe, not aggressive).
+_FALLBACK_SERVICE_BASELINE = 6 * 1024 ** 3
+_FALLBACK_OS_HEADROOM = 2 * 1024 ** 3
+
+
+class AdmissionError(ValueError):
+    """Raised when a scan cannot be admitted. Subclasses ValueError so existing
+    `except ValueError` handlers in the API return a clean 4xx today; carries the
+    typed `.result` for the Part 5 limit-modal payload."""
+
+    def __init__(self, result: "AdmissionResult"):
+        self.result = result
+        super().__init__(result.detail or "scan admission denied")
+
+
+class AdmissionResult:
+    """Outcome of a try_admit() call. Mirrors the Part 5 limit-modal payload."""
+
+    def __init__(self, admitted: bool, *, limit_type: Optional[str] = None,
+                 resource: str = "scan", current: int = 0, ceiling: int = 0,
+                 setting_name: Optional[str] = None, detail: str = ""):
+        self.admitted = admitted
+        self.limit_type = limit_type          # None | "hard" | "ram"
+        self.resource = resource
+        self.current = current
+        self.ceiling = ceiling
+        self.setting_name = setting_name
+        self.detail = detail
+
+    def payload(self) -> dict:
+        return {
+            "admitted": self.admitted,
+            "limitType": self.limit_type,
+            "resource": self.resource,
+            "current": self.current,
+            "ceiling": self.ceiling,
+            "settingName": self.setting_name,
+            "detail": self.detail,
+        }
+
+
+class ReservationLedger:
+    def __init__(self,
+                 mem_reader: Callable[[], Optional[Tuple[int, int]]] = rg.read_mem,
+                 pressure_fn: Callable[[], str] = rg.pressure):
+        self._mem_reader = mem_reader
+        self._pressure_fn = pressure_fn
+        self._committed: Dict[str, int] = {}      # key -> reserved bytes
+        self._lock = asyncio.Lock()
+
+    # --- configuration (read fresh so env changes / test overrides apply) -----
+
+    def os_headroom(self) -> int:
+        return rg.env_bytes("OS_HEADROOM_MEM", _FALLBACK_OS_HEADROOM)
+
+    def service_baseline(self) -> int:
+        env = rg.env_bytes("SERVICE_BASELINE_MEM", None)
+        if env is not None:
+            return env
+        prof = rg.envelope("service_baseline_bytes")
+        return prof if prof else _FALLBACK_SERVICE_BASELINE
+
+    def host_total(self) -> int:
+        mem = self._mem_reader()
+        return mem[0] if mem else 0
+
+    def available(self) -> int:
+        mem = self._mem_reader()
+        return mem[1] if mem else 0
+
+    def scan_pool(self) -> int:
+        return max(0, self.host_total() - self.os_headroom() - self.service_baseline())
+
+    def max_concurrent_global(self, envelope: int) -> Optional[int]:
+        """Optional secondary hard count cap. None = bytes-ledger only.
+
+        Unset -> None (no count cap). An explicit value >= 0 is honored, so
+        RECON_MAX_CONCURRENT_GLOBAL=0 correctly blocks ALL new scans (a valid
+        "pause" knob) rather than disabling the cap."""
+        raw = os.environ.get("RECON_MAX_CONCURRENT_GLOBAL")
+        if raw is None or raw.strip() == "":
+            return None
+        try:
+            val = int(float(raw))
+        except (TypeError, ValueError):
+            return None
+        return max(0, val)
+
+    # --- accounting -----------------------------------------------------------
+
+    def committed_bytes(self) -> int:
+        return sum(self._committed.values())
+
+    def active_count(self) -> int:
+        return len(self._committed)
+
+    def remaining_for_new(self) -> int:
+        """RAM actually available to admit a new job (for the /system/stats UI)."""
+        by_pool = self.scan_pool() - self.committed_bytes()
+        by_live = self.available() - self.os_headroom()
+        return max(0, min(by_pool, by_live))
+
+    # --- admission ------------------------------------------------------------
+
+    async def try_admit(self, key: str, envelope: int) -> AdmissionResult:
+        """Reserve `envelope` bytes for `key` if it fits; otherwise reject with a
+        typed reason. Idempotent: re-admitting an already-committed key is a no-op
+        success (keeps retries safe)."""
+        if not rg.governor_enabled():
+            async with self._lock:
+                self._committed[key] = envelope
+            return AdmissionResult(True)
+        async with self._lock:
+            if key in self._committed:
+                # Idempotent re-admit; keep the LARGER reservation so an escalated
+                # envelope never under-counts.
+                self._committed[key] = max(self._committed[key], envelope)
+                return AdmissionResult(True)
+
+            # Secondary hard count cap (explicit operator ceiling; 0 blocks all).
+            cap = self.max_concurrent_global(envelope)
+            if cap is not None and len(self._committed) >= cap:
+                return AdmissionResult(
+                    False, limit_type="hard", current=len(self._committed),
+                    ceiling=cap, setting_name="RECON_MAX_CONCURRENT_GLOBAL",
+                    detail=f"{len(self._committed)} of {cap} concurrent scans allowed")
+
+            # Fail OPEN: if host memory is unreadable (no /proc, restricted
+            # container), the governor can't make a safe decision — admit rather
+            # than deny everything. Matches resource_governor.scaled_cap's
+            # fail-open contract so the two halves never disagree.
+            if self._mem_reader() is None:
+                self._committed[key] = envelope
+                return AdmissionResult(True)
+
+            # Critical memory pressure blocks new work outright.
+            if self._pressure_fn() == "critical":
+                return AdmissionResult(
+                    False, limit_type="ram", current=self.available(),
+                    ceiling=self.scan_pool(),
+                    detail="host memory critically low")
+
+            pool = self.scan_pool()
+            committed = self.committed_bytes()
+            # Pool (concurrency) budget bounds CONCURRENT scans; never deny the
+            # SOLE scan on budget grounds (would brick small hosts). The physical
+            # availability check below still guards the first scan.
+            if committed > 0 and committed + envelope > pool:
+                return AdmissionResult(
+                    False, limit_type="ram", current=committed, ceiling=pool,
+                    detail="not enough reserved memory budget for another scan")
+            # Physical reality check: live available RAM must hold this envelope
+            # plus OS headroom (applies to the first scan too).
+            if self.available() < envelope + self.os_headroom():
+                return AdmissionResult(
+                    False, limit_type="ram", current=self.available(),
+                    ceiling=self.scan_pool(),
+                    detail="not enough free memory to start this scan now")
+
+            self._committed[key] = envelope
+            return AdmissionResult(True)
+
+    async def release(self, key: str) -> None:
+        async with self._lock:
+            self._committed.pop(key, None)
+
+    def release_nowait(self, key: str) -> None:
+        """Sync release for callers that aren't in an async context (dict pop is
+        atomic under the GIL; safe against an awaiting try_admit which re-reads
+        committed after acquiring the lock)."""
+        self._committed.pop(key, None)
+
+    def reconcile(self, active_keys) -> int:
+        """Drop any reservation whose scan is no longer active. Leak-proof
+        alternative to hooking every terminal path: the caller passes the set of
+        keys that are genuinely still RUNNING/STARTING and we keep only those.
+        Returns the number of stale reservations released."""
+        active = set(active_keys)
+        stale = [k for k in self._committed if k not in active]
+        for k in stale:
+            self._committed.pop(k, None)
+        return len(stale)
+
+    def envelope_for(self, scan_type: str) -> int:
+        """Per-scan-type envelope: env override wins (if > 0), else measured
+        profile. A 0/invalid override is ignored so it can't defeat the gate."""
+        env = rg.env_bytes("RECON_JOB_ENVELOPE_MEM", None)
+        if env and env > 0:
+            return env
+        return rg.scan_job_envelope(scan_type)
+
+    def snapshot(self) -> dict:
+        """For GET /system/stats (Part 5)."""
+        return {
+            "host_total": self.host_total(),
+            "available": self.available(),
+            "os_headroom": self.os_headroom(),
+            "service_baseline": self.service_baseline(),
+            "scan_pool": self.scan_pool(),
+            "committed": self.committed_bytes(),
+            "active_scans": self.active_count(),
+            "remaining_for_new": self.remaining_for_new(),
+            "pressure": self._pressure_fn(),
+        }

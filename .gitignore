@@ -1,0 +1,236 @@
+# Agent workspace bind-mount (per-project scratch / tool-outputs / jobs)
+agentic/agent-workspace/*
+!agentic/agent-workspace/.gitkeep
+
+# Memory-governor calibration output (host-specific measured envelopes). Each
+# host generates its own via `bash tests/redamon_mem_calibrate.sh`; the governor
+# falls back to safe built-in constants when absent. Never commit one host's
+# numbers for another host to inherit.
+**/resource_profile.json
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+knowledge_base/.redamon-venv/
+.env.local
+
+# Environment variables / Secrets
+.env
+*.env
+.env.*
+!.env.example
+
+# IDE / Editor settings
+.idea/
+.vscode/
+# .claude/ is intentionally tracked for project guidelines
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Recon data files (downloaded at runtime)
+recon/data/resolvers.txt
+
+# Recon output files (contain sensitive scan data)
+recon/output/*.json
+gvm_scan/output/*.json
+github_secret_hunt/output/*.json
+trufflehog_scan/output/*.json
+!recon/output/.gitkeep
+!gvm_scan/output/.gitkeep
+!github_secret_hunt/output/.gitkeep
+!trufflehog_scan/output/.gitkeep
+# AI Attack Surface scan output (garak/pyrit/giskard/promptfoo reports + transcripts)
+ai_attack_surface_scan/output/
+
+# Nmap scan results
+*.nmap
+*.xml
+*.gnmap
+
+# Log files
+*.log
+/logs/
+agentic/logs/
+agentic/cypherfix_codefix/logs/
+agentic/cypherfix_triage/logs/
+
+# Certificates & cryptographic key material
+*.pem
+*.key
+*.crt
+*.cer
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# SSH / PuTTY private keys (default filenames)
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ppk
+
+# Cloud / cluster credentials
+.netrc
+.pgpass
+.kube/
+kubeconfig
+*.kubeconfig
+.aws/credentials
+
+# Password / secret stores
+*.kdbx
+*.kdb
+
+# Database dumps & local DB files
+# NOTE: *.sql is intentionally NOT ignored — Prisma migrations live in
+# webapp/prisma/migrations/**/migration.sql and must stay tracked.
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.dump
+*.sql.gz
+*.sql.bz2
+*.bak
+*.backup
+
+# Terraform state & vars (frequently contain plaintext secrets)
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+
+# Crash dumps
+*.dmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Next.js build output
+.next/
+out/
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Private strategy docs
+agentic/readmes/README.EMPOWER.md
+agentic/readmes/README.CYPHERFIX.md
+agentic/readmes/README.FULLFIX.md
+agentic/readmes/README.TOOL_PLUGINS.md
+readmes/README.EMPOWER.md
+readmes/README.FULLFIX.md
+readmes/README.TOOL_PLUGINS.md
+readmes/README.ATTACK_PATHS.md
+readmes/AGENT.PROMPTS.md
+readmes/agent_prompts/
+
+
+# Internal docs (top-level only — anchored so it does not also ignore nested
+# dirs named "internal", e.g. webapp/src/app/api/internal/)
+/internal/
+
+# RedAmon local config (created by redamon.sh)
+.gvm-enabled
+.kbase-enabled
+.kbase-disabled
+.skipkbase
+
+# Claude Code config
+.claude/
+
+# Benchmark data
+bmark/
+validation-benchmarks/
+
+# Knowledge base runtime data
+knowledge_base/data/
+**/.file_hashes.json
+
+# DevergoLabs
+DevergoLabs/

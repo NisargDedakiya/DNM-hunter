@@ -1,0 +1,448 @@
+"""
+RAM-aware runtime resource governor (dual-cap: hard env ceiling + dynamic cap).
+
+Single source of truth for turning a configured limit (the hard ceiling) into an
+*effective* limit that also respects how much memory is actually available right
+now. It NEVER returns more than the configured value; it only throttles DOWN
+under memory pressure.
+
+Two models (pick by what one unit of the knob is):
+  - RATIO       (scaled)      : in-process concurrency (threads, -c/-t, pool
+                                widths). Proportional throttle on available/total.
+  - BYTE-BUDGET (scaled_cap)  : anything that costs real megabytes (a process /
+                                container / session, or an in-memory *_MAX_* list).
+                                effective = min(env, available * fraction / bytes).
+
+Dependency-free (stdlib only) and platform-uniform: it reads /proc, which exists
+inside every Linux container regardless of whether the host is Linux, macOS, or
+Windows (on Docker Desktop it reports the VM's figures, which is the correct
+ceiling to govern against). Fails OPEN: if /proc is unreadable or the governor is
+disabled, scale()==1.0 and scaled_cap() returns the env value, i.e. current
+behavior.
+
+This file is vendored identically into `recon_orchestrator/resource_governor.py`
+(the orchestrator does not import graph_db). Keep the two byte-identical.
+"""
+
+import json
+import os
+import time
+from typing import Optional, Tuple
+
+# ---------------------------------------------------------------------------
+# Config (env-overridable; DEFAULTS LIVE HERE). Empty/unset env -> default.
+# ---------------------------------------------------------------------------
+
+_MEMINFO_PATH = "/proc/meminfo"
+_STAT_PATH = "/proc/stat"
+
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
+def parse_size(s) -> Optional[int]:
+    """Parse a Docker-style size ('2g', '512m', '1024k', '123') into bytes.
+
+    Returns None on empty/invalid input. Plain numbers are treated as bytes.
+    """
+    if s is None:
+        return None
+    s = str(s).strip().lower()
+    if s == "":
+        return None
+    # tolerate a trailing 'b' (e.g. '512mb') BEFORE reading the unit letter.
+    if s.endswith("b"):
+        s = s[:-1].strip()
+    mult = 1
+    if s and s[-1] in ("k", "m", "g", "t"):
+        mult = {"k": 1024, "m": 1024 ** 2, "g": 1024 ** 3, "t": 1024 ** 4}[s[-1]]
+        s = s[:-1].strip()
+    try:
+        val = float(s)
+    except (TypeError, ValueError):
+        return None
+    if val < 0:
+        return None
+    return int(val * mult)
+
+
+def env_bytes(name: str, default_bytes: Optional[int]) -> Optional[int]:
+    """Read an env var as a byte size (Docker-style suffixes), else the default."""
+    parsed = parse_size(os.environ.get(name))
+    return parsed if parsed is not None else default_bytes
+
+
+def governor_enabled() -> bool:
+    return _env_bool("REDAMON_MEM_GOVERNOR", True)
+
+
+def _scale_high() -> float:
+    return _env_float("MEM_SCALE_HIGH", 0.50)
+
+
+def _scale_low() -> float:
+    return _env_float("MEM_SCALE_LOW", 0.15)
+
+
+def _scale_floor() -> float:
+    return _env_float("MEM_SCALE_FLOOR", 0.15)
+
+
+def _read_ttl() -> float:
+    return _env_float("MEM_READ_TTL_S", 2.0)
+
+
+def budget_fraction() -> float:
+    return _env_float("MEM_BUDGET_FRACTION", 0.10)
+
+
+def safety_tolerance() -> float:
+    return _env_float("MEM_SAFETY_TOLERANCE", 0.25)
+
+
+# ---------------------------------------------------------------------------
+# Test/override hook: let callers inject a synthetic (total, available) so unit
+# tests never depend on the real host. Set to None to use /proc.
+# ---------------------------------------------------------------------------
+
+_mem_override: Optional[Tuple[int, int]] = None
+_mem_cache: Optional[Tuple[int, int]] = None
+_mem_cache_at: float = 0.0
+
+
+def set_mem_override(total: Optional[int], available: Optional[int]) -> None:
+    """Force read_mem() to return these values (bytes). Pass None,None to clear."""
+    global _mem_override, _mem_cache
+    if total is None or available is None:
+        _mem_override = None
+    else:
+        _mem_override = (int(total), int(available))
+    _mem_cache = None  # invalidate cache so the override takes effect immediately
+
+
+def _parse_meminfo(text: str) -> Optional[Tuple[int, int]]:
+    """Return (total_bytes, available_bytes) from /proc/meminfo text, or None."""
+    total_kb = None
+    avail_kb = None
+    for line in text.splitlines():
+        if line.startswith("MemTotal:"):
+            total_kb = _first_int(line)
+        elif line.startswith("MemAvailable:"):
+            avail_kb = _first_int(line)
+        if total_kb is not None and avail_kb is not None:
+            break
+    if total_kb is None or avail_kb is None or total_kb <= 0:
+        return None
+    return total_kb * 1024, avail_kb * 1024
+
+
+def _first_int(line: str) -> Optional[int]:
+    for tok in line.split():
+        if tok.isdigit():
+            return int(tok)
+    return None
+
+
+def read_mem() -> Optional[Tuple[int, int]]:
+    """(total_bytes, available_bytes) from /proc/meminfo (host/VM), cached ~TTL.
+
+    Returns None if unreadable (callers then fail open). An override wins.
+    """
+    global _mem_cache, _mem_cache_at
+    if _mem_override is not None:
+        return _mem_override
+    now = time.monotonic()
+    if _mem_cache is not None and (now - _mem_cache_at) < _read_ttl():
+        return _mem_cache
+    try:
+        with open(_MEMINFO_PATH, "r") as fh:
+            parsed = _parse_meminfo(fh.read())
+    except (OSError, ValueError):
+        parsed = None
+    if parsed is not None:
+        _mem_cache = parsed
+        _mem_cache_at = now
+    return parsed
+
+
+def avail_ratio() -> Optional[float]:
+    """available/total in (0,1], or None if unreadable."""
+    mem = read_mem()
+    if mem is None:
+        return None
+    total, available = mem
+    if total <= 0:
+        return None
+    return max(0.0, min(1.0, available / total))
+
+
+# ---------------------------------------------------------------------------
+# CPU percent (for the /system/stats endpoint). Delta between two /proc/stat
+# reads; first call returns 0.0. Stateful, so not cached by the mem TTL.
+# ---------------------------------------------------------------------------
+
+_cpu_last: Optional[Tuple[int, int]] = None  # (busy, total)
+
+
+def cpu_percent() -> float:
+    """Host/VM CPU utilization percent since the previous call (0..100)."""
+    global _cpu_last
+    try:
+        with open(_STAT_PATH, "r") as fh:
+            first = fh.readline()
+    except OSError:
+        return 0.0
+    if not first.startswith("cpu "):
+        return 0.0
+    parts = [int(x) for x in first.split()[1:] if x.isdigit()]
+    if len(parts) < 4:
+        return 0.0
+    idle = parts[3] + (parts[4] if len(parts) > 4 else 0)  # idle + iowait
+    total = sum(parts)
+    busy = total - idle
+    last = _cpu_last
+    _cpu_last = (busy, total)
+    if last is None:
+        return 0.0
+    d_busy = busy - last[0]
+    d_total = total - last[1]
+    if d_total <= 0:
+        return 0.0
+    return max(0.0, min(100.0, 100.0 * d_busy / d_total))
+
+
+def cpu_cores() -> int:
+    try:
+        return os.cpu_count() or 1
+    except Exception:
+        return 1
+
+
+# ---------------------------------------------------------------------------
+# The two models.
+# ---------------------------------------------------------------------------
+
+def scale() -> float:
+    """Global memory-pressure scale factor in (0,1]. 1.0 = full env ceiling.
+
+    Piecewise: >=HIGH -> 1.0; <=LOW -> FLOOR; linear ramp between. Fails open
+    (1.0) when the governor is disabled or /proc is unreadable.
+    """
+    if not governor_enabled():
+        return 1.0
+    ratio = avail_ratio()
+    if ratio is None:
+        return 1.0
+    high, low, floor = _scale_high(), _scale_low(), _scale_floor()
+    if high <= low:  # misconfigured; be safe
+        return 1.0
+    if ratio >= high:
+        return 1.0
+    if ratio <= low:
+        return floor
+    frac = (ratio - low) / (high - low)
+    return floor + frac * (1.0 - floor)
+
+
+def scaled(value: int, floor: int = 1) -> int:
+    """RATIO model. clamp(round(value*scale()), floor, value). Never exceeds value."""
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return value
+    if value <= 0:
+        return value
+    floor = max(0, min(int(floor), value))
+    if not governor_enabled():
+        return value
+    eff = int(round(value * scale()))
+    return max(floor, min(value, eff))
+
+
+def scaled_cap(env_cap: int, bytes_per_unit: int, fraction: Optional[float] = None,
+               floor: int = 1) -> int:
+    """BYTE-BUDGET model for anything costing real bytes (processes/lists).
+
+    effective = clamp(available * fraction // bytes_per_unit, floor, env_cap).
+    Fails open to env_cap when disabled / unreadable / bad inputs.
+    """
+    try:
+        env_cap = int(env_cap)
+    except (TypeError, ValueError):
+        return env_cap
+    if env_cap <= 0:
+        return env_cap
+    floor = max(0, min(int(floor), env_cap))
+    if not governor_enabled() or not bytes_per_unit or bytes_per_unit <= 0:
+        return env_cap
+    mem = read_mem()
+    if mem is None:
+        return env_cap
+    available = mem[1]
+    frac = budget_fraction() if fraction is None else float(fraction)
+    by_budget = int((available * frac) // bytes_per_unit)
+    return max(floor, min(env_cap, by_budget))
+
+
+def pressure() -> str:
+    """'ok' | 'warn' | 'critical' from the available/total ratio."""
+    ratio = avail_ratio()
+    if ratio is None or not governor_enabled():
+        return "ok"
+    if ratio <= _scale_low():
+        return "critical"
+    if ratio < _scale_high():
+        return "warn"
+    return "ok"
+
+
+# ---------------------------------------------------------------------------
+# resource_profile.json (measured envelopes + bytes-per-unit; Part 0A). Loaded
+# lazily with a built-in fallback so the governor works before calibration.
+# ---------------------------------------------------------------------------
+
+# Conservative built-in fallbacks (bytes). Calibration TIGHTENS these from real
+# measurements; they are intentionally generous so pre-calibration behavior is
+# safe, not aggressive.
+_FALLBACK_PROFILE = {
+    "bytes_per_unit": {
+        "url": 600,
+        "js_file": 65536,
+        "osint_result": 1024,
+        "vhost_candidate": 256,
+    },
+    "tool_container_envelope_bytes": {
+        "_default": 1_500_000_000,
+    },
+    "scan_job_envelope_bytes": {
+        "_default": 4_000_000_000,
+    },
+    "agent_session_envelope_bytes": 512_000_000,
+    "fireteam_member_envelope_bytes": 512_000_000,
+    "plan_tool_slot_envelope_bytes": 400_000_000,
+    "background_job_envelope_bytes": 512_000_000,
+    "mcp_terminal_session_envelope_bytes": 64_000_000,
+    "service_baseline_bytes": None,
+}
+
+_profile_cache: Optional[dict] = None
+
+
+def _profile_path() -> str:
+    p = os.environ.get("RESOURCE_PROFILE_PATH")
+    if p and p.strip():
+        return p.strip()
+    # default: alongside this module
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "resource_profile.json")
+
+
+def load_profile() -> dict:
+    """Measured profile merged over the built-in fallback. Cached."""
+    global _profile_cache
+    if _profile_cache is not None:
+        return _profile_cache
+    merged = json.loads(json.dumps(_FALLBACK_PROFILE))  # deep copy
+    try:
+        with open(_profile_path(), "r") as fh:
+            data = json.load(fh)
+        if isinstance(data, dict):
+            # shallow-merge top-level keys; measured values (already inflated by
+            # tolerance during calibration) win over fallbacks.
+            for k, v in data.items():
+                if isinstance(v, dict) and isinstance(merged.get(k), dict):
+                    merged[k].update(v)
+                else:
+                    merged[k] = v
+    except (OSError, ValueError):
+        pass
+    _profile_cache = merged
+    return merged
+
+
+def reset_profile_cache() -> None:
+    global _profile_cache
+    _profile_cache = None
+
+
+def bytes_per_unit(family: str) -> int:
+    d = load_profile().get("bytes_per_unit", {})
+    return int(d.get(family) or _FALLBACK_PROFILE["bytes_per_unit"].get(family, 1024))
+
+
+def tool_container_envelope(tool: str) -> int:
+    d = load_profile().get("tool_container_envelope_bytes", {})
+    return int(d.get(tool) or d.get("_default") or _FALLBACK_PROFILE["tool_container_envelope_bytes"]["_default"])
+
+
+def scan_job_envelope(scan_type: str) -> int:
+    d = load_profile().get("scan_job_envelope_bytes", {})
+    return int(d.get(scan_type) or d.get("_default") or _FALLBACK_PROFILE["scan_job_envelope_bytes"]["_default"])
+
+
+def envelope(key: str) -> int:
+    """Top-level scalar envelope (e.g. 'agent_session_envelope_bytes').
+
+    A profile value of 0 (or any falsy) is treated as missing so a bad/zero
+    measurement can't silently reserve 0 bytes — fall back to the built-in.
+    """
+    val = load_profile().get(key)
+    if not val:  # None or 0 -> use fallback
+        val = _FALLBACK_PROFILE.get(key)
+    return int(val) if val else 0
+
+
+# ---------------------------------------------------------------------------
+# Cap logging: emit a machine-detectable marker ONLY when a value was reduced,
+# so the recon drawer can render it red. Prints to stdout (recon uses unbuffered
+# stdout), so it rides the existing log pipeline.
+# ---------------------------------------------------------------------------
+
+RESOURCE_CAP_MARKER = "[RESOURCE-CAP]"
+
+
+def _fmt_gb(nbytes: Optional[int]) -> str:
+    if not nbytes:
+        return "?"
+    return f"{nbytes / (1024 ** 3):.1f}"
+
+
+def log_cap(tool: str, param: str, env_value: int, effective: int, reason: str) -> None:
+    """Print the RESOURCE-CAP marker line. Caller must only call when reduced."""
+    mem = read_mem()
+    avail = _fmt_gb(mem[1]) if mem else "?"
+    print(
+        f"{RESOURCE_CAP_MARKER} {tool} {param} {env_value} -> {effective} "
+        f"(avail {avail} GB, {reason})",
+        flush=True,
+    )
+
+
+def scaled_logged(value: int, floor: int, tool: str, param: str) -> int:
+    """RATIO model + auto cap-log when it actually reduces `value`."""
+    eff = scaled(value, floor)
+    if eff < value:
+        log_cap(tool, param, value, eff, "ratio")
+    return eff
+
+
+def budget_logged(env_cap: int, per_unit_bytes: int, tool: str, param: str,
+                  floor: int = 1, fraction: Optional[float] = None) -> int:
+    """BYTE-BUDGET model + auto cap-log when it actually reduces `env_cap`."""
+    eff = scaled_cap(env_cap, per_unit_bytes, fraction, floor)
+    if eff < env_cap:
+        log_cap(tool, param, env_cap, eff, "byte-budget")
+    return eff
