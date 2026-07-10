@@ -98,10 +98,10 @@ describe('GlobalHeader – logo link', () => {
     expect(logoLink.tagName).toBe('A')
   })
 
-  test('logo links to /graph', () => {
+  test('logo links to /dashboard', () => {
     render(<GlobalHeader />)
     const logoLink = getLogoLink()
-    expect(logoLink.getAttribute('href')).toBe('/graph')
+    expect(logoLink.getAttribute('href')).toBe('/dashboard')
   })
 
   test('logo contains the brand image with correct src and alt', () => {
@@ -132,7 +132,7 @@ describe('GlobalHeader – logo link', () => {
   })
 })
 
-describe('GlobalHeader – logo href is /graph on every route', () => {
+describe('GlobalHeader – logo href is /dashboard on every route', () => {
   test.each([
     '/graph',
     '/cypherfix',
@@ -142,11 +142,11 @@ describe('GlobalHeader – logo href is /graph on every route', () => {
     '/settings',
     '/graph/some-sub-view',
     '/projects/123/edit',
-  ])('logo links to /graph when pathname is %s', (route) => {
+  ])('logo links to /dashboard when pathname is %s', (route) => {
     mockPathname = route
     render(<GlobalHeader />)
     const logoLink = getLogoLink()
-    expect(logoLink.getAttribute('href')).toBe('/graph')
+    expect(logoLink.getAttribute('href')).toBe('/dashboard')
   })
 })
 
@@ -167,7 +167,7 @@ describe('GlobalHeader – structure', () => {
 
   test('header contains all core nav links', () => {
     render(<GlobalHeader />)
-    const expectedLabels = ['Red Zone', 'CypherFix', 'Insights', 'Reports']
+    const expectedLabels = ['Dashboard', 'Red Zone', 'CypherFix', 'Insights', 'Reports']
     for (const label of expectedLabels) {
       const link = screen.getByRole('link', { name: new RegExp(label, 'i') })
       expect(link).toBeDefined()

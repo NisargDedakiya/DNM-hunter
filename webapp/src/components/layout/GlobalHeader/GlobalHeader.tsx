@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch } from 'lucide-react'
+import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch, LayoutDashboard } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ProjectSelector } from './ProjectSelector'
 import { UserSelector } from './UserSelector'
@@ -17,6 +17,7 @@ export function GlobalHeader() {
   const { projectId } = useProject()
 
   const coreNav = [
+    { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={14} /> },
     { label: 'Red Zone', href: '/graph', icon: <Crosshair size={14} /> },
     ...(projectId
       ? [{ label: 'Recon Pipeline', href: `/projects/${projectId}/settings`, icon: <GitBranch size={14} /> }]
@@ -28,7 +29,7 @@ export function GlobalHeader() {
 
   return (
     <header className={styles.header}>
-      <Link href="/graph" className={styles.logo}>
+      <Link href="/dashboard" className={styles.logo}>
         <Image src="/logo.png" alt="NisargHunter AI" width={28} height={28} className={styles.logoImg} />
         <span className={styles.logoText}>
           <span className={styles.logoAccent}>NisargHunter</span> AI
