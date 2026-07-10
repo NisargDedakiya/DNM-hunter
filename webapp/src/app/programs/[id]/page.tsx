@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2, Target as TargetIcon } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Target as TargetIcon, KeyRound, Compass } from 'lucide-react'
 import { useProgram, useUpdateProgram, useCreateAsset, useDeleteAsset, PLATFORMS, ASSET_TYPES } from '@/hooks/usePrograms'
 import { useAlertModal, useToast } from '@/components/ui'
 import styles from './page.module.css'
@@ -102,6 +102,14 @@ export default function ProgramDetailPage() {
         <button className={styles.backButton} onClick={() => router.push('/programs')}>
           <ArrowLeft size={14} /> Programs
         </button>
+        <div className={styles.headerActions}>
+          <Link href={`/programs/${programId}/wizard`} className={styles.authManagerLink}>
+            <Compass size={14} /> Manual Hunt Wizard
+          </Link>
+          <Link href={`/programs/${programId}/auth`} className={styles.authManagerLink}>
+            <KeyRound size={14} /> Auth Manager
+          </Link>
+        </div>
       </div>
 
       <div className={styles.grid}>

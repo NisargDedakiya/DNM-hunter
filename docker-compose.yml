@@ -746,6 +746,8 @@ services:
       # Auth
       AUTH_SECRET: ${AUTH_SECRET:-changeme}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-changeme}
+      # Encrypts stored target-application credentials at rest (Phase 07 auth vault)
+      CREDENTIAL_VAULT_ENCRYPTION_KEY: ${CREDENTIAL_VAULT_ENCRYPTION_KEY:-changeme}
       # Backend services (server-side API routes → internal docker network)
       RECON_ORCHESTRATOR_URL: http://recon-orchestrator:8010
       # Sent as X-Orchestrator-Key on every orchestrator call (server-side only).

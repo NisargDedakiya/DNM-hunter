@@ -1043,10 +1043,43 @@ model Program {
   assets          Asset[]
   projects        Project[]
   remediations    Remediation[]
+  authCredentials AuthCredential[]
 
   @@index([userId])
   @@index([userId, status])
   @@map("programs")
+}
+
+// A stored identity for cross-account/IDOR testing against one Program's
+// target: cookies, a JWT, custom auth headers, or an OAuth token, encrypted
+// at rest (see src/lib/credentialVault.ts). Distinct from the app's own
+// login -- these are session credentials for the *target under test*, kept
+// so the Replay tool can re-issue a captured request as a different role
+// and diff the responses.
+model AuthCredential {
+  id          String   @id @default(cuid())
+  programId   String   @map("program_id")
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  label       String   // e.g. "Admin", "Regular user A", "Attacker account"
+  role        String   @default("") // free-text role label, e.g. "admin" | "user" | "guest"
+  authType    String   @default("cookie") @map("auth_type") // cookie | jwt | header | oauth | saml | mfa
+
+  // Encrypted at rest — empty string when unused for this credential's authType.
+  cookiesEncrypted    String @default("") @map("cookies_encrypted") @db.Text
+  jwtEncrypted        String @default("") @map("jwt_encrypted") @db.Text
+  headersEncrypted    String @default("") @map("headers_encrypted") @db.Text
+  oauthTokenEncrypted String @default("") @map("oauth_token_encrypted") @db.Text
+
+  // Non-secret context: SAML IdP config references, MFA backup-code
+  // locations, rotation reminders -- never the credential itself.
+  notes       String   @default("") @db.Text
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([programId])
+  @@map("auth_credentials")
 }
 
 // A single declared-scope entry within a Program: a domain, subdomain, CIDR block,

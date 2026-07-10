@@ -497,6 +497,14 @@ ensure_auth_secrets() {
         echo "MCP_AUTH_TOKEN=$(openssl rand -hex 32)" >> "$env_file"
         info "Generated MCP_AUTH_TOKEN"
     fi
+    # AES-256-GCM key for the auth credential vault (Phase 07): encrypts
+    # stored target-application session cookies/JWTs/OAuth tokens at rest.
+    # Stateless (not baked into any volume), so append-if-absent is safe —
+    # rotating it just invalidates previously-stored vault entries.
+    if ! grep -q '^CREDENTIAL_VAULT_ENCRYPTION_KEY=' "$env_file" 2>/dev/null; then
+        echo "CREDENTIAL_VAULT_ENCRYPTION_KEY=$(openssl rand -hex 32)" >> "$env_file"
+        info "Generated CREDENTIAL_VAULT_ENCRYPTION_KEY"
+    fi
 }
 
 # Compose project name (used to resolve the data-volume names). Must match
