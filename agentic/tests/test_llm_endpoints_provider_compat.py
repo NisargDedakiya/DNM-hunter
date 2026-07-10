@@ -298,6 +298,48 @@ class TakeoverClassifyProviderCompatTests(_LLMEndpointFixture):
 
 
 # ---------------------------------------------------------------------------
+# /llm/recon-plan (Phase 04 — upfront AI recon planner)
+# ---------------------------------------------------------------------------
+
+class ReconPlanProviderCompatTests(_LLMEndpointFixture):
+    REQUEST = {
+        "domain": "acme.example",
+        "enabled_tools": ["crt.sh", "Subfinder", "Amass"],
+        "model": "test-model",
+    }
+    PAYLOAD = {
+        "target_summary": "Likely a mid-size SaaS company's customer-facing product.",
+        "technology_guess": "unknown",
+        "framework_guess": "unknown",
+        "interesting_endpoints": ["/api/", "/admin/", "/.well-known/"],
+        "recommended_scanners": ["crt.sh", "Subfinder"],
+        "estimated_duration_minutes": 20,
+        "likely_vulnerabilities": ["IDOR", "SSRF"],
+    }
+
+    def test_openai_string_content(self):
+        r = self._post_with_stub_llm("/llm/recon-plan", self.REQUEST, _openai_str(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["estimated_duration_minutes"], 20)
+        self.assertEqual(r.json()["recommended_scanners"], ["crt.sh", "Subfinder"])
+
+    def test_bedrock_list_content(self):
+        r = self._post_with_stub_llm("/llm/recon-plan", self.REQUEST, _bedrock_blocks(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["likely_vulnerabilities"], ["IDOR", "SSRF"])
+
+    def test_bedrock_with_tool_use_block(self):
+        r = self._post_with_stub_llm("/llm/recon-plan", self.REQUEST, _bedrock_with_tool_use(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json()["technology_guess"], "unknown")
+
+    def test_malformed_schema_returns_502(self):
+        bad_payload = {"target_summary": "no duration field at all"}
+        r = self._post_with_stub_llm("/llm/recon-plan", self.REQUEST, _openai_str(bad_payload))
+        self.assertEqual(r.status_code, 502, r.text)
+
+
+# ---------------------------------------------------------------------------
 # Regression: would-have-crashed-pre-fix proof
 # ---------------------------------------------------------------------------
 

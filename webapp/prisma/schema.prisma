@@ -869,6 +869,22 @@ model Project {
   purednsWildcardBatch                  Int      @default(0)     @map("puredns_wildcard_batch")
   purednsSkipValidation                 Boolean  @default(false) @map("puredns_skip_validation")
 
+  // Assetfinder (passive subdomain enum, no API key)
+  assetfinderEnabled                    Boolean  @default(true)  @map("assetfinder_enabled")
+  assetfinderMaxResults                 Int      @default(5000)  @map("assetfinder_max_results")
+
+  // Chaos (ProjectDiscovery bug-bounty subdomain dataset — needs a free PDCP key,
+  // same key as the CVE intel rate-limit upgrade)
+  chaosEnabled                          Boolean  @default(false) @map("chaos_enabled")
+  chaosMaxResults                       Int      @default(5000)  @map("chaos_max_results")
+
+  // dnsx (fast bulk DNS existence pre-filter, opt-in speedup)
+  dnsxEnabled                           Boolean  @default(false) @map("dnsx_enabled")
+  dnsxThreads                           Int      @default(100)   @map("dnsx_threads")
+
+  // Upfront AI recon planner (Phase 04) — runs before the discovery fan-out
+  reconAiPlannerEnabled                 Boolean  @default(true)  @map("recon_ai_planner_enabled")
+
   // ========== PHISHING / SOCIAL ENGINEERING SETTINGS ==========
   phishingSmtpConfig                    String   @default("") @map("phishing_smtp_config")
 

@@ -422,6 +422,140 @@ def run_amass(domain: str, settings: dict = None) -> set:
     return subdomains
 
 
+def run_assetfinder(domain: str, settings: dict = None) -> set:
+    """Run assetfinder passive subdomain enumeration (local Go binary, no API key)."""
+    if settings is None:
+        settings = {}
+
+    if not settings.get('ASSETFINDER_ENABLED', True):
+        print(f"[-][Assetfinder] Disabled — skipping")
+        return set()
+
+    max_results = settings.get('ASSETFINDER_MAX_RESULTS', 5000)
+    print(f"[*][Assetfinder] Running passive enumeration...")
+
+    command = ['assetfinder', '--subs-only', domain]
+
+    subdomains = set()
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=300)
+
+        for line in result.stdout.strip().split('\n'):
+            host = line.strip().lower()
+            if host:
+                subdomains.add(host)
+
+        if len(subdomains) > max_results:
+            subdomains = set(sorted(subdomains)[:max_results])
+            print(f"[*][Assetfinder] Capped at {max_results} results")
+
+        if subdomains:
+            print(f"[+][Assetfinder] Found {len(subdomains)} subdomains")
+        else:
+            print(f"[*][Assetfinder] Found 0 subdomains")
+
+    except subprocess.TimeoutExpired:
+        print("[!][Assetfinder] Timed out")
+    except FileNotFoundError:
+        print("[!][Assetfinder] Binary not found — cannot run")
+    except Exception as e:
+        print(f"[!][Assetfinder] Error: {e}")
+
+    return subdomains
+
+
+def run_chaos(domain: str, settings: dict = None) -> set:
+    """Query the ProjectDiscovery Chaos bug-bounty subdomain dataset (local Go
+    binary). Requires a free PDCP API key — reuses the same key already used
+    to lift the anonymous rate limit on the CVE intel (vulnx) lookup, since
+    both are ProjectDiscovery Cloud Platform services."""
+    if settings is None:
+        settings = {}
+
+    if not settings.get('CHAOS_ENABLED', False):
+        print(f"[-][Chaos] Disabled — skipping")
+        return set()
+
+    api_key = settings.get('CHAOS_API_KEY', '')
+    if not api_key:
+        print(f"[-][Chaos] No PDCP API key configured — skipping")
+        return set()
+
+    max_results = settings.get('CHAOS_MAX_RESULTS', 5000)
+    print(f"[*][Chaos] Querying Chaos dataset...")
+
+    command = ['chaos', '-d', domain, '-silent']
+    env = os.environ.copy()
+    env['PDCP_API_KEY'] = api_key
+
+    subdomains = set()
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=120, env=env)
+
+        for line in result.stdout.strip().split('\n'):
+            host = line.strip().lower()
+            if host:
+                subdomains.add(host)
+
+        if len(subdomains) > max_results:
+            subdomains = set(sorted(subdomains)[:max_results])
+            print(f"[*][Chaos] Capped at {max_results} results")
+
+        if subdomains:
+            print(f"[+][Chaos] Found {len(subdomains)} subdomains")
+        else:
+            print(f"[*][Chaos] Found 0 subdomains (domain may not be in the dataset)")
+
+    except subprocess.TimeoutExpired:
+        print("[!][Chaos] Timed out")
+    except FileNotFoundError:
+        print("[!][Chaos] Binary not found — cannot run")
+    except Exception as e:
+        print(f"[!][Chaos] Error: {e}")
+
+    return subdomains
+
+
+def run_dnsx_filter(subdomains: list, settings: dict = None) -> list:
+    """Fast bulk existence pre-filter using dnsx (local Go binary).
+
+    Returns the subset of `subdomains` that dnsx confirms resolve, so the
+    slower per-record-type Python resolver in resolve_all_dns() only does
+    detailed work on hosts that are actually live. Off by default; on failure
+    (binary missing, timeout) it falls back to returning the input unchanged
+    rather than silently dropping subdomains.
+    """
+    if settings is None:
+        settings = {}
+
+    if not settings.get('DNSX_ENABLED', False) or not subdomains:
+        return subdomains
+
+    threads = settings.get('DNSX_THREADS', 100)
+    print(f"[*][DNSx] Bulk-resolving {len(subdomains)} candidates...")
+
+    command = ['dnsx', '-silent', '-t', str(threads)]
+    try:
+        result = subprocess.run(
+            command, input='\n'.join(subdomains), capture_output=True, text=True, timeout=180,
+        )
+        resolved = {line.strip().lower() for line in result.stdout.strip().split('\n') if line.strip()}
+        print(f"[+][DNSx] {len(resolved)}/{len(subdomains)} resolve")
+
+        filtered = [s for s in subdomains if s.lower() in resolved]
+        return filtered if filtered else subdomains
+
+    except subprocess.TimeoutExpired:
+        print("[!][DNSx] Timed out — falling back to unfiltered list")
+        return subdomains
+    except FileNotFoundError:
+        print("[!][DNSx] Binary not found — falling back to unfiltered list")
+        return subdomains
+    except Exception as e:
+        print(f"[!][DNSx] Error: {e} — falling back to unfiltered list")
+        return subdomains
+
+
 def dns_lookup_single(hostname: str, rtype: str, max_retries: int = 3) -> list:
     """
     Perform DNS lookup for a single record type with retry logic.
@@ -799,15 +933,39 @@ def discover_subdomains(domain: str, anonymous: bool = False, bruteforce: bool =
     # Setup
     pc_prefix = get_proxychains_prefix(anonymous)
 
-    # Subdomain Discovery — fan-out all 5 tools in parallel
-    print(f"[*][Discovery] Launching 5 discovery tools in parallel...")
-    with ThreadPoolExecutor(max_workers=5, thread_name_prefix="discovery") as executor:
+    # Upfront AI recon plan — informational (target/tech/framework/endpoints/
+    # scanners/duration/likely-vulns), plus a bounded DNS worker-count clamp.
+    # Never gates or disables a tool the user explicitly configured.
+    ai_plan = None
+    if (settings or {}).get('RECON_AI_PLANNER_ENABLED', True):
+        from recon.helpers.ai_planner.recon_planner import plan_recon
+        enabled_tools = [
+            name for name, key in (
+                ("crt.sh", "CRTSH_ENABLED"), ("HackerTarget", "HACKERTARGET_ENABLED"),
+                ("Subfinder", "SUBFINDER_ENABLED"), ("Amass", "AMASS_ENABLED"),
+                ("Knockpy", "KNOCKPY_RECON_ENABLED"), ("Assetfinder", "ASSETFINDER_ENABLED"),
+                ("Chaos", "CHAOS_ENABLED"),
+            ) if (settings or {}).get(key, True)
+        ]
+        ai_plan = plan_recon(
+            domain=domain,
+            enabled_tools=enabled_tools,
+            model=(settings or {}).get('AI_PIPELINE_MODEL', 'claude-opus-4-6'),
+            user_id=(settings or {}).get('USER_ID', ''),
+            project_id=(settings or {}).get('PROJECT_ID', ''),
+        )
+
+    # Subdomain Discovery — fan-out all 7 tools in parallel
+    print(f"[*][Discovery] Launching 7 discovery tools in parallel...")
+    with ThreadPoolExecutor(max_workers=7, thread_name_prefix="discovery") as executor:
         futures = {
             executor.submit(query_crtsh, domain, anonymous, settings): "crtsh",
             executor.submit(query_hackertarget, domain, anonymous, settings): "hackertarget",
             executor.submit(run_subfinder, domain, settings): "subfinder",
             executor.submit(run_amass, domain, settings): "amass",
             executor.submit(run_knockpy, domain, pc_prefix, bruteforce, settings): "knockpy",
+            executor.submit(run_assetfinder, domain, settings): "assetfinder",
+            executor.submit(run_chaos, domain, settings): "chaos",
         }
 
         discovery_results = {}
@@ -824,7 +982,7 @@ def discover_subdomains(domain: str, anonymous: bool = False, bruteforce: bool =
 
     # Fan-in: combine results from all tools
     # crtsh and hackertarget return {subdomain: set_of_sources}
-    # subfinder, amass, knockpy return set of subdomains
+    # subfinder, amass, knockpy, assetfinder, chaos return set of subdomains
     sourced_subs = {}  # domain -> set of source labels
     for s, sources in discovery_results.get("crtsh", {}).items():
         sourced_subs.setdefault(s, set()).update(sources)
@@ -836,6 +994,10 @@ def discover_subdomains(domain: str, anonymous: bool = False, bruteforce: bool =
         sourced_subs.setdefault(s, set()).add("amass")
     for s in discovery_results.get("knockpy", set()):
         sourced_subs.setdefault(s, set()).add("knockpy")
+    for s in discovery_results.get("assetfinder", set()):
+        sourced_subs.setdefault(s, set()).add("assetfinder")
+    for s in discovery_results.get("chaos", set()):
+        sourced_subs.setdefault(s, set()).add("chaos")
 
     filtered_subs = []
     external_domain_entries = []
@@ -853,6 +1015,13 @@ def discover_subdomains(domain: str, anonymous: bool = False, bruteforce: bool =
     if len(all_subs) < pre_filter_count:
         print(f"[+][Puredns] Wildcard filtering: {pre_filter_count} → {len(all_subs)} subdomains")
 
+    # dnsx bulk pre-filter (optional, off by default) — trims dead hosts fast
+    # before the slower per-record-type Python resolver below does its work.
+    pre_dnsx_count = len(all_subs)
+    all_subs = run_dnsx_filter(all_subs, settings)
+    if len(all_subs) < pre_dnsx_count:
+        print(f"[+][DNSx] Existence filtering: {pre_dnsx_count} → {len(all_subs)} subdomains")
+
     # Build result structure
     result = {
         "metadata": {
@@ -867,11 +1036,17 @@ def discover_subdomains(domain: str, anonymous: bool = False, bruteforce: bool =
         "subdomain_count": len(all_subs),
         "dns": {},
         "external_domains": external_domain_entries,
+        "ai_plan": ai_plan,
     }
-    
+
     # DNS Resolution for domain + all subdomains
     if resolve:
         dns_workers = (settings or {}).get('DNS_MAX_WORKERS', 50)
+        # Bounded clamp from the AI plan's size estimate — never below the
+        # user's own setting, and capped well short of anything that could
+        # look like a stealth/rate-limit override.
+        if ai_plan and ai_plan.get('estimated_duration_minutes', 0) >= 40:
+            dns_workers = min(max(dns_workers, 80), 150)
         dns_record_parallel = (settings or {}).get('DNS_RECORD_PARALLELISM', True)
         result["dns"] = resolve_all_dns(domain, all_subs, max_workers=dns_workers, record_parallelism=dns_record_parallel, settings=settings)
 

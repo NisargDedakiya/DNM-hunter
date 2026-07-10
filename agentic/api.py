@@ -809,6 +809,116 @@ async def llm_waf_classify(body: WafClassifyRequest):
     }
 
 
+class ReconPlanRequest(BaseModel):
+    domain: str
+    enabled_tools: list[str] = []
+    model: str
+    user_id: Optional[str] = None
+    project_id: Optional[str] = None
+
+
+_RECON_PLAN_SYSTEM_PROMPT = """You are a bug-bounty recon planning assistant. Before
+a reconnaissance pipeline runs against a target domain, produce a short upfront
+plan from the domain name alone (and the list of scanner tools already enabled
+for this run) — reasoning about what's publicly knowable about the organization
+and domain naming from general knowledge, NOT by browsing or fetching the URL.
+
+Answer exactly these questions:
+- target_summary: 1-2 sentences on what kind of organization/product this
+  domain likely belongs to, based on the name and TLD.
+- technology_guess: likely tech stack (e.g. "Ruby on Rails + AWS", "WordPress",
+  "unknown — no signal"). Say "unknown" rather than fabricate certainty.
+- framework_guess: likely web framework/CMS if inferable, else "unknown".
+- interesting_endpoints: 3-6 path patterns worth prioritizing once recon data
+  exists (e.g. "/api/", "/admin/", "/.well-known/", "/graphql") — generic
+  good-practice targets, not fabricated specifics about this domain.
+- recommended_scanners: subset of the enabled_tools list to prioritize first,
+  as a JSON array of strings from that exact list.
+- estimated_duration_minutes: integer, rough total recon time estimate for a
+  domain of this apparent scale (small business ~5-15, mid-size product
+  ~15-40, large enterprise/multi-subsidiary ~40-90).
+- likely_vulnerabilities: 3-6 vulnerability classes worth prioritizing given
+  the guessed stack (e.g. ["IDOR", "SSRF", "misconfigured S3 buckets"]).
+
+Be honest about uncertainty — "unknown" and modest estimates are correct and
+expected for most domains. Never invent specific facts about the real
+organization behind the domain that you cannot actually know.
+
+Respond with ONLY a JSON object of this exact shape, no prose:
+{"target_summary": "...", "technology_guess": "...", "framework_guess": "...",
+ "interesting_endpoints": ["...", ...], "recommended_scanners": ["...", ...],
+ "estimated_duration_minutes": 0, "likely_vulnerabilities": ["...", ...]}"""
+
+
+@app.post("/llm/recon-plan", tags=["LLM"])
+async def llm_recon_plan(body: ReconPlanRequest):
+    """Upfront AI recon plan: target/tech/framework/interesting-endpoints/
+    recommended-scanners/duration/likely-vulns, generated before the discovery
+    pipeline runs. Called once per domain by discover_subdomains() in
+    domain_recon.py when RECON_AI_PLANNER_ENABLED is on. Informational — the
+    caller only ever uses this to clamp thread counts, never to silently
+    flip a tool the user configured.
+    """
+    import json as json_mod
+
+    logger.info(
+        "recon-plan: domain=%s tools=%d model=%s user=%s",
+        body.domain, len(body.enabled_tools), body.model, body.user_id,
+    )
+
+    try:
+        llm = _build_llm_with_model_for_user(body.model, body.user_id)
+    except Exception as e:
+        logger.error(f"recon-plan: cannot set up LLM: {e}")
+        return JSONResponse(content={"error": f"LLM not configured: {e}"}, status_code=503)
+
+    user_msg = f"Domain: {body.domain}\nEnabled tools this run: {json_mod.dumps(body.enabled_tools)}"
+
+    try:
+        response = await llm.ainvoke([
+            SystemMessage(content=_RECON_PLAN_SYSTEM_PROMPT),
+            HumanMessage(content=user_msg),
+        ])
+    except Exception as e:
+        logger.error(f"recon-plan: LLM call failed: {e}")
+        return JSONResponse(content={"error": f"LLM call failed: {e}"}, status_code=502)
+
+    raw_text = normalize_content(getattr(response, 'content', None)).strip()
+    if raw_text.startswith('```'):
+        raw_text = raw_text.strip('`')
+        if raw_text.startswith('json'):
+            raw_text = raw_text[4:].strip()
+
+    try:
+        data = json_mod.loads(raw_text)
+    except (json_mod.JSONDecodeError, ValueError) as e:
+        logger.warning(f"recon-plan: model returned non-JSON ({e}): {raw_text[:200]}")
+        return JSONResponse(content={"error": "Model returned non-JSON", "raw": raw_text[:500]}, status_code=502)
+
+    if not isinstance(data, dict):
+        return JSONResponse(content={"error": "Model returned non-object", "raw": str(data)[:500]}, status_code=502)
+
+    duration = data.get('estimated_duration_minutes')
+    if not isinstance(duration, (int, float)):
+        return JSONResponse(content={"error": "Model returned malformed schema", "raw": str(data)[:500]}, status_code=502)
+
+    def _str_list(key: str, limit: int) -> list[str]:
+        raw = data.get(key)
+        if not isinstance(raw, list):
+            return []
+        return [str(x)[:200] for x in raw if isinstance(x, (str, int, float))][:limit]
+
+    return {
+        "target_summary": str(data.get('target_summary') or '')[:500],
+        "technology_guess": str(data.get('technology_guess') or 'unknown')[:200],
+        "framework_guess": str(data.get('framework_guess') or 'unknown')[:200],
+        "interesting_endpoints": _str_list('interesting_endpoints', 10),
+        "recommended_scanners": _str_list('recommended_scanners', 20),
+        "estimated_duration_minutes": max(0, int(duration)),
+        "likely_vulnerabilities": _str_list('likely_vulnerabilities', 10),
+    }
+
+
 class NucleiFpFilterRequest(BaseModel):
     template_id: str
     tags: list[str] = []

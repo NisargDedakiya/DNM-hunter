@@ -657,6 +657,25 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     'PUREDNS_WILDCARD_BATCH': 0,   # 0 = default batch size
     'PUREDNS_SKIP_VALIDATION': False,
 
+    # Assetfinder (passive subdomain enum, no API key — local Go binary)
+    'ASSETFINDER_ENABLED': True,
+    'ASSETFINDER_MAX_RESULTS': 5000,
+
+    # Chaos (ProjectDiscovery bug-bounty subdomain dataset — needs a free PDCP key)
+    'CHAOS_ENABLED': False,
+    'CHAOS_API_KEY': '',
+    'CHAOS_MAX_RESULTS': 5000,
+
+    # dnsx (fast bulk DNS existence pre-filter, off by default — opt-in speedup)
+    'DNSX_ENABLED': False,
+    'DNSX_THREADS': 100,
+
+    # Upfront AI recon planner — runs before the discovery fan-out and answers
+    # target/tech/framework/interesting-endpoints/recommended-scanners/duration/
+    # likely-vulns. Informational by default; only ever clamps thread counts,
+    # never silently flips a tool the user explicitly configured.
+    'RECON_AI_PLANNER_ENABLED': True,
+
     # Rules of Engagement (recon-relevant fields only)
     'ROE_ENABLED': False,
     'ROE_EXCLUDED_HOSTS': [],
@@ -1345,6 +1364,15 @@ def fetch_project_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     settings['AMASS_BRUTE_WORDLISTS'] = project.get('amassBruteWordlists', DEFAULT_SETTINGS['AMASS_BRUTE_WORDLISTS'])
     settings['AMASS_DOCKER_IMAGE'] = project.get('amassDockerImage', DEFAULT_SETTINGS['AMASS_DOCKER_IMAGE'])
 
+    # Assetfinder / Chaos / dnsx / AI planner
+    settings['ASSETFINDER_ENABLED'] = project.get('assetfinderEnabled', DEFAULT_SETTINGS['ASSETFINDER_ENABLED'])
+    settings['ASSETFINDER_MAX_RESULTS'] = project.get('assetfinderMaxResults', DEFAULT_SETTINGS['ASSETFINDER_MAX_RESULTS'])
+    settings['CHAOS_ENABLED'] = project.get('chaosEnabled', DEFAULT_SETTINGS['CHAOS_ENABLED'])
+    settings['CHAOS_MAX_RESULTS'] = project.get('chaosMaxResults', DEFAULT_SETTINGS['CHAOS_MAX_RESULTS'])
+    settings['DNSX_ENABLED'] = project.get('dnsxEnabled', DEFAULT_SETTINGS['DNSX_ENABLED'])
+    settings['DNSX_THREADS'] = project.get('dnsxThreads', DEFAULT_SETTINGS['DNSX_THREADS'])
+    settings['RECON_AI_PLANNER_ENABLED'] = project.get('reconAiPlannerEnabled', DEFAULT_SETTINGS['RECON_AI_PLANNER_ENABLED'])
+
     # Puredns (wildcard filtering)
     settings['PUREDNS_ENABLED'] = project.get('purednsEnabled', DEFAULT_SETTINGS['PUREDNS_ENABLED'])
     settings['PUREDNS_DOCKER_IMAGE'] = project.get('purednsDockerImage', DEFAULT_SETTINGS['PUREDNS_DOCKER_IMAGE'])
@@ -1402,6 +1430,9 @@ def fetch_project_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     if settings.get('CENSYS_ENABLED'):
         settings['CENSYS_API_TOKEN'] = user_global.get('censysApiToken', '')
         settings['CENSYS_ORG_ID'] = user_global.get('censysOrgId', '')
+
+    if settings.get('CHAOS_ENABLED'):
+        settings['CHAOS_API_KEY'] = user_global.get('pdcpApiKey', '')
 
     if settings.get('FOFA_ENABLED'):
         fofa_key = user_global.get('fofaApiKey', '')

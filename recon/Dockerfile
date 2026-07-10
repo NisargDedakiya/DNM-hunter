@@ -29,6 +29,22 @@ RUN printf '#!/bin/sh\nmax=5; n=0; until "$@"; do n=$((n+1)); [ $n -ge $max ] &&
     > /usr/local/bin/retry && chmod +x /usr/local/bin/retry
 RUN CGO_ENABLED=0 retry go install github.com/haccer/subjack@latest
 
+# Stage 1e: Build assetfinder, chaos, and dnsx (pure Go, no CGO needed)
+# assetfinder: https://github.com/tomnomnom/assetfinder (MIT) — passive subdomain enum
+# chaos-client: https://github.com/projectdiscovery/chaos-client (MIT) — ProjectDiscovery
+#   Chaos dataset lookup; requires a free PDCP API key (same key already used for
+#   the CVE intel rate-limit upgrade — see PDCP_API_KEY in project_settings.py)
+# dnsx: https://github.com/projectdiscovery/dnsx (MIT) — fast bulk DNS resolver/toolkit
+# Built here (not run as sibling `docker run` containers like subfinder/amass) to
+# match the jsluice/ffuf/subjack precedent above rather than depend on unverified
+# third-party Docker Hub images for tools this repo hasn't pulled before.
+FROM golang:1.22-alpine AS pd-tools-builder
+RUN printf '#!/bin/sh\nmax=5; n=0; until "$@"; do n=$((n+1)); [ $n -ge $max ] && exit 1; echo "Retry $n/$max ..."; sleep $((n*5)); done\n' \
+    > /usr/local/bin/retry && chmod +x /usr/local/bin/retry
+RUN CGO_ENABLED=0 retry go install github.com/tomnomnom/assetfinder@latest && \
+    CGO_ENABLED=0 retry go install github.com/projectdiscovery/chaos-client/cmd/chaos@latest && \
+    CGO_ENABLED=0 retry go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+
 # Stage 1c: Build masscan from source (C project, requires libpcap)
 FROM debian:bookworm-slim AS masscan-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -145,6 +161,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY --from=jsluice-builder /go/bin/jsluice /usr/local/bin/jsluice
 COPY --from=ffuf-builder /go/bin/ffuf /usr/local/bin/ffuf
 COPY --from=subjack-builder /go/bin/subjack /usr/local/bin/subjack
+COPY --from=pd-tools-builder /go/bin/assetfinder /usr/local/bin/assetfinder
+COPY --from=pd-tools-builder /go/bin/chaos /usr/local/bin/chaos
+COPY --from=pd-tools-builder /go/bin/dnsx /usr/local/bin/dnsx
 
 # Install SecLists wordlists for FFuf directory fuzzing
 RUN mkdir -p /usr/share/seclists/Discovery/Web-Content && \

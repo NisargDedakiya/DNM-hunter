@@ -128,6 +128,8 @@ def test_discover_subdomains_parallel():
          mock.patch("recon.main_recon_modules.domain_recon.run_subfinder", return_value={"c.example.com"}), \
          mock.patch("recon.main_recon_modules.domain_recon.run_amass", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.run_knockpy", return_value={"d.example.com"}), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_assetfinder", return_value=set()), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_chaos", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.resolve_all_dns") as mock_dns:
 
         mock_dns.return_value = {
@@ -137,7 +139,8 @@ def test_discover_subdomains_parallel():
 
         result = discover_subdomains(
             "example.com", anonymous=False, bruteforce=False,
-            resolve=True, save_output=False, settings={"AMASS_ENABLED": False}
+            resolve=True, save_output=False,
+            settings={"AMASS_ENABLED": False, "RECON_AI_PLANNER_ENABLED": False}
         )
 
         # Should have discovered subdomains from all sources
@@ -419,11 +422,13 @@ def test_fanin_merge_dedup():
          mock.patch("recon.main_recon_modules.domain_recon.run_subfinder", return_value={"shared.example.com"}), \
          mock.patch("recon.main_recon_modules.domain_recon.run_amass", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.run_knockpy", return_value=set()), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_assetfinder", return_value=set()), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_chaos", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.resolve_all_dns", return_value={"domain": {}, "subdomains": {}}):
 
         result = discover_subdomains(
             "example.com", resolve=True, save_output=False,
-            settings={"AMASS_ENABLED": False}
+            settings={"AMASS_ENABLED": False, "RECON_AI_PLANNER_ENABLED": False}
         )
 
     subs = result["subdomains"]
@@ -452,11 +457,13 @@ def test_external_domains_separation():
          mock.patch("recon.main_recon_modules.domain_recon.run_subfinder", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.run_amass", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.run_knockpy", return_value=set()), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_assetfinder", return_value=set()), \
+         mock.patch("recon.main_recon_modules.domain_recon.run_chaos", return_value=set()), \
          mock.patch("recon.main_recon_modules.domain_recon.resolve_all_dns", return_value={"domain": {}, "subdomains": {}}):
 
         result = discover_subdomains(
             "example.com", resolve=True, save_output=False,
-            settings={"AMASS_ENABLED": False}
+            settings={"AMASS_ENABLED": False, "RECON_AI_PLANNER_ENABLED": False}
         )
 
     # In-scope
