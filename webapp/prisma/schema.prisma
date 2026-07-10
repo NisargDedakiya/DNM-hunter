@@ -14,6 +14,7 @@ model User {
   password      String            @default("")
   role          String            @default("standard")
   projects      Project[]
+  programs      Program[]
   conversations Conversation[]
   llmProviders  UserLlmProvider[]
   attackSkills  UserAttackSkill[]
@@ -202,6 +203,15 @@ model Project {
 
   conversations               Conversation[]
   graphViews                  GraphView[]
+
+  // ========== BUG BOUNTY PROGRAM LINKAGE ==========
+  // Optional: a Project can belong to a Program (HackerOne/Bugcrowd/etc. engagement)
+  // and originate from one of that Program's declared Assets. Both are nullable so
+  // standalone pentest-style Projects (no Program) keep working unchanged.
+  programId                   String?  @map("program_id")
+  program                     Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
+  assetId                     String?  @map("asset_id")
+  asset                       Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
 
   // ========== TARGET CONFIGURATION ==========
   targetDomain                String   @default("") @map("target_domain")
@@ -974,7 +984,74 @@ model Project {
   remediations                      Remediation[]
   reports                           Report[]
 
+  @@index([programId])
+  @@index([assetId])
   @@map("projects")
+}
+
+// A bug-bounty engagement: a HackerOne/Bugcrowd/Intigriti/YesWeHack program, or a
+// manually-tracked one. Groups Assets (declared scope) and Projects (active recon/
+// scan work against those assets) under one place with platform metadata, rate
+// limits, deadlines and reward range — the "Program" layer of the Workspace ->
+// Program -> Scope -> Assets hierarchy.
+model Program {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name            String
+  platform        String    @default("manual") @map("platform") // hackerone | bugcrowd | intigriti | yeswehack | manual
+  platformHandle  String    @default("") @map("platform_handle") // program slug/handle on the platform, if any
+  platformUrl     String    @default("") @map("platform_url")
+  status          String    @default("active") @map("status") // active | paused | completed | archived
+
+  scopeSummary    String    @default("") @map("scope_summary") @db.Text
+  outOfScope      String    @default("") @map("out_of_scope") @db.Text
+  rateLimits      String    @default("") @map("rate_limits") @db.Text
+  credentialNotes String    @default("") @map("credential_notes") @db.Text
+  notes           String    @default("") @db.Text
+
+  rewardMin       Float?    @map("reward_min")
+  rewardMax       Float?    @map("reward_max")
+  rewardCurrency  String    @default("USD") @map("reward_currency")
+
+  startDate       DateTime? @map("start_date")
+  deadline        DateTime?
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  assets          Asset[]
+  projects        Project[]
+  remediations    Remediation[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@map("programs")
+}
+
+// A single declared-scope entry within a Program: a domain, subdomain, CIDR block,
+// API, mobile app, GitHub org/repo, cloud account, or GraphQL endpoint. Feeds recon
+// target selection for any Project created against it.
+model Asset {
+  id          String    @id @default(cuid())
+  programId   String    @map("program_id")
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  // domain | subdomain | cidr | api | mobile_android | mobile_ios | github | cloud | graphql
+  type        String
+  value       String
+  inScope     Boolean   @default(true) @map("in_scope")
+  notes       String    @default("") @db.Text
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  projects    Project[]
+
+  @@index([programId])
+  @@index([programId, type])
+  @@map("assets")
 }
 
 model Conversation {
@@ -1080,6 +1157,10 @@ model Remediation {
   id                String   @id @default(cuid())
   projectId         String   @map("project_id")
   project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // Denormalized from project.programId at creation time so the bug-bounty
+  // dashboard can query "findings for program X" without joining through Project.
+  programId         String?  @map("program_id")
+  program           Program? @relation(fields: [programId], references: [id], onDelete: SetNull)
 
   // ── Core info ──
   title             String
@@ -1120,12 +1201,30 @@ model Remediation {
   // ── File changes (populated by CodeFix agent) ──
   fileChanges       Json     @default("[]") @map("file_changes")
 
+  // ── AI validator (confidence/impact scoring on top of the triage priority above) ──
+  confidenceScore    Float?  @map("confidence_score")       // 0-100, likelihood this is a true positive
+  falsePositiveScore Float?  @map("false_positive_score")   // 0-100
+  businessImpact     String  @default("") @map("business_impact") @db.Text
+  likelihood         String  @default("") @map("likelihood") // e.g. "low" | "medium" | "high"
+  validatorStatus    String  @default("needs_manual_review") @map("validator_status")
+  // confirmed | likely | needs_manual_review | ignored
+
+  // ── Bug-bounty submission tracking ──
+  submissionStatus   String   @default("not_submitted") @map("submission_status")
+  // not_submitted | draft | submitted | triaged | accepted | duplicate | informative | rejected | paid
+  submittedAt        DateTime? @map("submitted_at")
+  platformReportUrl  String   @default("") @map("platform_report_url")
+  rewardAmount       Float?   @map("reward_amount")
+  rewardCurrency     String   @default("USD") @map("reward_currency")
+
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@index([projectId, status])
   @@index([projectId, severity])
   @@index([projectId, priority])
+  @@index([programId, severity])
+  @@index([programId, submissionStatus])
   @@map("remediations")
 }
 
