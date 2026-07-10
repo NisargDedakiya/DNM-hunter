@@ -1,5 +1,5 @@
 """
-RedAmon Unclassified Attack Skill Prompts
+NisargHunter AI Unclassified Attack Skill Prompts
 
 Generic exploitation guidance for attack skills that don't match
 CVE exploit or brute force credential guess workflows.

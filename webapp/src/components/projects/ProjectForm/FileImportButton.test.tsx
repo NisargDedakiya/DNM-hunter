@@ -197,10 +197,10 @@ describe('parseFileText: header-with-semicolon known limitation', () => {
   })
 
   test('headers without inline semicolons round-trip safely', () => {
-    const text = 'Authorization: Bearer xyz\nUser-Agent: redamon/1.0'
+    const text = 'Authorization: Bearer xyz\nUser-Agent: nisarghunter/1.0'
     expect(parseFileText(text)).toEqual([
       'Authorization: Bearer xyz',
-      'User-Agent: redamon/1.0',
+      'User-Agent: nisarghunter/1.0',
     ])
   })
 })

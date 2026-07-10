@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RedAmon - TruffleHog Secret Scanner Main Entry Point
+NisargHunter AI - TruffleHog Secret Scanner Main Entry Point
 ======================================================
 Orchestrates TruffleHog deep secret scanning using project settings from the webapp API.
 
@@ -61,7 +61,7 @@ def run_trufflehog_scan(project_id: str) -> dict:
     exclude_detectors = get_setting('TRUFFLEHOG_EXCLUDE_DETECTORS', '')
 
     print("\n" + "=" * 70)
-    print("           RedAmon - TruffleHog Secret Scanner")
+    print("           NisargHunter AI - TruffleHog Secret Scanner")
     print("=" * 70)
     print(f"  Target Org:          {target_org or '(not set)'}")
     print(f"  Target Repos:        {target_repos or '(not set)'}")

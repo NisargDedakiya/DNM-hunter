@@ -66,7 +66,7 @@ MAX_PARALLEL_PARTIAL_RECONS = 12
 # containers over the host bind bridge on Docker Desktop for Mac; the volume
 # lives inside the Linux VM and works on both macOS and native Linux. Overridable
 # for tests / alternate layouts.
-BROKER_SOCKET_VOLUME = os.environ.get("RECON_DOCKER_BROKER_VOLUME", "redamon_broker_socket")
+BROKER_SOCKET_VOLUME = os.environ.get("RECON_DOCKER_BROKER_VOLUME", "nisarghunter_broker_socket")
 
 # Where the cypherfix-work volume is mounted INSIDE the orchestrator container.
 # Used to clean up per-job worktrees (the same volume the agent clones into).
@@ -140,7 +140,7 @@ AI_ATTACK_SURFACE_PHASE_PATTERNS = [
 class ContainerManager:
     """Manages Docker containers for recon, GVM scan, GitHub hunt, and TruffleHog processes"""
 
-    def __init__(self, recon_image: str = "redamon-recon:latest", gvm_image: str = "redamon-vuln-scanner:latest", github_hunt_image: str = "redamon-github-hunter:latest", trufflehog_image: str = "redamon-trufflehog:latest", ai_attack_image: str = "redamon-ai-attack-surface:latest"):
+    def __init__(self, recon_image: str = "nisarghunter-recon:latest", gvm_image: str = "nisarghunter-vuln-scanner:latest", github_hunt_image: str = "nisarghunter-github-hunter:latest", trufflehog_image: str = "nisarghunter-trufflehog:latest", ai_attack_image: str = "nisarghunter-ai-attack-surface:latest"):
         self.client = docker.from_env()
         self.recon_image = recon_image
         self.gvm_image = gvm_image
@@ -163,8 +163,8 @@ class ContainerManager:
         # CodeFix build sandboxes (T6/E10): ephemeral, hardened, secret-free
         # containers that run the UNTRUSTED clone+build+test step of the CypherFix
         # agent. job_id -> {"container_id", "created_at"}.
-        self.codefix_sandbox_image = os.environ.get("CODEFIX_SANDBOX_IMAGE", "redamon-codefix-sandbox:latest")
-        self.codefix_sandbox_network = os.environ.get("CODEFIX_SANDBOX_NETWORK", "redamon-codefix-net")
+        self.codefix_sandbox_image = os.environ.get("CODEFIX_SANDBOX_IMAGE", "nisarghunter-codefix-sandbox:latest")
+        self.codefix_sandbox_network = os.environ.get("CODEFIX_SANDBOX_NETWORK", "nisarghunter-codefix-net")
         self.codefix_sandbox_mem = os.environ.get("CODEFIX_SANDBOX_MEM", "2g")
         self.codefix_sandbox_nanocpus = int(os.environ.get("CODEFIX_SANDBOX_NANOCPUS", str(2_000_000_000)))
         self.codefix_sandbox_pids = int(os.environ.get("CODEFIX_SANDBOX_PIDS", "512"))
@@ -308,7 +308,7 @@ class ContainerManager:
         """Generate container name for a project"""
         # Sanitize project_id for container name
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-recon-{safe_id}"
+        return f"nisarghunter-recon-{safe_id}"
 
     async def get_status(self, project_id: str) -> ReconState:
         """Get current status of a recon process"""
@@ -471,10 +471,10 @@ class ContainerManager:
                     # Mount graph_db module
                     sibling_host_path(recon_path, "graph_db"): {"bind": "/app/graph_db", "mode": "ro"},
                     # Mount /tmp for Docker-in-Docker temp files (avoids spaces in paths)
-                    "/tmp/redamon": {"bind": "/tmp/redamon", "mode": "rw"},
+                    "/tmp/nisarghunter": {"bind": "/tmp/nisarghunter", "mode": "rw"},
                     # JS Recon shared volumes with webapp
-                    "redamon_js_recon_uploads": {"bind": "/data/js-recon-uploads", "mode": "ro"},
-                    "redamon_js_recon_custom": {"bind": "/data/js-recon-custom", "mode": "ro"},
+                    "nisarghunter_js_recon_uploads": {"bind": "/data/js-recon-uploads", "mode": "ro"},
+                    "nisarghunter_js_recon_custom": {"bind": "/data/js-recon-custom", "mode": "ro"},
                     # Official nuclei-templates volume (read-only) for the AI tag
                     # selector to read TEMPLATES-STATS.json. Populated by
                     # ensure_templates_volume() before any nuclei pass.
@@ -504,7 +504,7 @@ class ContainerManager:
     # secrets. Spawned via the orchestrator's REAL docker socket (like GVM), with
     # hardening enforced here. The agent drives it via `docker exec` (the command
     # channel is the docker control plane, NOT a shared network), so the sandbox
-    # sits on codefix-net with NO RedAmon peer.
+    # sits on codefix-net with NO NisargHunter AI peer.
     # =======================================================================
 
     @staticmethod
@@ -517,13 +517,13 @@ class ContainerManager:
         return safe or "codefix"
 
     def _codefix_sandbox_name(self, job_id: str) -> str:
-        return f"redamon-codefix-{self._safe_job_id(job_id)}"
+        return f"nisarghunter-codefix-{self._safe_job_id(job_id)}"
 
     def _ensure_codefix_network(self) -> None:
         """Create the isolated CodeFix network if it does not exist.
 
         Docker Compose never creates this network: by design NO service is
-        attached to it (the sandbox must have no RedAmon peer), and Compose only
+        attached to it (the sandbox must have no NisargHunter AI peer), and Compose only
         creates networks used by the services it starts. So the orchestrator owns
         its lifecycle — create-if-missing here, idempotently, before every spawn.
         """
@@ -1025,7 +1025,7 @@ class ContainerManager:
     def _get_partial_container_name(self, project_id: str, run_id: str) -> str:
         """Generate container name for a partial recon run"""
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-partial-recon-{safe_id}-{run_id[:8]}"
+        return f"nisarghunter-partial-recon-{safe_id}-{run_id[:8]}"
 
     def _count_active_partial_recons(self, project_id: str) -> int:
         """Count the number of active (running/starting) partial recons for a project"""
@@ -1152,9 +1152,9 @@ class ContainerManager:
                 logger.info(f"Building recon image from {recon_path}")
                 self.client.images.build(path=recon_path, tag=self.recon_image, rm=True)
 
-            # Write config JSON to /tmp/redamon/ (shared volume)
+            # Write config JSON to /tmp/nisarghunter/ (shared volume)
             import json
-            config_dir = Path("/tmp/redamon")
+            config_dir = Path("/tmp/nisarghunter")
             config_dir.mkdir(parents=True, exist_ok=True)
             config_path = config_dir / f"partial_{project_id}_{run_id}.json"
             with open(config_path, "w") as f:
@@ -1176,7 +1176,7 @@ class ContainerManager:
                     "PROJECT_ID": project_id,
                     "USER_ID": config.get("user_id", ""),
                     "WEBAPP_API_URL": config.get("webapp_api_url", ""),
-                    "PARTIAL_RECON_CONFIG": f"/tmp/redamon/partial_{project_id}_{run_id}.json",
+                    "PARTIAL_RECON_CONFIG": f"/tmp/nisarghunter/partial_{project_id}_{run_id}.json",
                     "PARTIAL_RECON_RUN_ID": run_id,
                     "UPDATE_GRAPH_DB": "true",
                     "HOST_RECON_OUTPUT_PATH": f"{recon_path}/output",
@@ -1204,10 +1204,10 @@ class ContainerManager:
                     BROKER_SOCKET_VOLUME: {"bind": "/var/run/broker", "mode": "rw"},
                     f"{recon_path}": {"bind": "/app/recon", "mode": "rw"},
                     sibling_host_path(recon_path, "graph_db"): {"bind": "/app/graph_db", "mode": "ro"},
-                    "/tmp/redamon": {"bind": "/tmp/redamon", "mode": "rw"},
+                    "/tmp/nisarghunter": {"bind": "/tmp/nisarghunter", "mode": "rw"},
                     # JS Recon shared volumes with webapp (uploaded files + custom patterns)
-                    "redamon_js_recon_uploads": {"bind": "/data/js-recon-uploads", "mode": "ro"},
-                    "redamon_js_recon_custom": {"bind": "/data/js-recon-custom", "mode": "ro"},
+                    "nisarghunter_js_recon_uploads": {"bind": "/data/js-recon-uploads", "mode": "ro"},
+                    "nisarghunter_js_recon_custom": {"bind": "/data/js-recon-custom", "mode": "ro"},
                     # Official nuclei-templates volume (read-only) for the AI tag
                     # selector to read TEMPLATES-STATS.json.
                     "nuclei-templates": {"bind": "/opt/nuclei-templates-official", "mode": "ro"},
@@ -1263,7 +1263,7 @@ class ContainerManager:
 
         # Best-effort cleanup of config file
         try:
-            config_path = Path(f"/tmp/redamon/partial_{project_id}_{run_id}.json")
+            config_path = Path(f"/tmp/nisarghunter/partial_{project_id}_{run_id}.json")
             if config_path.exists():
                 config_path.unlink()
         except Exception:
@@ -1401,7 +1401,7 @@ class ContainerManager:
     def _get_ai_attack_container_name(self, project_id: str, run_id: str) -> str:
         """Generate container name for an AI Attack Surface run"""
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-ai-attack-{safe_id}-{run_id[:8]}"
+        return f"nisarghunter-ai-attack-{safe_id}-{run_id[:8]}"
 
     def _count_active_ai_attack(self, project_id: str) -> int:
         return sum(
@@ -1552,8 +1552,8 @@ class ContainerManager:
                         f"scan will degrade to no-judge"
                     )
 
-            # Write the run config to the shared /tmp/redamon volume.
-            config_dir = Path("/tmp/redamon")
+            # Write the run config to the shared /tmp/nisarghunter volume.
+            config_dir = Path("/tmp/nisarghunter")
             config_dir.mkdir(parents=True, exist_ok=True)
             # Sanitize project_id for the filename (it's client-supplied via the
             # path param); run_id is a server UUID. Mirrors the container-name rule.
@@ -1589,7 +1589,7 @@ class ContainerManager:
                     "INTERNAL_API_KEY": os.environ.get("INTERNAL_API_KEY", ""),
                 },
                 volumes={
-                    "/tmp/redamon": {"bind": "/tmp/redamon", "mode": "rw"},
+                    "/tmp/nisarghunter": {"bind": "/tmp/nisarghunter", "mode": "rw"},
                     # Mount source for dev (no rebuild needed), like the other scanners.
                     f"{ai_attack_path}": {"bind": "/app/ai_attack_surface_scan", "mode": "rw"},
                 },
@@ -1653,7 +1653,7 @@ class ContainerManager:
         if not runs and project_id in self.ai_attack_states:
             del self.ai_attack_states[project_id]
         try:
-            cfg = Path(f"/tmp/redamon/ai_attack_{project_id}_{run_id}.json")
+            cfg = Path(f"/tmp/nisarghunter/ai_attack_{project_id}_{run_id}.json")
             if cfg.exists():
                 cfg.unlink()
         except Exception:
@@ -1821,7 +1821,7 @@ class ContainerManager:
     def _get_gvm_container_name(self, project_id: str) -> str:
         """Generate container name for a GVM scan"""
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-gvm-{safe_id}"
+        return f"nisarghunter-gvm-{safe_id}"
 
     async def get_gvm_status(self, project_id: str) -> GvmState:
         """Get current status of a GVM scan process"""
@@ -1954,7 +1954,7 @@ class ContainerManager:
                 },
                 volumes={
                     # GVM socket for communicating with gvmd
-                    "redamon_gvmd_socket": {"bind": "/run/gvmd", "mode": "ro"},
+                    "nisarghunter_gvmd_socket": {"bind": "/run/gvmd", "mode": "ro"},
                     # Recon output (read-only, for extracting targets)
                     f"{recon_path}/output": {"bind": "/app/recon/output", "mode": "ro"},
                     # GVM scan output (read-write, for saving results)
@@ -2206,7 +2206,7 @@ class ContainerManager:
     def is_gvm_available(self) -> bool:
         """Check if GVM stack is installed by looking for the gvmd container"""
         try:
-            container = self.client.containers.get("redamon-gvm-gvmd")
+            container = self.client.containers.get("nisarghunter-gvm-gvmd")
             return container.status == "running"
         except Exception:
             return False
@@ -2218,7 +2218,7 @@ class ContainerManager:
     def _get_github_hunt_container_name(self, project_id: str) -> str:
         """Generate container name for a GitHub hunt"""
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-github-hunt-{safe_id}"
+        return f"nisarghunter-github-hunt-{safe_id}"
 
     async def get_github_hunt_status(self, project_id: str) -> GithubHuntState:
         """Get current status of a GitHub hunt process"""
@@ -2600,7 +2600,7 @@ class ContainerManager:
     def _get_trufflehog_container_name(self, project_id: str) -> str:
         """Generate container name for a TruffleHog scan"""
         safe_id = re.sub(r'[^a-zA-Z0-9_.-]', '_', project_id)
-        return f"redamon-trufflehog-{safe_id}"
+        return f"nisarghunter-trufflehog-{safe_id}"
 
     async def get_trufflehog_status(self, project_id: str) -> TrufflehogState:
         """Get current status of a TruffleHog scan process"""

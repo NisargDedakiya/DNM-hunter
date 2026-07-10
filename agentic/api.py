@@ -1,5 +1,5 @@
 """
-RedAmon Agent WebSocket API
+NisargHunter AI Agent WebSocket API
 
 FastAPI application providing WebSocket endpoint for real-time agent communication.
 Supports session-based conversation continuity and phase-based approval flow.
@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     # rm/edit them. Ownership still root, but mode 666/777 makes that OK.
     os.umask(0)
 
-    logger.info("Starting RedAmon Agent API...")
+    logger.info("Starting NisargHunter AI Agent API...")
 
     # Initialize orchestrator
     orchestrator = AgentOrchestrator()
@@ -91,17 +91,17 @@ async def lifespan(app: FastAPI):
     ws_job_emitter.set_ws_manager(ws_manager)
     reg.set_ws_emitter(ws_job_emitter.emit_job_update)
 
-    logger.info("RedAmon Agent API ready (WebSocket)")
+    logger.info("NisargHunter AI Agent API ready (WebSocket)")
 
     yield
 
-    logger.info("Shutting down RedAmon Agent API...")
+    logger.info("Shutting down NisargHunter AI Agent API...")
     if orchestrator:
         await orchestrator.close()
 
 
 app = FastAPI(
-    title="RedAmon Agent API",
+    title="NisargHunter AI Agent API",
     description="WebSocket API for real-time agent communication with phase tracking, MCP tools, and Neo4j integration",
     version="3.0.0",
     lifespan=lifespan

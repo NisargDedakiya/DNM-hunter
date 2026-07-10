@@ -1,5 +1,5 @@
 #!/bin/bash
-# RedAmon Reconnaissance Module - Docker Entrypoint
+# NisargHunter AI Reconnaissance Module - Docker Entrypoint
 # ==================================================
 # Handles initialization, Tor setup, and executes the recon pipeline
 
@@ -158,13 +158,13 @@ IMAGES=(
     "projectdiscovery/uncover:latest"
     "dolevf/graphql-cop:1.14"
     "ghcr.io/zaproxy/zaproxy:stable"
-    "redamon-wcvs:latest"
+    "nisarghunter-wcvs:latest"
 )
 
 for IMAGE in "${IMAGES[@]}"; do
     if docker images -q "$IMAGE" 2>/dev/null | grep -q .; then
         echo -e "${GREEN}[+] $IMAGE already pulled${NC}"
-    elif [[ "$IMAGE" == redamon-* ]]; then
+    elif [[ "$IMAGE" == nisarghunter-* ]]; then
         # Locally-built image (e.g. WCVS) — never pull from a registry.
         echo -e "${YELLOW}[!] $IMAGE not found locally — build with: docker compose --profile tools build wcvs${NC}"
     else

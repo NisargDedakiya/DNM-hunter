@@ -4,7 +4,7 @@
 
 ## Operating System Compatibility
 
-RedAmon is fully Dockerized and runs on **any OS** that supports Docker and Docker Compose v2+. Below are common OS-specific issues and their fixes.
+NisargHunter AI is fully Dockerized and runs on **any OS** that supports Docker and Docker Compose v2+. Below are common OS-specific issues and their fixes.
 
 ### Linux
 
@@ -26,7 +26,7 @@ RedAmon is fully Dockerized and runs on **any OS** that supports Docker and Dock
 | Docker socket unavailable | Windows uses named pipes, not Unix sockets | Use [Docker Desktop](https://www.docker.com/products/docker-desktop/) with **WSL2 backend** enabled |
 | Line ending errors (`\r\n`) | Git auto-converts LF → CRLF on Windows | `git config --global core.autocrlf input` then re-clone the repo |
 | Path too long errors | Windows 260-character path limit | `git config --global core.longpaths true` |
-| Volume mount fails | Windows path format incompatible with Linux containers | Run from inside WSL2 filesystem (`~/redamon`), **not** from `/mnt/c/` |
+| Volume mount fails | Windows path format incompatible with Linux containers | Run from inside WSL2 filesystem (`~/nisarghunter`), **not** from `/mnt/c/` |
 | Extremely slow performance | Bind mounts across Windows ↔ WSL boundary | Store the project inside WSL2 home (`~/`), not on a Windows-mounted drive |
 | Docker Desktop won't start | WSL2 or Hyper-V not enabled | Run `wsl --install` in PowerShell (admin), reboot, then install Docker Desktop |
 | Socket permission error in WSL2 | Docker Desktop integration not enabled for your WSL distro | Docker Desktop → Settings → Resources → WSL Integration → enable your distro |
@@ -38,8 +38,8 @@ RedAmon is fully Dockerized and runs on **any OS** that supports Docker and Dock
 | Slow bind-mount performance | macOS filesystem sharing overhead | Upgrade to Docker Desktop 4.x+ and enable **VirtioFS** in Settings → General |
 | Port 5000 conflict | macOS AirPlay Receiver uses port 5000 | Disable AirPlay Receiver in System Settings → General → AirDrop & Handoff, or remap the port in `.env` |
 | `docker compose` not found | Docker CLI plugins not in PATH | Run `brew install docker-compose` or reinstall Docker Desktop |
-| Containers OOM-killed during install | Docker Desktop default Memory below RedAmon minimum | Docker Desktop → Settings → Resources → Memory: set to 4 GB (8 GB with `--gvm`), then `./redamon.sh install` |
-| `Cannot connect to the Docker daemon` | Docker Desktop not started | `open /Applications/Docker.app` and wait until the whale icon stops animating before running `./redamon.sh` |
+| Containers OOM-killed during install | Docker Desktop default Memory below NisargHunter AI minimum | Docker Desktop → Settings → Resources → Memory: set to 4 GB (8 GB with `--gvm`), then `./nisarghunter.sh install` |
+| `Cannot connect to the Docker daemon` | Docker Desktop not started | `open /Applications/Docker.app` and wait until the whale icon stops animating before running `./nisarghunter.sh` |
 | `Mounts denied` / `path not shared` | Repo cloned outside Docker Desktop's File Sharing allowlist | Clone the repo under `~/` (default-allowed), or add the custom path in Settings → Resources → File Sharing |
-| SYN scans (naabu, masscan) miss hosts on the local LAN | `network_mode: host` joins Docker Desktop's LinuxKit VM, not the Mac's network | Expected on Docker Desktop. Internet targets work normally; for LAN scans, run RedAmon on a Linux host |
-| Login fails after install with no error in logs | Non-interactive shell (CI, agents, some multiplexers) injected a `\u0001` SOH byte into the admin email/password prompt | Run `./redamon.sh reset-password` to recreate credentials cleanly |
+| SYN scans (naabu, masscan) miss hosts on the local LAN | `network_mode: host` joins Docker Desktop's LinuxKit VM, not the Mac's network | Expected on Docker Desktop. Internet targets work normally; for LAN scans, run NisargHunter AI on a Linux host |
+| Login fails after install with no error in logs | Non-interactive shell (CI, agents, some multiplexers) injected a `\u0001` SOH byte into the admin email/password prompt | Run `./nisarghunter.sh reset-password` to recreate credentials cleanly |

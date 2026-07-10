@@ -55,7 +55,7 @@ export default function LoginPage() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.logoRow}>
-            <Image src="/logo.png" alt="RedAmon" width={63} height={40} priority />
+            <Image src="/logo.png" alt="NisargHunter AI" width={63} height={40} priority />
             <span className={styles.logoText}>
               <span className={styles.logoAccent}>Red</span>Amon
             </span>
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 className={styles.input}
-                placeholder="admin@redamon.local"
+                placeholder="admin@nisarghunter.local"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required

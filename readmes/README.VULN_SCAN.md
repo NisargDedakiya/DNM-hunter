@@ -1,10 +1,10 @@
-# RedAmon - Nuclei Vulnerability Scanner
+# NisargHunter AI - Nuclei Vulnerability Scanner
 
 ## Complete Technical Documentation
 
 > **Module:** `recon/nuclei_scan.py`  
 > **Purpose:** Template-based web application vulnerability scanning using ProjectDiscovery's Nuclei  
-> **Author:** RedAmon Security Suite
+> **Author:** NisargHunter AI Security Suite
 
 ---
 
@@ -28,7 +28,7 @@
 
 ## Overview
 
-The `nuclei_scan.py` module integrates ProjectDiscovery's Nuclei scanner into RedAmon's reconnaissance pipeline. Nuclei is a fast, template-based vulnerability scanner that excels at web application security testing.
+The `nuclei_scan.py` module integrates ProjectDiscovery's Nuclei scanner into NisargHunter AI's reconnaissance pipeline. Nuclei is a fast, template-based vulnerability scanner that excels at web application security testing.
 
 **⚠️ Important:** Nuclei runs exclusively via Docker. No native installation is supported.
 
@@ -895,7 +895,7 @@ info:
 
 ### Automatic Template Updates
 
-RedAmon automatically updates templates when `NUCLEI_AUTO_UPDATE_TEMPLATES = True` (default):
+NisargHunter AI automatically updates templates when `NUCLEI_AUTO_UPDATE_TEMPLATES = True` (default):
 
 ```python
 # In project settings
@@ -1611,7 +1611,7 @@ NUCLEI_EXCLUDE_TEMPLATES = ["fuzzing"]
 
 ## Custom Security Checks
 
-In addition to Nuclei templates, RedAmon includes custom Python-based security checks that detect vulnerabilities **not covered by Nuclei**.
+In addition to Nuclei templates, NisargHunter AI includes custom Python-based security checks that detect vulnerabilities **not covered by Nuclei**.
 
 ### Why Custom Checks?
 
@@ -1712,4 +1712,4 @@ Custom security check findings are stored in `security_checks`:
 
 ---
 
-*Documentation generated for RedAmon v1.0 - Nuclei Scanner Module with Katana DAST Integration*
+*Documentation generated for NisargHunter AI v1.0 - Nuclei Scanner Module with Katana DAST Integration*

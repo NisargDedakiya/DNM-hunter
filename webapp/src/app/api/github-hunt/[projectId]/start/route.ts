@@ -6,7 +6,7 @@ import { orchestratorFetch } from '@/lib/orchestrator'
 
 const RECON_ORCHESTRATOR_URL = process.env.RECON_ORCHESTRATOR_URL || 'http://localhost:8010'
 const WEBAPP_URL = process.env.WEBAPP_URL || 'http://localhost:3000'
-const RECON_OUTPUT_PATH = process.env.RECON_OUTPUT_PATH || '/home/samuele/Progetti didattici/RedAmon/recon/output'
+const RECON_OUTPUT_PATH = process.env.RECON_OUTPUT_PATH || '/home/samuele/Progetti didattici/NisargHunter AI/recon/output'
 
 interface RouteParams {
   params: Promise<{ projectId: string }>

@@ -1,5 +1,5 @@
 """
-RedAmon Server-Side Request Forgery (SSRF) Prompts
+NisargHunter AI Server-Side Request Forgery (SSRF) Prompts
 
 Prompts for SSRF attack workflows covering detection, internal network access,
 cloud metadata exploitation, protocol smuggling, DNS rebinding, and escalation

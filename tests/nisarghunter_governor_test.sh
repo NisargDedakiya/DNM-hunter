@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Unit tests for the memory-governor bash helpers in redamon.sh:
+# Unit tests for the memory-governor bash helpers in nisarghunter.sh:
 #   _size_to_mb / preflight_ram_gate / export_resource_caps / _export_clamped_cap
-# Run:  bash tests/redamon_governor_test.sh
+# Run:  bash tests/nisarghunter_governor_test.sh
 # detect_build_resources is stubbed so the gate/export logic is deterministic and
 # needs no real Docker daemon.
 # =============================================================================
@@ -10,8 +10,8 @@ set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1090
-source "$REPO_ROOT/redamon.sh"
-set +e   # redamon.sh turns on `set -e`; relax it so a non-zero return under test
+source "$REPO_ROOT/nisarghunter.sh"
+set +e   # nisarghunter.sh turns on `set -e`; relax it so a non-zero return under test
          # (e.g. the gate returning 1) does not abort the harness.
 
 PASS=0; FAIL=0
@@ -40,7 +40,7 @@ echo "== preflight_ram_gate =="
 STUB_MEM=0
 detect_build_resources() { BUILD_MEM_MB="$STUB_MEM"; BUILD_RES_SOURCE="stub"; BUILD_NCPU=4; }
 
-STUB_MEM=4096; unset REDAMON_MIN_RAM_MB REDAMON_SKIP_RAM_GATE SERVICE_BASELINE_MEM OS_HEADROOM_MEM
+STUB_MEM=4096; unset NISARGHUNTER_MIN_RAM_MB NISARGHUNTER_SKIP_RAM_GATE SERVICE_BASELINE_MEM OS_HEADROOM_MEM
 preflight_ram_gate; eq "4GB host fails default 8GB gate" "$?" "1"
 
 STUB_MEM=16384
@@ -49,13 +49,13 @@ preflight_ram_gate; eq "16GB host passes gate" "$?" "0"
 STUB_MEM=7700   # physical 8GB host reads ~7.7GB via docker info -> should pass (tolerance)
 preflight_ram_gate; eq "8GB host (7700MB) passes via tolerance" "$?" "0"
 
-STUB_MEM=4096; REDAMON_SKIP_RAM_GATE=1
+STUB_MEM=4096; NISARGHUNTER_SKIP_RAM_GATE=1
 preflight_ram_gate; eq "skip flag overrides" "$?" "0"
-unset REDAMON_SKIP_RAM_GATE
+unset NISARGHUNTER_SKIP_RAM_GATE
 
-STUB_MEM=10240; REDAMON_MIN_RAM_MB=12288
+STUB_MEM=10240; NISARGHUNTER_MIN_RAM_MB=12288
 preflight_ram_gate; eq "explicit MIN_RAM_MB enforced" "$?" "1"
-unset REDAMON_MIN_RAM_MB
+unset NISARGHUNTER_MIN_RAM_MB
 
 STUB_MEM=0   # undetectable -> do not block
 preflight_ram_gate; eq "undetectable RAM does not block" "$?" "0"
@@ -101,15 +101,15 @@ eq "AGENT_MEM floored to 1024m" "$AGENT_MEM" "1024m"  # 4096*12% = 491 -> floor 
 
 echo "== setup_zram guards =="
 # Default off -> pure no-op (returns 0, does nothing).
-unset REDAMON_ENABLE_ZRAM
+unset NISARGHUNTER_ENABLE_ZRAM
 setup_zram; eq "disabled by default -> no-op" "$?" "0"
 
 # Enabled but stub uname to non-Linux -> skips cleanly.
-REDAMON_ENABLE_ZRAM=1
+NISARGHUNTER_ENABLE_ZRAM=1
 uname() { echo "Darwin"; }
 setup_zram; eq "non-Linux host -> skip ok" "$?" "0"
 unset -f uname
-unset REDAMON_ENABLE_ZRAM
+unset NISARGHUNTER_ENABLE_ZRAM
 
 echo
 echo "RESULT: $PASS passed, $FAIL failed"

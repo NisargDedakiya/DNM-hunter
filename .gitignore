@@ -3,7 +3,7 @@ agentic/agent-workspace/*
 !agentic/agent-workspace/.gitkeep
 
 # Memory-governor calibration output (host-specific measured envelopes). Each
-# host generates its own via `bash tests/redamon_mem_calibrate.sh`; the governor
+# host generates its own via `bash tests/nisarghunter_mem_calibrate.sh`; the governor
 # falls back to safe built-in constants when absent. Never commit one host's
 # numbers for another host to inherit.
 **/resource_profile.json
@@ -67,7 +67,7 @@ venv/
 ENV/
 env/
 .venv/
-knowledge_base/.redamon-venv/
+knowledge_base/.nisarghunter-venv/
 .env.local
 
 # Environment variables / Secrets
@@ -215,7 +215,7 @@ readmes/agent_prompts/
 # dirs named "internal", e.g. webapp/src/app/api/internal/)
 /internal/
 
-# RedAmon local config (created by redamon.sh)
+# NisargHunter AI local config (created by nisarghunter.sh)
 .gvm-enabled
 .kbase-enabled
 .kbase-disabled

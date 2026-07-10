@@ -12,7 +12,7 @@ Behaviour:
 - ``MCP_AUTH_TOKEN`` unset  -> FAIL OPEN and log a one-time warning, so dev
   or empty                    stacks (and the loopback-only publish) keep working
                                without a token. Fresh installs always get a token
-                               from redamon.sh ``ensure_auth_secrets``.
+                               from nisarghunter.sh ``ensure_auth_secrets``.
 
 Implemented as a pure-ASGI wrapper (no Starlette/FastMCP-version coupling) so it
 composes with whatever SSE app the installed FastMCP builds. ``lifespan`` and any

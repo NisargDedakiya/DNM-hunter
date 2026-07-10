@@ -365,7 +365,7 @@ export function useDownloadMarkdown(deps: DownloadMarkdownDeps) {
       }
     }
     await downloadStreaming(
-      `redamon-session-${timestamp}.md`,
+      `nisarghunter-session-${timestamp}.md`,
       'text/markdown;charset=utf-8',
       () => sessionChunks(),
     )

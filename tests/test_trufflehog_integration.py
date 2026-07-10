@@ -679,7 +679,7 @@ class TestTrufflehogPhasePatterns(unittest.TestCase):
         return None, None
 
     def test_phase1_init_banner(self):
-        name, num = self._match_phase("RedAmon - TruffleHog Secret Scanner")
+        name, num = self._match_phase("NisargHunter AI - TruffleHog Secret Scanner")
         self.assertEqual(name, "Loading Settings")
         self.assertEqual(num, 1)
 
@@ -729,14 +729,14 @@ class TestDockerComposeConsistency(unittest.TestCase):
     def test_trufflehog_scanner_service(self):
         self.assertIn("trufflehog-scanner:", self.content)
         self.assertIn("trufflehog_scan/Dockerfile", self.content)
-        self.assertIn("redamon-trufflehog:latest", self.content)
+        self.assertIn("nisarghunter-trufflehog:latest", self.content)
 
     def test_orchestrator_volume_mounts(self):
         self.assertIn("./trufflehog_scan:/app/trufflehog_scan:ro", self.content)
         self.assertIn("./trufflehog_scan/output:/app/trufflehog_scan/output:rw", self.content)
 
     def test_orchestrator_env_var(self):
-        self.assertIn("TRUFFLEHOG_IMAGE: redamon-trufflehog:latest", self.content)
+        self.assertIn("TRUFFLEHOG_IMAGE: nisarghunter-trufflehog:latest", self.content)
 
     def test_webapp_output_path(self):
         self.assertIn("TRUFFLEHOG_OUTPUT_PATH: /data/trufflehog-output", self.content)

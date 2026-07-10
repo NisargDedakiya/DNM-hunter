@@ -1,5 +1,5 @@
 """
-RedAmon Stealth Mode Rules
+NisargHunter AI Stealth Mode Rules
 
 Comprehensive stealth constraints injected into the agent system prompt
 when STEALTH_MODE is enabled. Prepended BEFORE the main REACT_SYSTEM_PROMPT

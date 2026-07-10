@@ -1,4 +1,4 @@
-# RedAmon Agent Dockerfile
+# NisargHunter AI Agent Dockerfile
 # Python-based LangGraph agent with MCP and Neo4j integration
 
 FROM python:3.11-slim
@@ -97,7 +97,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir uv
 
 # Build arg: set to "true" to skip heavy KB dependencies (~4.4 GB saved)
-# Use ./redamon.sh install --skipkbase to activate
+# Use ./nisarghunter.sh install --skipkbase to activate
 # Declared AFTER core pip install so changing SKIP_KB doesn't bust that cache layer.
 ARG SKIP_KB=false
 

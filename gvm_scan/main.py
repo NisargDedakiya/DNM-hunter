@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RedAmon - Vulnerability Scanner Main Entry Point
+NisargHunter AI - Vulnerability Scanner Main Entry Point
 =================================================
 Orchestrates GVM/OpenVAS vulnerability scanning using recon data.
 
@@ -130,7 +130,7 @@ def run_vulnerability_scan(
     cleanup = get_setting('CLEANUP_AFTER_SCAN', True)
 
     print("\n" + "=" * 70)
-    print("           RedAmon - GVM Vulnerability Scanner")
+    print("           NisargHunter AI - GVM Vulnerability Scanner")
     print("=" * 70)
     print(f"  Target Domain: {domain}")
     print(f"  Scan Config:   {scan_config}")

@@ -12,9 +12,9 @@ Test classes (run independently or with `python3 -m unittest`):
   TestRegression                      — regression, public surface unchanged
   TestSmokeNucleiBehavior             — smoke, runs real nuclei in container
 
-Run all (inside redamon-recon image which has dns/yaml/etc):
+Run all (inside nisarghunter-recon image which has dns/yaml/etc):
   docker run --rm --entrypoint python3 \\
-      -v "$PWD:/app" -w /app redamon-recon \\
+      -v "$PWD:/app" -w /app nisarghunter-recon \\
       -m unittest recon.tests.test_nuclei_two_pass -v
 """
 import sys
@@ -575,7 +575,7 @@ class TestSmokeNucleiBehavior(unittest.TestCase):
     """
     These tests shell out to nuclei to validate our assumptions about -dast.
     They're skipped if nuclei is unreachable (e.g. when running in a CI image
-    without templates). Inside the redamon-kali container they all run.
+    without templates). Inside the nisarghunter-kali container they all run.
     """
     NUCLEI_BIN = shutil.which("nuclei")
     DAST_DIR = "/root/nuclei-templates/dast"

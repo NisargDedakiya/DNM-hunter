@@ -1,5 +1,5 @@
 """
-Model provider discovery for RedAmon Agent.
+Model provider discovery for NisargHunter AI Agent.
 
 Fetches available models from configured AI providers (OpenAI, Anthropic,
 OpenRouter, AWS Bedrock) and returns them in a unified format for the frontend.

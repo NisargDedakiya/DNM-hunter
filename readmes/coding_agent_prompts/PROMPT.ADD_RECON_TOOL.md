@@ -1,6 +1,6 @@
 # NEW TOOL IN RECON PIPELINE
 
-Integrate **[TOOL_NAME]** into the RedAmon recon pipeline.
+Integrate **[TOOL_NAME]** into the NisargHunter AI recon pipeline.
 
 ### Critical Rules
 
@@ -133,7 +133,7 @@ Integrate **[TOOL_NAME]** into the RedAmon recon pipeline.
 - [ ] Run `docker compose exec webapp npx prisma db push` (never use `prisma migrate`)
 - [ ] Docker image added to `recon/entrypoint.sh` IMAGES array (if Docker-based)
 - [ ] Docker image setting (e.g. `TOOL_DOCKER_IMAGE`) in `DEFAULT_SETTINGS` (if Docker-based)
-- [ ] Temp files in `/tmp/redamon/`, cleaned up in `finally` block
+- [ ] Temp files in `/tmp/nisarghunter/`, cleaned up in `finally` block
 - [ ] Frontend section component in `webapp/src/components/projects/ProjectForm/sections/`
 - [ ] Section imported and rendered in `ProjectForm.tsx` under the correct tab
 - [ ] Section exported from `sections/index.ts`

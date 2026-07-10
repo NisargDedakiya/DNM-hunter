@@ -1,10 +1,10 @@
-# RedAmon Neo4j Docker Compose (standalone)
+# NisargHunter AI Neo4j Docker Compose (standalone)
 # For full stack, use the root docker-compose.yml instead.
 
 services:
   neo4j:
     image: neo4j:5.26-community
-    container_name: redamon-neo4j
+    container_name: nisarghunter-neo4j
     ports:
       - "7474:7474"  # HTTP browser interface
       - "7687:7687"  # Bolt protocol (for Python driver)

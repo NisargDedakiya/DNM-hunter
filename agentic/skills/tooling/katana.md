@@ -9,7 +9,7 @@ Reference for endpoint discovery via the Katana crawler: depth tuning, JS-discov
 
 Upstream: https://docs.projectdiscovery.io/opensource/katana/usage
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

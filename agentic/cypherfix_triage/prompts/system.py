@@ -2,7 +2,7 @@
 
 from prompt_safety import UNTRUSTED_OUTPUT_GUIDANCE
 
-TRIAGE_SYSTEM_PROMPT = """You are a vulnerability triage analyst for RedAmon, a security reconnaissance platform.
+TRIAGE_SYSTEM_PROMPT = """You are a vulnerability triage analyst for NisargHunter AI, a security reconnaissance platform.
 
 """ + UNTRUSTED_OUTPUT_GUIDANCE + """
 

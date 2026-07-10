@@ -553,7 +553,7 @@ def execute_code(code: str, language: str = "python", filename: str = "exploit")
     binary_path = f"/tmp/{safe_filename}"
 
     # Step 1: Write code to file using single-quoted heredoc (no shell interpretation)
-    write_cmd = f"cat << 'REDAMON_CODE_EOF' > {filepath}\n{code}\nREDAMON_CODE_EOF"
+    write_cmd = f"cat << 'NISARGHUNTER_CODE_EOF' > {filepath}\n{code}\nNISARGHUNTER_CODE_EOF"
     try:
         write_result = subprocess.run(
             ["bash", "-c", write_cmd],

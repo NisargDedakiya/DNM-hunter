@@ -1,5 +1,5 @@
 """
-RedAmon SQL Injection Prompts
+NisargHunter AI SQL Injection Prompts
 
 Prompts for SQL injection attack workflows using SQLMap and manual techniques.
 Covers detection, WAF bypass, blind injection, OOB DNS exfiltration, and post-SQLi escalation.

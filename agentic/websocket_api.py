@@ -1,5 +1,5 @@
 """
-WebSocket API for RedAmon Agent
+WebSocket API for NisargHunter AI Agent
 
 Provides WebSocket endpoint for real-time bidirectional communication with the agent.
 Supports streaming of LLM thoughts, tool executions, and interactive approval/question flows.

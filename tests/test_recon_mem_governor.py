@@ -23,7 +23,7 @@ GB = 1024 ** 3
 
 class ReconGovTestBase(unittest.TestCase):
     def setUp(self):
-        for k in ("REDAMON_MEM_GOVERNOR", "MEM_BUDGET_FRACTION", "RESOURCE_PROFILE_PATH"):
+        for k in ("NISARGHUNTER_MEM_GOVERNOR", "MEM_BUDGET_FRACTION", "RESOURCE_PROFILE_PATH"):
             os.environ.pop(k, None)
         rg.set_mem_override(None, None)
         rg.reset_profile_cache()
@@ -71,7 +71,7 @@ class TestByteBudget(ReconGovTestBase):
 
 class TestGuards(ReconGovTestBase):
     def test_governor_off_no_change(self):
-        os.environ['REDAMON_MEM_GOVERNOR'] = 'false'
+        os.environ['NISARGHUNTER_MEM_GOVERNOR'] = 'false'
         rg.set_mem_override(32 * GB, 1 * GB)
         s = {'NUCLEI_CONCURRENCY': 25, 'KATANA_MAX_URLS': 300000}
         out = ps.apply_memory_governor(dict(s))

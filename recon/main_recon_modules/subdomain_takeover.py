@@ -1,5 +1,5 @@
 """
-RedAmon - Subdomain Takeover Scanner Module
+NisargHunter AI - Subdomain Takeover Scanner Module
 ===========================================
 Layered subdomain takeover detection:
     1. Subjack              primary, DNS-first, installed as Go binary
@@ -66,7 +66,7 @@ def run_subdomain_takeover(
         scan_metadata  timing + enabled tool list
     """
     print("\n" + "=" * 70)
-    print("[*][Takeover] RedAmon - Subdomain Takeover Scanner")
+    print("[*][Takeover] NisargHunter AI - Subdomain Takeover Scanner")
     print("=" * 70)
 
     settings = settings or {}
@@ -142,11 +142,11 @@ def run_subdomain_takeover(
     # 2. Execute scanners
     # --------------------------------------------------------------
     started = time.time()
-    # Use /tmp/redamon (bind-mounted between recon container and host) so that
+    # Use /tmp/nisarghunter (bind-mounted between recon container and host) so that
     # Docker-in-Docker sibling containers (nuclei, baddns) see the same paths.
-    shared_root = Path("/tmp/redamon")
+    shared_root = Path("/tmp/nisarghunter")
     shared_root.mkdir(parents=True, exist_ok=True)
-    work_dir = Path(tempfile.mkdtemp(prefix="redamon_takeover_", dir=str(shared_root)))
+    work_dir = Path(tempfile.mkdtemp(prefix="nisarghunter_takeover_", dir=str(shared_root)))
     # World-readable so the non-root baddns user inside the sidecar can read.
     try:
         work_dir.chmod(0o755)
@@ -559,19 +559,19 @@ def _run_baddns(
     """
     Run the BadDNS sidecar against the subdomain list.
 
-    Uses Docker-in-Docker against `redamon-baddns:latest` (built separately
+    Uses Docker-in-Docker against `nisarghunter-baddns:latest` (built separately
     by `docker compose --profile tools build baddns-scanner`). Output is
     NDJSON on stdout -- one Finding per line -- captured via subprocess and
     parsed in-memory.
 
-    AGPL isolation: RedAmon never imports baddns; the process + filesystem
+    AGPL isolation: NisargHunter AI never imports baddns; the process + filesystem
     boundary enforces the license separation.
     """
     if not is_docker_installed() or not is_docker_running():
         print("[!][Takeover][BadDNS] Docker unavailable -- skipping baddns layer")
         return []
 
-    baddns_image = settings.get("BADDNS_DOCKER_IMAGE", "redamon-baddns:latest")
+    baddns_image = settings.get("BADDNS_DOCKER_IMAGE", "nisarghunter-baddns:latest")
     # Is the image present on the host? If not, skip gracefully -- build via
     # `docker compose --profile tools build baddns-scanner` first.
     try:
@@ -595,7 +595,7 @@ def _run_baddns(
         pass
 
     # Mount the WORK DIR (not the file) -- see build_baddns_command docstring.
-    # Convert container path → host path for Docker-in-Docker. /tmp/redamon
+    # Convert container path → host path for Docker-in-Docker. /tmp/nisarghunter
     # paths pass through unchanged per get_host_path()'s convention.
     from recon.helpers.nuclei_helpers import get_host_path  # local import to avoid cycles
     work_dir_host = get_host_path(str(work_dir))
@@ -612,7 +612,7 @@ def _run_baddns(
     # timeout. Without --name, a TimeoutExpired leaves an orphan container
     # running on the host because subprocess.run kills the docker CLI but
     # the daemon-owned container keeps going.
-    container_name = f"redamon-baddns-{os.getpid()}-{int(time.time())}"
+    container_name = f"nisarghunter-baddns-{os.getpid()}-{int(time.time())}"
     cmd = build_baddns_command(
         work_dir_host=work_dir_host,
         targets_filename=targets_filename,
@@ -796,7 +796,7 @@ def _probe_for_ai_disambiguation(hostname: str, timeout: int = 10):
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     schemes = ("https", "http")
-    headers_base = {"User-Agent": "Mozilla/5.0 (compatible; RedAmon/4.7)"}
+    headers_base = {"User-Agent": "Mozilla/5.0 (compatible; NisargHunter AI/4.7)"}
     for scheme in schemes:
         try:
             r = requests.get(

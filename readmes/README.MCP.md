@@ -1,4 +1,4 @@
-# RedAmon MCP Servers
+# NisargHunter AI MCP Servers
 
 MCP (Model Context Protocol) servers for agentic penetration testing. These servers expose security tools to AI agents via the MCP protocol, enabling autonomous vulnerability discovery and exploitation.
 
@@ -71,8 +71,8 @@ These variables are set in `docker-compose.yml` and passed to the container:
 | Variable | Value | Description |
 |----------|-------|-------------|
 | `MCP_TRANSPORT` | `sse` | Transport mode: `stdio` (direct) or `sse` (network) |
-| `MCP_HOST` | `0.0.0.0` | Bind address **inside the container** (so the agent can reach the servers over the internal `redamon` bridge). The *host* port publish is loopback-only — see the security note below. |
-| `MCP_AUTH_TOKEN` | *(generated)* | Bearer token required on every MCP SSE request. Auto-generated into `.env` by `redamon.sh`; the agent sends it, the servers validate it. Empty/unset ⇒ servers **fail open** with a warning (dev only). |
+| `MCP_HOST` | `0.0.0.0` | Bind address **inside the container** (so the agent can reach the servers over the internal `nisarghunter` bridge). The *host* port publish is loopback-only — see the security note below. |
+| `MCP_AUTH_TOKEN` | *(generated)* | Bearer token required on every MCP SSE request. Auto-generated into `.env` by `nisarghunter.sh`; the agent sends it, the servers validate it. Empty/unset ⇒ servers **fail open** with a warning (dev only). |
 | `NETWORK_RECON_PORT` | `8000` | HTTP client + port scanner server |
 | `NUCLEI_PORT` | `8002` | Vulnerability scanner server |
 | `METASPLOIT_PORT` | `8003` | Exploitation framework server |
@@ -468,13 +468,13 @@ default:
 - **Loopback-only host publish.** The MCP servers (`8000/8002/8003/8004/8005`),
   progress streams (`8013/8014`), tunnel-manager (`8015`) and ngrok API (`4040`)
   are published on `127.0.0.1` — never on the LAN. The agent reaches them over
-  the internal `redamon` Docker bridge, so no functionality depends on host
+  the internal `nisarghunter` Docker bridge, so no functionality depends on host
   reachability. (`4444`, the reverse-shell catcher, is intentionally left
   routable so a real target can connect back in direct/no-tunnel mode.)
 - **Bearer-token auth.** Every MCP SSE request must carry
-  `Authorization: Bearer $MCP_AUTH_TOKEN`. `redamon.sh` generates the token into
+  `Authorization: Bearer $MCP_AUTH_TOKEN`. `nisarghunter.sh` generates the token into
   `.env`; the agent sends it automatically. If the token is unset (e.g. a manual
-  `docker compose up` without running `redamon.sh`), the servers **fail open**
+  `docker compose up` without running `nisarghunter.sh`), the servers **fail open**
   with a startup warning — the loopback bind is still the active control in that
   case. To require auth in that scenario, set `MCP_AUTH_TOKEN` in `.env`.
 

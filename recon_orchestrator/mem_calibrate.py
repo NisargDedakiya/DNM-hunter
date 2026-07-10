@@ -33,9 +33,9 @@ PROFILE_PATH = os.environ.get("RESOURCE_PROFILE_PATH") or os.path.join(
 
 # Always-on core services (container names) that make up service_baseline.
 ALWAYS_ON = [
-    "redamon-neo4j", "redamon-postgres", "redamon-gvm-gvmd", "redamon-agent",
-    "redamon-recon-orchestrator", "redamon-webapp", "redamon-kali",
-    "redamon-docker-broker",
+    "nisarghunter-neo4j", "nisarghunter-postgres", "nisarghunter-gvm-gvmd", "nisarghunter-agent",
+    "nisarghunter-recon-orchestrator", "nisarghunter-webapp", "nisarghunter-kali",
+    "nisarghunter-docker-broker",
 ]
 
 # Sibling tool images -> the tool key used in tool_container_envelope_bytes.
@@ -92,7 +92,7 @@ def sample(client, seconds: float, interval: float = 1.0):
             if name in service_peaks:
                 service_peaks[name] = max(service_peaks[name], mem)
                 continue
-            if name.startswith("redamon-recon-") or name.startswith("redamon-partial-recon-"):
+            if name.startswith("nisarghunter-recon-") or name.startswith("nisarghunter-partial-recon-"):
                 recon_now += mem
                 recon_peak = max(recon_peak, mem)
                 continue
@@ -203,7 +203,7 @@ def cmd_scan(client, args):
 
 
 def main():
-    p = argparse.ArgumentParser(description="RedAmon memory calibration (Part 0A)")
+    p = argparse.ArgumentParser(description="NisargHunter AI memory calibration (Part 0A)")
     sub = p.add_subparsers(dest="cmd", required=True)
     b = sub.add_parser("baseline")
     b.add_argument("--seconds", type=float, default=10)

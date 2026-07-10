@@ -9,7 +9,7 @@ Tactical reference for content, vhost, parameter, and POST-body fuzzing with `ff
 
 Upstream: https://github.com/ffuf/ffuf
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

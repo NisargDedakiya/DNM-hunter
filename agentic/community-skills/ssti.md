@@ -141,7 +141,7 @@ Pick the engine-specific track that matches the Phase 1 fingerprint and run it f
    ```
    tplmap -u "https://target.tld/path?inj=test" --os-shell
    ```
-6. **Validation**: capture `id`, `hostname`, `cat /etc/hostname`, and a UUID written into `/tmp/redamon-<random>.txt`. Re-read via the same gadget to prove process identity.
+6. **Validation**: capture `id`, `hostname`, `cat /etc/hostname`, and a UUID written into `/tmp/nisarghunter-<random>.txt`. Re-read via the same gadget to prove process identity.
 
 #### 2.B Twig (Symfony / Drupal / Craft / OctoberCMS)
 

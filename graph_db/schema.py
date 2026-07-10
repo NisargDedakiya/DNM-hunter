@@ -1,5 +1,5 @@
 """
-Neo4j Schema: Constraints and Indexes for RedAmon Graph Database
+Neo4j Schema: Constraints and Indexes for NisargHunter AI Graph Database
 
 All DDL statements use IF NOT EXISTS / IF EXISTS guards, making them
 fully idempotent — safe to run multiple times without side effects.

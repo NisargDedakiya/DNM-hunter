@@ -63,7 +63,7 @@ _DEFAULT_ALLOWED_IMAGES = [
     "jauderho/hakrawler:latest",
     "ghcr.io/zaproxy/zaproxy:stable",
     "dolevf/graphql-cop:1.14",
-    "redamon-baddns:latest",
+    "nisarghunter-baddns:latest",
     "alpine",          # temp-file cleanup helper
     "alpine:latest",
 ]
@@ -78,7 +78,7 @@ ALLOWED_IMAGES = set(_DEFAULT_ALLOWED_IMAGES) | set(_csv_env("DOCKER_BROKER_ALLO
 # Host bind-mount sources the tools legitimately need. Anything else (especially
 # "/" or the docker socket) is denied. Sources without a leading "/" are treated
 # as named volumes and checked against ALLOWED_VOLUMES.
-_DEFAULT_BIND_PREFIXES = ["/tmp/redamon"]
+_DEFAULT_BIND_PREFIXES = ["/tmp/nisarghunter"]
 ALLOWED_BIND_PREFIXES = _DEFAULT_BIND_PREFIXES + _csv_env("DOCKER_BROKER_ALLOWED_BIND_PREFIXES")
 ALLOWED_VOLUMES = set(_csv_env("DOCKER_BROKER_ALLOWED_VOLUMES")) | {"nuclei-templates"}
 
@@ -126,7 +126,7 @@ def _bind_source_allowed(source: str) -> bool:
         return False
     if source.startswith("/"):
         # absolute host path. NORMALIZE first so traversal tricks like
-        # "/tmp/redamon/../../etc" (which textually starts with the allowed
+        # "/tmp/nisarghunter/../../etc" (which textually starts with the allowed
         # prefix but resolves to /etc) are caught.
         norm = os.path.normpath(source)
         if norm == "/" or "docker.sock" in norm:

@@ -1,5 +1,5 @@
 """
-RedAmon - IP Filtering Helpers
+NisargHunter AI - IP Filtering Helpers
 ===============================
 Classify and filter IPs before OSINT enrichment to avoid wasting API
 credits on non-routable, reserved, or CDN addresses.

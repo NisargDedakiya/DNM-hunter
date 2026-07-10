@@ -27,7 +27,7 @@
 **/coverage.xml
 
 # ---------- Virtualenvs ----------
-knowledge_base/.redamon-venv/
+knowledge_base/.nisarghunter-venv/
 **/*-env/
 **/*-venv/
 **/.venv/

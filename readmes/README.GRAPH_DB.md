@@ -1,4 +1,4 @@
-# Neo4j Graph Database for RedAmon
+# Neo4j Graph Database for NisargHunter AI
 
 ## Quick Start
 
@@ -48,7 +48,7 @@ docker compose ps
 docker compose restart
 
 # Enter container shell
-docker exec -it redamon-neo4j bash
+docker exec -it nisarghunter-neo4j bash
 ```
 
 ## Cypher Queries

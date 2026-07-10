@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="assets/logo.png" alt="RedAmon Logo" width="120"/>
+  <img src="assets/logo.png" alt="NisargHunter AI Logo" width="120"/>
   <br/>
-  <img src="assets/title.svg" alt="RedAmon" width="340"/>
+  <img src="assets/title.svg" alt="NisargHunter AI" width="340"/>
   <br/>
   <b><i><big><big>Unmask the hidden before the world does</big></big></i></b>
 </p>
@@ -11,16 +11,10 @@
 
 <br/>
 
-<p align="center">
-  <a href="https://www.redamon.org/"><img height="34" src="https://img.shields.io/badge/🌐_Website-redamon.org-A01025?style=for-the-badge&labelColor=000000" alt="RedAmon Website"/></a>
-  <a href="https://discord.com/invite/dxSrH2gaC"><img height="34" src="https://img.shields.io/badge/Discord-Join_Community-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=000000" alt="Discord Community"/></a>
-  <a href="https://t.me/redamon_ai"><img height="34" src="https://img.shields.io/badge/Telegram-Join_Channel-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=000000" alt="Telegram Channel"/></a>
-</p>
-
 <br/>
 
 <p align="center">
-  <a href="https://github.com/samugit83/redamon/stargazers"><img height="24" src="https://img.shields.io/github/stars/samugit83/redamon?style=flat&color=2E8B57&label=Stars" alt="GitHub Stars"/></a>
+  <a href="https://github.com/nisargdedakiya/dnm-hunter/stargazers"><img height="24" src="https://img.shields.io/github/stars/nisargdedakiya/dnm-hunter?style=flat&color=2E8B57&label=Stars" alt="GitHub Stars"/></a>
   <img height="24" src="https://img.shields.io/badge/v5.3.2-release-2E8B57?style=flat" alt="Version 5.3.2"/>
   <img height="24" src="https://img.shields.io/badge/WARNING-SECURITY%20TOOL-B22222?style=flat" alt="Security Tool Warning"/>
   <img height="24" src="https://img.shields.io/badge/LICENSE-MIT-4169A1?style=flat" alt="MIT License"/>
@@ -52,7 +46,7 @@
 > **LEGAL DISCLAIMER**: This tool is intended for **authorized security testing**, **educational purposes**, and **research only**. Never use this system to scan, probe, or attack any system you do not own or have explicit written permission to test. Unauthorized access is **illegal** and punishable by law. By using this tool, you accept **full responsibility** for your actions. **[Read Full Disclaimer](DISCLAIMER.md)**
 
 <p align="center">
-  <img src="assets/agent.gif" alt="RedAmon Agent Demo" width="100%"/>
+  <img src="assets/agent.gif" alt="NisargHunter AI Agent Demo" width="100%"/>
 </p>
 <p align="center">
   <a href="https://youtu.be/afViJUit0xE"><img height="24" src="https://img.shields.io/badge/▶_WATCH_DEMO-3_Parallel_Agents-FF0000?style=flat&logo=youtube&logoColor=white" alt="Watch Demo"/></a>
@@ -68,14 +62,14 @@
 <img src="assets/recon-pipeline.gif" alt="Parallel recon pipeline in action" width="100%"/>
 </p>
 <p align="center">
-  <em>RedAmon launches multiple reconnaissance tools in parallel, each feeding results into a shared knowledge graph in real time. Tools spin up, adapt their scope based on live discoveries, and coordinate without manual intervention. The entire attack surface -- subdomains, ports, endpoints, parameters -- materializes in minutes, not hours.</em>
+  <em>NisargHunter AI launches multiple reconnaissance tools in parallel, each feeding results into a shared knowledge graph in real time. Tools spin up, adapt their scope based on live discoveries, and coordinate without manual intervention. The entire attack surface -- subdomains, ports, endpoints, parameters -- materializes in minutes, not hours.</em>
 </p>
 
 <br/>
 
 <h2 align="center">Recon as a Living Knowledge Graph</h2>
 <p align="center">
-<img src="assets/redamon-graph.gif" alt="RedAmon Neo4j attack-surface graph rendered in 2D" width="100%"/>
+<img src="assets/nisarghunter-graph.gif" alt="NisargHunter AI Neo4j attack-surface graph rendered in 2D" width="100%"/>
 </p>
 <p align="center">
   <em>Industry-standard scanners chained so each tool's output feeds the next, then merged into a single Neo4j knowledge graph. Findings are deduplicated, relationships are explicit, and the agent inherits a structured, fully connected attack surface ready to query in natural language.</em>
@@ -87,7 +81,7 @@
 <p align="center">
 <b><samp><big>Reconnaissance ➜ Exploitation ➜ Post-Exploitation ➜ AI Triage ➜ CodeFix Agent ➜ GitHub PR</big></samp></b>
 <br/><br/>
-RedAmon doesn't stop at finding vulnerabilities, it fixes them. The pipeline starts with a 6-phase reconnaissance engine that maps your target's entire attack surface, then hands control to an autonomous AI agent that validates CVE exploitability, tests credential policies, and maps lateral movement paths. Every finding is recorded in a Neo4j knowledge graph. When the offensive phase completes, CypherFix takes over: an AI triage agent correlates hundreds of findings, deduplicates them, and ranks them by exploitability. Then a CodeFix agent clones your repository, navigates the codebase with 11 code-aware tools, implements targeted fixes, and opens a GitHub pull request, ready for review and merge.
+NisargHunter AI doesn't stop at finding vulnerabilities, it fixes them. The pipeline starts with a 6-phase reconnaissance engine that maps your target's entire attack surface, then hands control to an autonomous AI agent that validates CVE exploitability, tests credential policies, and maps lateral movement paths. Every finding is recorded in a Neo4j knowledge graph. When the offensive phase completes, CypherFix takes over: an AI triage agent correlates hundreds of findings, deduplicates them, and ranks them by exploitability. Then a CodeFix agent clones your repository, navigates the codebase with 11 code-aware tools, implements targeted fixes, and opens a GitHub pull request, ready for review and merge.
 </p>
 
 <p align="center">
@@ -149,21 +143,21 @@ That's it. No Node.js, Python, or security tools needed on your host.
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/samugit83/redamon.git
-cd redamon
+git clone https://github.com/nisargdedakiya/dnm-hunter.git
+cd nisarghunter
 
 # Without GVM (lighter, faster startup):
-./redamon.sh install
+./nisarghunter.sh install
 
 # With GVM / OpenVAS (full stack, ~30 min first run):
-./redamon.sh install --gvm
+./nisarghunter.sh install --gvm
 ```
 
 The script builds all images and starts the services.
 
 ### 2. Create Admin Account
 
-At the end of the install (and on every `./redamon.sh up` or `./redamon.sh update` if no admin exists), you will be prompted in the terminal:
+At the end of the install (and on every `./nisarghunter.sh up` or `./nisarghunter.sh update` if no admin exists), you will be prompted in the terminal:
 
 ```
 [WARN] No admin user found. Let's create one.
@@ -192,7 +186,7 @@ After creation, open **http://localhost:3000** and sign in with the email and pa
 If you forget the admin password, reset it from the terminal:
 
 ```bash
-./redamon.sh reset-password
+./nisarghunter.sh reset-password
 ```
 
 ### 3. Configure
@@ -219,22 +213,22 @@ All lifecycle management is handled by a single script:
 
 | Command | Description |
 |---------|-------------|
-| `./redamon.sh install` | Build + start lightweight (no GVM, no Knowledge Base, Tavily-only web search) |
-| `./redamon.sh install --kbase` | Build + start with the local Knowledge Base (~4.4 GB heavier) |
-| `./redamon.sh install --gvm` | Build + start with GVM/OpenVAS |
+| `./nisarghunter.sh install` | Build + start lightweight (no GVM, no Knowledge Base, Tavily-only web search) |
+| `./nisarghunter.sh install --kbase` | Build + start with the local Knowledge Base (~4.4 GB heavier) |
+| `./nisarghunter.sh install --gvm` | Build + start with GVM/OpenVAS |
 
-> Flags can be combined: `./redamon.sh install --gvm --kbase`
+> Flags can be combined: `./nisarghunter.sh install --gvm --kbase`
 
 | Command | Description |
 |---------|-------------|
-| **`./redamon.sh update`** | **Pull latest version, smart-rebuild only changed services (preserves your install-time GVM/KB choice)** |
-| `./redamon.sh up` | Start services (auto-detects GVM and KB mode from install) |
-| `./redamon.sh up dev` | Start in dev mode with hot-reload (auto-detects GVM and KB mode) |
-| `./redamon.sh down` | Stop services (preserves data) |
-| `./redamon.sh status` | Show running services, version, GVM mode, KB state |
-| `./redamon.sh clean` | Remove containers + images, keep data |
-| `./redamon.sh reset-password` | Reset a user's password from the terminal |
-| `./redamon.sh purge` | Remove everything including all data |
+| **`./nisarghunter.sh update`** | **Pull latest version, smart-rebuild only changed services (preserves your install-time GVM/KB choice)** |
+| `./nisarghunter.sh up` | Start services (auto-detects GVM and KB mode from install) |
+| `./nisarghunter.sh up dev` | Start in dev mode with hot-reload (auto-detects GVM and KB mode) |
+| `./nisarghunter.sh down` | Stop services (preserves data) |
+| `./nisarghunter.sh status` | Show running services, version, GVM mode, KB state |
+| `./nisarghunter.sh clean` | Remove containers + images, keep data |
+| `./nisarghunter.sh reset-password` | Reset a user's password from the terminal |
+| `./nisarghunter.sh purge` | Remove everything including all data |
 
 
 ### Updating to a New Version
@@ -242,18 +236,18 @@ All lifecycle management is handled by a single script:
 Just run:
 
 ```bash
-./redamon.sh update
+./nisarghunter.sh update
 ```
 
 The script pulls the latest code from GitHub, detects which Dockerfiles and source files changed, rebuilds only the affected images, and restarts the updated services. Your databases, scan results, and reports are preserved -- volumes are never deleted.
 
-> **One-time note when a release adds a new background service.** `update` re-execs the freshly-pulled script so new build/start rules apply automatically -- but only for the script version you are updating *from*. When updating *from a version that predates this self-heal* (i.e. your first update onto it), run `./redamon.sh up` once right after `update` so any newly added core service is started:
+> **One-time note when a release adds a new background service.** `update` re-execs the freshly-pulled script so new build/start rules apply automatically -- but only for the script version you are updating *from*. When updating *from a version that predates this self-heal* (i.e. your first update onto it), run `./nisarghunter.sh up` once right after `update` so any newly added core service is started:
 >
 > ```bash
-> ./redamon.sh update && ./redamon.sh up
+> ./nisarghunter.sh update && ./nisarghunter.sh up
 > ```
 >
-> `up` is idempotent -- it starts only what is missing and leaves running containers untouched. After this one-time step, plain `./redamon.sh update` handles everything on its own.
+> `up` is idempotent -- it starts only what is missing and leaves running containers untouched. After this one-time step, plain `./nisarghunter.sh update` handles everything on its own.
 
 The webapp also checks for updates automatically and shows a notification in the UI when a new version is available.
 
@@ -262,7 +256,7 @@ The webapp also checks for updates automatically and shows a notification in the
 For contributors and active development with **Next.js fast refresh**:
 
 ```bash
-./redamon.sh up dev           # auto-detects GVM mode from install
+./nisarghunter.sh up dev           # auto-detects GVM mode from install
 ```
 
 Tool images are built automatically on first run if they don't exist yet. The dev override swaps the production webapp image for a dev container with your source code volume-mounted. Every file save triggers instant hot-reload in the browser.
@@ -306,7 +300,7 @@ docker compose --profile tools down --rmi local --volumes --remove-orphans  # Fu
 **Reclaim disk space:**
 ```bash
 docker system df                                  # Show Docker disk usage (add -v for per-image breakdown)
-docker image prune -f                             # Remove dangling images (auto-run by `./redamon.sh update`)
+docker image prune -f                             # Remove dangling images (auto-run by `./nisarghunter.sh update`)
 docker builder prune -f                           # Clear build cache (NOT auto-cleaned, can grow to many GB over time)
 docker container prune -f                         # Remove stopped containers
 ```
@@ -321,13 +315,13 @@ The agent's `web_search` tool includes a local **Knowledge Base** -- a RAG pipel
 
 **How it works:** When the KB is enabled, `install` / `up` / `restart` builds a lightweight KB index (~1,200 chunks in 10-15 min on CPU). At query time, the agent runs a hybrid retrieval pipeline (FAISS vector search + Neo4j fulltext), reranks with a cross-encoder, and checks a confidence threshold. If the score is high enough, results come from the local KB. Otherwise, it falls back to Tavily or merges both.
 
-**Default behavior:** The KB is **opt-in**. `./redamon.sh install` produces a lightweight install (~4.4 GB lighter, Tavily-only web search). To enable the local KB, pass `--kbase`:
+**Default behavior:** The KB is **opt-in**. `./nisarghunter.sh install` produces a lightweight install (~4.4 GB lighter, Tavily-only web search). To enable the local KB, pass `--kbase`:
 
 ```bash
-./redamon.sh install --kbase
+./nisarghunter.sh install --kbase
 ```
 
-On first install with `--kbase`, RedAmon detects your hardware (GPU / CPU / API) and offers a quick-start profile. The choice is persisted, so subsequent `update` / `up` commands respect it without re-passing the flag.
+On first install with `--kbase`, NisargHunter AI detects your hardware (GPU / CPU / API) and offers a quick-start profile. The choice is persisted, so subsequent `update` / `up` commands respect it without re-passing the flag.
 
 **Speed up ingestion with API embeddings:** By default, embeddings run locally on CPU/GPU. On CPU-only machines, large datasets (ExploitDB, NVD) can take hours. You can offload embedding to an external API by creating a `.env` file from the template:
 
@@ -359,11 +353,11 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 **Manage the KB:**
 
 ```bash
-./redamon.sh kb build lite          # Build with lite profile (~30-60s with API)
-./redamon.sh kb build standard      # Add NVD CVEs
-./redamon.sh kb update nvd          # Incremental NVD refresh
-./redamon.sh kb stats               # Show index statistics
-./redamon.sh kb rebuild lite        # Wipe and rebuild from scratch
+./nisarghunter.sh kb build lite          # Build with lite profile (~30-60s with API)
+./nisarghunter.sh kb build standard      # Add NVD CVEs
+./nisarghunter.sh kb update nvd          # Incremental NVD refresh
+./nisarghunter.sh kb stats               # Show index statistics
+./nisarghunter.sh kb rebuild lite        # Wipe and rebuild from scratch
 ```
 
 > For full technical documentation -- query pipeline, data sources, ingestion profiles, scoring, security model -- see the **[Knowledge Base Technical Reference](readmes/README.KBASE.md)** or the **[Wiki: Knowledge Base & Web Search](https://github.com/samugit83/redamon/wiki/Knowledge-Base-Web-Search)**.
@@ -379,7 +373,7 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 - [Components](#components)
 - [Documentation](#documentation)
 - [Troubleshooting](#troubleshooting)
-- [RedAmon HackLab](#redamon-hacklab)
+- [NisargHunter AI HackLab](#nisarghunter-hacklab)
 - [Community Showcase](#community-showcase)
 - [Legal](#legal)
 
@@ -387,7 +381,7 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 
 ## Overview
 
-RedAmon is a modular, containerized penetration testing framework that chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end offensive security pipeline. Every component runs inside Docker (no tools installed on your host) and communicates through well-defined APIs so each layer can evolve independently.
+NisargHunter AI is a modular, containerized penetration testing framework that chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end offensive security pipeline. Every component runs inside Docker (no tools installed on your host) and communicates through well-defined APIs so each layer can evolve independently.
 
 The platform is built around six pillars:
 
@@ -413,7 +407,7 @@ Everything runs on a **fan-out / fan-in** architecture: each phase fires as many
 > **[Wiki: Running Reconnaissance](https://github.com/samugit83/redamon/wiki/Running-Reconnaissance)** | **[Technical: README.RECON.md](readmes/README.RECON.md)**
 
 <p align="center">
-  <img src="assets/recon.gif" alt="RedAmon Reconnaissance Pipeline" width="100%"/>
+  <img src="assets/recon.gif" alt="NisargHunter AI Reconnaissance Pipeline" width="100%"/>
 </p>
 
 #### Recon Pipeline Tool Matrix
@@ -457,7 +451,7 @@ Everything runs on a **fan-out / fan-in** architecture: each phase fires as many
 | **GraphQL Security** | **GraphQL Security Testing** | Endpoint discovery, introspection test, schema extraction, sensitive-field detection, graphql-cop (12 misconfig checks: alias/batch/directive DoS, GraphiQL, trace mode, GET/POST CSRF, field suggestions) | Active / Passive | Parallel with Nuclei + Subdomain Takeover + VHost & SNI + Web Cache Poisoning (GROUP 6 Phase A) |
 | **Subdomain Takeover** | **Subdomain Takeover Detection** | Subjack (Apache-2.0 DNS-first fingerprints) + Nuclei takeover templates (`http/takeovers/` + `dns/`) + BadDNS (AGPL-3.0 isolated sidecar: CNAME, NS, MX, TXT, SPF, DMARC, wildcard, NSEC, references, zonetransfer). Cross-tool dedup, 12+ auto-exploitable providers, confidence-scored `confirmed` / `likely` / `manual_review` verdicts | Active / Passive | Parallel with Nuclei + GraphQL Scan + VHost & SNI + Web Cache Poisoning (GROUP 6 Phase A) |
 | **VHost & SNI Enumeration** | **Hidden Virtual Host Discovery** | Curl-only dual-layer probing: L7 Host-header overrides + L4 TLS SNI swaps via `--resolve`, baseline-comparison anomaly detection, 4-tier severity ladder (`high` for L7/L4 routing inconsistency, `medium` for internal-keyword matches, `low`/`info` for status/size deltas), 2,471-entry default wordlist + custom + graph-derived candidates, discovery feedback loop into httpx | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + Web Cache Poisoning (GROUP 6 Phase A) |
-| **Web Cache Poisoning** | **Web Cache Poisoning & Deception** | Two-engine detection: WCVS (Hackmanit, Docker-in-Docker) breadth sweep across 10+ technique classes (unkeyed-header poisoning, parameter cloaking, path/cache-key normalization, cache-key injection, web cache deception) then a RedAmon-native 5-phase confirmation (cache oracle with silent-cache frozen-Date fallback, isolated cache-buster, fingerprint-gated framework packs for Next.js/Nuxt/Remix, baseline→poison→clean persistence check, reflected + non-reflective differential detection). Confidence-scored `Confirmed`/`Strong`/`Tentative` tiers, min-confidence gate; benign `.invalid` canaries + isolated cache buckets so the real cache is never poisoned. Disabled by default | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + VHost & SNI (GROUP 6 Phase A) |
+| **Web Cache Poisoning** | **Web Cache Poisoning & Deception** | Two-engine detection: WCVS (Hackmanit, Docker-in-Docker) breadth sweep across 10+ technique classes (unkeyed-header poisoning, parameter cloaking, path/cache-key normalization, cache-key injection, web cache deception) then a NisargHunterAI-native 5-phase confirmation (cache oracle with silent-cache frozen-Date fallback, isolated cache-buster, fingerprint-gated framework packs for Next.js/Nuxt/Remix, baseline→poison→clean persistence check, reflected + non-reflective differential detection). Confidence-scored `Confirmed`/`Strong`/`Tentative` tiers, min-confidence gate; benign `.invalid` canaries + isolated cache buckets so the real cache is never poisoned. Disabled by default | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + VHost & SNI (GROUP 6 Phase A) |
 | **Security Checks** | **Security Checks** | WAF bypass, direct IP access, TLS expiry, missing headers, cache-control | Active | Parallel workers |
 | **CVE & MITRE** | **CVE Enrichment** | NVD API, Vulners API | Passive | Sequential |
 | | **MITRE Enrichment** | CWE / CAPEC mapping | Passive | Sequential |
@@ -497,7 +491,7 @@ A **LangGraph-based autonomous agent** implementing the ReAct pattern. It progre
 > **[Wiki: AI Agent Guide](https://github.com/samugit83/redamon/wiki/AI-Agent-Guide)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md)**
 
 <p align="center">
-  <img src="assets/exploit.gif" alt="RedAmon Exploitation Demo" width="100%"/>
+  <img src="assets/exploit.gif" alt="NisargHunter AI Exploitation Demo" width="100%"/>
 </p>
 
 #### Agent Tool Arsenal
@@ -571,7 +565,7 @@ Two paths: pick one of **39 prefilled Quick-Add presets** (OSINT, threat-intel, 
 
 ### Agent Workspace: Per-Project Filesystem, Background Jobs, Auto-Offload
 
-> **Watch the demo:** [RedAmon Agent Workspace: AI Runs 4 Parallel Pentests and Writes Its Own Report (YouTube)](https://youtu.be/dkgIk78T7Hw)
+> **Watch the demo:** [NisargHunter AI Agent Workspace: AI Runs 4 Parallel Pentests and Writes Its Own Report (YouTube)](https://youtu.be/dkgIk78T7Hw)
 
 Every project gets a persistent `/workspace/<projectId>/` directory that the agent, the kali-sandbox, and you (through the **FileSystem Drawer** in the Red Zone) all see at the same time. Four purpose-built folders are auto-created and protected from rename/delete: `notes/` for the agent's scratch work and draft reports, `tool-outputs/` for auto-offloaded huge outputs, `jobs/` for background-job logs, and `uploads/` for files you drop in for the agent to read. The agent is taught the layout on every think step via a `WORKSPACE_LAYOUT_BLOCK`, and when you drop files into `uploads/` the block surfaces them under a `CHECK THESE NOW` directive so the agent reads them before continuing whatever else it was doing.
 
@@ -583,7 +577,7 @@ Path validation rejects every traversal trick (project-id injection, symlink esc
 
 ### Fireteam: Parallel Specialist Sub-Agents
 
-The agent's most powerful execution mode. When an objective decomposes into **independent investigation angles** (auth surface, route map, header policy; or 5 candidate CVEs to triage in parallel), the root agent fans out into N **specialist sub-agents** that work concurrently inside the same backend, each running its own multi-step ReAct loop with a focused mission. This is RedAmon's implementation of the **Scatter-Gather ReAct (SG-ReAct)** architectural pattern: a root agent that decides when to fan out, a bounded fireteam of specialists that work in parallel, and a fan-in step that merges their findings back into a single consolidated worldview.
+The agent's most powerful execution mode. When an objective decomposes into **independent investigation angles** (auth surface, route map, header policy; or 5 candidate CVEs to triage in parallel), the root agent fans out into N **specialist sub-agents** that work concurrently inside the same backend, each running its own multi-step ReAct loop with a focused mission. This is NisargHunter AI's implementation of the **Scatter-Gather ReAct (SG-ReAct)** architectural pattern: a root agent that decides when to fan out, a bounded fireteam of specialists that work in parallel, and a fan-in step that merges their findings back into a single consolidated worldview.
 
 Every safety guarantee that applies to the root agent also applies to every member: hard guardrails, soft guardrails, phase gating, Rules of Engagement, and dangerous-tool confirmations (handled **per-member, in parallel**; N members can each be awaiting your approval on their own panel simultaneously without serializing). Recursion is forbidden (a member cannot itself deploy a fireteam) and every wave has a hard cap on members, an iteration budget per member, and a wall-clock timeout. The result is wall-clock parallelism without coordination chaos, predictable termination, and an audit trail where every action is attributable to the specialist that produced it.
 
@@ -619,7 +613,7 @@ Unified view of active sessions: meterpreter, reverse/bind shells, and listeners
 
 > **[Wiki: Reverse Shells](https://github.com/samugit83/redamon/wiki/Reverse-Shells)**
 
-### RedAmon Terminal
+### NisargHunter AI Terminal
 
 Full interactive **PTY shell access** to the Kali sandbox container directly from the graph page via **xterm.js**. Access all pre-installed pentesting tools (Metasploit, Nmap, Nuclei, Hydra, sqlmap) without leaving the browser. Features dark terminal theme, connection status indicator, auto-reconnect with exponential backoff, fullscreen mode, and browser-side keepalive.
 
@@ -639,7 +633,7 @@ An **LLM-powered Intent Router** classifies user requests into agent skills: CVE
 
 ### Chat Skills
 
-**On-demand reference injection** via `/skill` command in the agent chat. Chat Skills are tactical reference docs -- tool playbooks, vulnerability guides, framework-specific notes -- that you inject into the agent's context exactly when you need them. Type `/skill ssrf` to load SSRF expertise, or click the skill picker button for a browsable list. **46 reference skills** ship with RedAmon covering vulnerabilities (JWT, OAuth/OIDC, CSRF, race conditions, business logic, prototype pollution, ReDoS, 2FA bypass, LDAP/XPath injection, web cache poisoning, CORS, host header injection, clickjacking, CRLF, and more), tooling (sqlmap, nuclei, ffuf, nmap, httpx, naabu, katana, subfinder, semgrep), protocols (GraphQL, WebSocket, SOAP/WS-Security, SAML), technologies (Firebase, Supabase), frameworks (Next.js, FastAPI, NestJS), Active Directory (kill chain, Kerberoasting/ASREPRoast, AD-CS ESC1-15, BloodHound path-to-DA), cloud (AWS, Azure, GCP), and post-exploitation (Docker escape, Linux / Windows privesc). Unlike Agent Skills (which drive classification and phase-aware workflows), Chat Skills are supplementary context that persists until you change or remove them.
+**On-demand reference injection** via `/skill` command in the agent chat. Chat Skills are tactical reference docs -- tool playbooks, vulnerability guides, framework-specific notes -- that you inject into the agent's context exactly when you need them. Type `/skill ssrf` to load SSRF expertise, or click the skill picker button for a browsable list. **46 reference skills** ship with NisargHunter AI covering vulnerabilities (JWT, OAuth/OIDC, CSRF, race conditions, business logic, prototype pollution, ReDoS, 2FA bypass, LDAP/XPath injection, web cache poisoning, CORS, host header injection, clickjacking, CRLF, and more), tooling (sqlmap, nuclei, ffuf, nmap, httpx, naabu, katana, subfinder, semgrep), protocols (GraphQL, WebSocket, SOAP/WS-Security, SAML), technologies (Firebase, Supabase), frameworks (Next.js, FastAPI, NestJS), Active Directory (kill chain, Kerberoasting/ASREPRoast, AD-CS ESC1-15, BloodHound path-to-DA), cloud (AWS, Azure, GCP), and post-exploitation (Docker escape, Linux / Windows privesc). Unlike Agent Skills (which drive classification and phase-aware workflows), Chat Skills are supplementary context that persists until you change or remove them.
 
 > **[Wiki: Chat Skills](https://github.com/samugit83/redamon/wiki/Chat-Skills)** | **[Community Chat Skills](agentic/skills/)**
 
@@ -660,7 +654,7 @@ Scans GitHub repositories for leaked credentials using **700+ detectors** with a
 > **[Wiki: Project Settings Reference](https://github.com/samugit83/redamon/wiki/Project-Settings-Reference)**
 
 <p align="center">
-  <img src="assets/settings.gif" alt="RedAmon Project Settings" width="100%"/>
+  <img src="assets/settings.gif" alt="NisargHunter AI Project Settings" width="100%"/>
 </p>
 
 ### Rules of Engagement (RoE)
@@ -676,7 +670,7 @@ Upload a RoE document (PDF, TXT, MD, DOCX) to auto-configure project settings an
 > **[Wiki: Insights Dashboard](https://github.com/samugit83/redamon/wiki/Insights-Dashboard)**
 
 <p align="center">
-  <img src="assets/insights.gif" alt="RedAmon Insights Dashboard" width="100%"/>
+  <img src="assets/insights.gif" alt="NisargHunter AI Insights Dashboard" width="100%"/>
 </p>
 
 ### Target Guardrail
@@ -693,7 +687,7 @@ Per-tool human-in-the-loop gate for dangerous operations. When enabled, the agen
 
 ### Pentest Reports
 
-Professional, client-ready HTML reports with 11 sections. When an AI model is configured, 6 sections receive **LLM-generated narratives** including executive summary, risk analysis, and prioritized remediation triage. **[View example report](https://htmlpreview.github.io/?https://raw.githubusercontent.com/wiki/samugit83/redamon/docs/Pentest%20Report%20%E2%80%94%20devergolabs.com.html)**.
+Professional, client-ready HTML reports with 11 sections. When an AI model is configured, 6 sections receive **LLM-generated narratives** including executive summary, risk analysis, and prioritized remediation triage. **[View example report](https://htmlpreview.github.io/?https://raw.githubusercontent.com/wiki/nisargdedakiya/dnm-hunter/docs/Pentest%20Report%20%E2%80%94%20devergolabs.com.html)**.
 
 > **[Wiki: Pentest Reports](https://github.com/samugit83/redamon/wiki/Pentest-Reports)**
 
@@ -842,21 +836,21 @@ flowchart TB
 
 ## Troubleshooting
 
-RedAmon is fully Dockerized and runs on any OS with Docker Compose v2+. For OS-specific fixes (Linux, Windows, macOS), see **[Troubleshooting Guide](readmes/TROUBLESHOOTING.md)** or the **[Wiki](https://github.com/samugit83/redamon/wiki/Troubleshooting)**.
+NisargHunter AI is fully Dockerized and runs on any OS with Docker Compose v2+. For OS-specific fixes (Linux, Windows, macOS), see **[Troubleshooting Guide](readmes/TROUBLESHOOTING.md)** or the **[Wiki](https://github.com/samugit83/redamon/wiki/Troubleshooting)**.
 
 ---
 
-## RedAmon HackLab
+## NisargHunter AI HackLab
 
 <table>
 <tr>
 <td width="280" align="center">
   <a href="https://github.com/samugit83/redamon/wiki/RedAmon-HackLab">
-    <img src="assets/hacklab.png" alt="RedAmon HackLab" width="260"/>
+    <img src="assets/hacklab.png" alt="NisargHunter AI HackLab" width="260"/>
   </a>
 </td>
 <td>
-  <h3>Want to see RedAmon think like a real pentester?</h3>
+  <h3>Want to see NisargHunter AI think like a real pentester?</h3>
   <p>Explore real-time live attack sessions -- every step, every pivot, every exploit -- across 15 vulnerability categories on a live target. Full session logs, decoded walkthroughs, and video recordings showing the agent autonomously compromising a multi-service server from scratch.</p>
   <a href="https://github.com/samugit83/redamon/wiki/RedAmon-HackLab"><b>Explore the HackLab &rarr;</b></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
@@ -870,30 +864,30 @@ RedAmon is fully Dockerized and runs on any OS with Docker Compose v2+. For OS-s
 
 ## Community Showcase
 
-Videos, writeups, and real-world experiences from security professionals using RedAmon in the field. Want to be featured? See the [Content Creator](CONTRIBUTING.md#content-creator) track in CONTRIBUTING.md.
+Videos, writeups, and real-world experiences from security professionals using NisargHunter AI in the field. Want to be featured? See the [Content Creator](CONTRIBUTING.md#content-creator) track in CONTRIBUTING.md.
 
 ### Videos
 
 | Title | Link |
 |-------|------|
-| RedAmon v2.2.0, Social Engineering Test: Payload Delivery to Shell Access | [Watch](https://youtu.be/kVjV9K_eks4) |
+| NisargHunter AI v2.2.0, Social Engineering Test: Payload Delivery to Shell Access | [Watch](https://youtu.be/kVjV9K_eks4) |
 | AI Agent CVE Validation: Beyond Standard Tooling | [Watch](https://youtu.be/rypmP1SJon8) |
-| RedAmon 2.0, From 0 to 1000 GitHub Stars in 10 Days: Multi-Agent Parallel Attacks | [Watch](https://youtu.be/afViJUit0xE) |
+| NisargHunter AI 2.0, From 0 to 1000 GitHub Stars in 10 Days: Multi-Agent Parallel Attacks | [Watch](https://youtu.be/afViJUit0xE) |
 | Build an Autonomous AI Red Team Agent from Scratch: LangGraph + Metasploit + Neo4j Full Tutorial | [Watch](https://youtu.be/mO5CCkYlY94) |
 
 ### Real-World Case Studies
 
 | Who | What | Link |
 |-----|------|------|
-| Nipun Dinudaya | Deployed RedAmon on a company website, identified a critical SQL injection vulnerability that could have caused significant data exposure | [Read on LinkedIn](https://www.linkedin.com/posts/nipun-dinudaya-6159b32bb_redamon-cybersecurity-penetrationtesting-ugcPost-7431233870253166592-aLvb) |
-| Venkata Bhargav CH S | Used RedAmon during an internship at Ascent e-Digit Solutions: hands-on reconnaissance, DNS analysis, and attack surface mapping | [Read on LinkedIn](https://www.linkedin.com/posts/venkata-bhargav-cybersecurity_cybersecurity-ethicalhacking-redteam-share-7434940660803182592-e9En) |
+| Nipun Dinudaya | Deployed NisargHunter AI on a company website, identified a critical SQL injection vulnerability that could have caused significant data exposure | [Read on LinkedIn](https://www.linkedin.com/posts/nipun-dinudaya-6159b32bb_nisarghunter-cybersecurity-penetrationtesting-ugcPost-7431233870253166592-aLvb) |
+| Venkata Bhargav CH S | Used NisargHunter AI during an internship at Ascent e-Digit Solutions: hands-on reconnaissance, DNS analysis, and attack surface mapping | [Read on LinkedIn](https://www.linkedin.com/posts/venkata-bhargav-cybersecurity_cybersecurity-ethicalhacking-redteam-share-7434940660803182592-e9En) |
 
 ### Community Guides
 
 | Who | What | Link |
 |-----|------|------|
-| MrGood | Mastering Redamon: A Comprehensive Guide to Installation on Kali Linux, addressing Kali-specific Docker challenges and security posture | [Read on Medium](https://cyberaccoon.medium.com/mastering-redamon-a-comprehensive-guide-to-installation-on-kali-linux-ea544e6f5b9f) |
-| Bogdan Caraman | How to Install RedAmon on Debian 13 (Trixie) with OpenRouter, step-by-step guide with Docker setup, static IP, and systemd automation | [Read on Blog](https://blog.bogdancaraman.com/install-redamon-debian-13-openrouter/) |
+| MrGood | Mastering NisargHunter AI: A Comprehensive Guide to Installation on Kali Linux, addressing Kali-specific Docker challenges and security posture | [Read on Medium](https://cyberaccoon.medium.com/mastering-nisarghunter-a-comprehensive-guide-to-installation-on-kali-linux-ea544e6f5b9f) |
+| Bogdan Caraman | How to Install NisargHunter AI on Debian 13 (Trixie) with OpenRouter, step-by-step guide with Docker setup, static IP, and systemd automation | [Read on Blog](https://blog.bogdancaraman.com/install-nisarghunter-debian-13-openrouter/) |
 
 ---
 
@@ -919,13 +913,13 @@ For questions, feedback, or collaboration inquiries: **devergo.sam@gmail.com**
 
 ## Legal
 
-> **LOCAL USE ONLY**: RedAmon is designed to run on a **local machine** and has **not** been hardened for server or cloud deployment. It lacks the security controls required for a production environment exposed to the internet (e.g. authentication hardening, rate limiting, TLS enforcement, input sanitization across all surfaces). **Do not deploy RedAmon on a public-facing server.** Running it outside a trusted local network is entirely at your own risk.
+> **LOCAL USE ONLY**: NisargHunter AI is designed to run on a **local machine** and has **not** been hardened for server or cloud deployment. It lacks the security controls required for a production environment exposed to the internet (e.g. authentication hardening, rate limiting, TLS enforcement, input sanitization across all surfaces). **Do not deploy NisargHunter AI on a public-facing server.** Running it outside a trusted local network is entirely at your own risk.
 
 This project is released under the [MIT License](LICENSE).
 
-RedAmon integrates several third-party tools under their own licenses (MIT, Apache-2.0, BSD, GPL-2.0/3.0, AGPL-3.0, LGPL, and the WPScan Public Source License). Source code for all AGPL-licensed components is available at their upstream repositories. The full inventory and license obligations are documented in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+NisargHunter AI integrates several third-party tools under their own licenses (MIT, Apache-2.0, BSD, GPL-2.0/3.0, AGPL-3.0, LGPL, and the WPScan Public Source License). Source code for all AGPL-licensed components is available at their upstream repositories. The full inventory and license obligations are documented in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
-> **Commercial use note**: The Kali sandbox image bundles **WPScan**, which is governed by the WPScan Public Source License. WPScan restricts commercial use (SaaS, paid product offerings, value-added services) without a separate license from the WPScan team. Pentesting engagements and personal use are permitted. If you intend to use RedAmon in a commercial product or service, review [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md) before distribution.
+> **Commercial use note**: The Kali sandbox image bundles **WPScan**, which is governed by the WPScan Public Source License. WPScan restricts commercial use (SaaS, paid product offerings, value-added services) without a separate license from the WPScan team. Pentesting engagements and personal use are permitted. If you intend to use NisargHunter AI in a commercial product or service, review [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md) before distribution.
 
 See [DISCLAIMER.md](DISCLAIMER.md) for full terms of use, acceptable use policy, and legal compliance requirements.
 

@@ -177,7 +177,7 @@ def test_container_path_sanitizes_id():
 
 def test_upload_list_delete_flow():
     """Full CRUD flow: upload a wordlist, list it, delete it."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_id = "test_project_123"
     project_dir = os.path.join(tmpdir, project_id)
 
@@ -207,7 +207,7 @@ def test_upload_list_delete_flow():
 
 def test_multiple_wordlists():
     """Multiple wordlists should coexist and list alphabetically."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_id = "multi_test"
     project_dir = os.path.join(tmpdir, project_id)
 
@@ -228,7 +228,7 @@ def test_multiple_wordlists():
 
 def test_non_txt_files_excluded():
     """Non-.txt files in the directory should be excluded from listing."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_dir = os.path.join(tmpdir, "proj1")
 
     try:
@@ -250,7 +250,7 @@ def test_non_txt_files_excluded():
 
 def test_overwrite_existing_file():
     """Uploading a file with the same name should overwrite it."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_dir = os.path.join(tmpdir, "proj_overwrite")
 
     try:
@@ -275,7 +275,7 @@ def test_overwrite_existing_file():
 
 def test_empty_directory_returns_empty_list():
     """An empty project directory should return an empty list."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_dir = os.path.join(tmpdir, "empty_proj")
 
     try:
@@ -290,7 +290,7 @@ def test_empty_directory_returns_empty_list():
 
 def test_nonexistent_directory_returns_empty():
     """A non-existent directory should return empty (not error)."""
-    tmpdir = tempfile.mkdtemp(prefix="redamon_wl_test_")
+    tmpdir = tempfile.mkdtemp(prefix="nisarghunter_wl_test_")
     project_dir = os.path.join(tmpdir, "does_not_exist")
 
     try:

@@ -9,7 +9,7 @@ Reference for template selection, throughput limits, OAST handling, and structur
 
 Upstream: https://docs.projectdiscovery.io/opensource/nuclei/running
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

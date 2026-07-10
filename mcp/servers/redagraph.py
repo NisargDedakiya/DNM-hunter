@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-redagraph — Tenant-scoped CLI for the RedAmon graph database.
+redagraph — Tenant-scoped CLI for the NisargHunter AI graph database.
 
-Runs inside kali-sandbox. Reads REDAMON_USER_ID and REDAMON_PROJECT_ID from
+Runs inside kali-sandbox. Reads NISARGHUNTER_USER_ID and NISARGHUNTER_PROJECT_ID from
 the environment (injected by the terminal server when launched from the
 webapp Graph -> Terminal tab) and queries the graph THROUGH THE AGENT — it
 holds no Neo4j credentials of its own. The agent's `/graph/exec` endpoint
@@ -27,8 +27,8 @@ def _eprint(*args, **kwargs) -> None:
 
 
 def _require_tenant() -> tuple[str, str]:
-    user_id = os.environ.get("REDAMON_USER_ID", "").strip()
-    project_id = os.environ.get("REDAMON_PROJECT_ID", "").strip()
+    user_id = os.environ.get("NISARGHUNTER_USER_ID", "").strip()
+    project_id = os.environ.get("NISARGHUNTER_PROJECT_ID", "").strip()
     if not user_id or not project_id:
         _eprint(
             "redagraph: no active project. Open the terminal via the webapp "
@@ -44,7 +44,7 @@ def _agent_post(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     + tenant scoping; this CLI never touches the database directly."""
     import requests
 
-    agent_url = os.environ.get("REDAMON_AGENT_URL", "http://agent:8080").rstrip("/")
+    agent_url = os.environ.get("NISARGHUNTER_AGENT_URL", "http://agent:8080").rstrip("/")
     try:
         resp = requests.post(f"{agent_url}/graph/exec", json=payload, timeout=120)
     except requests.RequestException as e:
@@ -167,7 +167,7 @@ def _execute(cypher: str, user_id: str, project_id: str) -> List[Dict[str, Any]]
 def cmd_whoami(args, _user_id: str, _project_id: str) -> int:
     print(f"user_id    {_user_id}")
     print(f"project_id {_project_id}")
-    print(f"agent_url  {os.environ.get('REDAMON_AGENT_URL', 'http://agent:8080')}")
+    print(f"agent_url  {os.environ.get('NISARGHUNTER_AGENT_URL', 'http://agent:8080')}")
     return 0
 
 
@@ -215,7 +215,7 @@ def cmd_cypher(args, user_id: str, project_id: str) -> int:
 def cmd_ask(args, user_id: str, project_id: str) -> int:
     import requests
 
-    agent_url = os.environ.get("REDAMON_AGENT_URL", "http://agent:8080").rstrip("/")
+    agent_url = os.environ.get("NISARGHUNTER_AGENT_URL", "http://agent:8080").rstrip("/")
     question = " ".join(args.question) if isinstance(args.question, list) else args.question
     try:
         resp = requests.post(
@@ -258,7 +258,7 @@ def cmd_ask(args, user_id: str, project_id: str) -> int:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="redagraph",
-        description="Tenant-scoped graph CLI for RedAmon. Read-only.",
+        description="Tenant-scoped graph CLI for NisargHunter AI. Read-only.",
     )
     p.add_argument(
         "--format", "-f",

@@ -1,6 +1,6 @@
 FROM kalilinux/kali-rolling:latest
 
-LABEL maintainer="RedAmon Project"
+LABEL maintainer="NisargHunter AI Project"
 LABEL description="Kali Linux sandbox with MCP servers for agentic penetration testing"
 
 # Avoid prompts during package installation
@@ -416,9 +416,9 @@ COPY servers/ /opt/mcp_servers/
 RUN chmod +x /opt/mcp_servers/redagraph.py \
     && ln -sf /opt/mcp_servers/redagraph.py /usr/local/bin/redagraph
 
-# RedAmon MOTD hint shown after the Kali login banner.
-COPY kali-sandbox/redamon-motd.sh /etc/profile.d/zz-redamon-motd.sh
-RUN chmod 0644 /etc/profile.d/zz-redamon-motd.sh
+# NisargHunter AI MOTD hint shown after the Kali login banner.
+COPY kali-sandbox/nisarghunter-motd.sh /etc/profile.d/zz-nisarghunter-motd.sh
+RUN chmod 0644 /etc/profile.d/zz-nisarghunter-motd.sh
 
 # Copy and set entrypoint script
 COPY kali-sandbox/entrypoint.sh /opt/entrypoint.sh

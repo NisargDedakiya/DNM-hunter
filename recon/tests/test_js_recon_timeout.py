@@ -11,8 +11,8 @@ After the fix:
     shutdown(wait=False, cancel_futures=True) in `finally`. The function
     returns within ~budget seconds even if a worker is still computing.
 
-Run inside the redamon-recon container:
-    docker run --rm -v "$PWD:/app" -w /app redamon-recon:latest \
+Run inside the nisarghunter-recon container:
+    docker run --rm -v "$PWD:/app" -w /app nisarghunter-recon:latest \
         python3 -m pytest recon/tests/test_js_recon_timeout.py -v
 """
 

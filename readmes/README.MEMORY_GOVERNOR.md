@@ -1,6 +1,6 @@
 # Memory Governor (RAM Management) - Technical Reference
 
-This document explains, end to end, how RedAmon keeps a single host from running out
+This document explains, end to end, how NisargHunter AI keeps a single host from running out
 of RAM while many recon scans and agent chat sessions run at once. It is written for
 an engineer who needs to understand, operate, debug, or extend the system. It starts
 with the problem and the core model, then dives into every component, data structure,
@@ -11,7 +11,7 @@ correctly in both light and dark themes).
 
 ## 1. The problem, in one paragraph
 
-RedAmon runs everything on one host: Postgres, Neo4j, the agent, the orchestrator, the
+NisargHunter AI runs everything on one host: Postgres, Neo4j, the agent, the orchestrator, the
 webapp, and, on demand, up to a dozen recon scan containers, each of which spawns its
 own sibling tool containers (naabu, httpx, katana, nuclei, gau, …). Historically none of
 this was memory-aware: every concurrency, parallelism, worker, and `*_MAX_*` list value
@@ -89,7 +89,7 @@ flowchart TB
         inj[inject HostConfig.Memory into siblings]
     end
 
-    subgraph sh[redamon.sh]
+    subgraph sh[nisarghunter.sh]
         gate[startup RAM gate]
         export[export per-service caps]
     end
@@ -265,7 +265,7 @@ flowchart LR
    orchestrator, webapp, kali, gvmd. Neo4j also gets explicit JVM `heap` + `pagecache` env,
    because a `mem_limit` alone OOM-kills the JVM, the container limit must exceed
    heap + pagecache + overhead. Values default to safe constants and are overridden by
-   host-adaptive values exported from `redamon.sh` (§9).
+   host-adaptive values exported from `nisarghunter.sh` (§9).
 2. **On-demand scan containers** (`container_manager._container_mem_limit`): each of the 6
    `containers.run()` spawns (full/partial recon, ai-attack, gvm, github-hunt, trufflehog)
    gets `cap = clamp( envelope × CONTAINER_CAP_HEADROOM , envelope , PER_CONTAINER_MAX )`.
@@ -351,22 +351,22 @@ worst OOM-restart the agent container in isolation; the caps prevent even that.
 
 ---
 
-## 9. Backstops in `redamon.sh`, startup gate, cap export, zram
+## 9. Backstops in `nisarghunter.sh`, startup gate, cap export, zram
 
-`redamon.sh` reuses its existing `detect_build_resources()` (reads `docker info MemTotal`,
+`nisarghunter.sh` reuses its existing `detect_build_resources()` (reads `docker info MemTotal`,
 falling back to `/proc/meminfo` or macOS `sysctl`) for three host-side functions:
 
 - **`preflight_ram_gate`**, called before `docker compose up`. If detected RAM is below
   `SERVICE_BASELINE_MEM + OS_HEADROOM_MEM` (with a 512 MB tolerance for kernel overhead), it
   prints a clear message and aborts, turning a mysterious mid-scan OOM into an upfront,
-  actionable error. Override with `REDAMON_SKIP_RAM_GATE=1` or `REDAMON_MIN_RAM_MB=<mb>`.
+  actionable error. Override with `NISARGHUNTER_SKIP_RAM_GATE=1` or `NISARGHUNTER_MIN_RAM_MB=<mb>`.
 - **`export_resource_caps`**, derives per-service `mem_limit`s from detected RAM and exports
   them so `docker-compose.yml`'s `${VAR:-default}` interpolation picks them up. Crucially it
   derives `NEO4J_MEM` from the *effective* heap + pagecache + overhead (never below the JVM
   heap), so an operator-set `NEO4J_HEAP` can't produce an OOM-on-boot cap. Run on `up` and,
   since a recent fix, on `update` too when `docker-compose.yml` changed.
 - **`setup_zram`**, optional, Linux-native host only (a no-op on Docker Desktop / WSL). When
-  `REDAMON_ENABLE_ZRAM=1`, it sets up a one-time compressed-RAM swap cushion (zstd) so brief
+  `NISARGHUNTER_ENABLE_ZRAM=1`, it sets up a one-time compressed-RAM swap cushion (zstd) so brief
   overshoots degrade gracefully instead of OOM-killing. Best-effort, never interactive
   (`sudo -n`), never fatal.
 
@@ -378,9 +378,9 @@ Every byte figure the governor relies on is meant to be *measured*, not guessed.
 calibration harness uses the orchestrator's Docker SDK to sample real per-container memory
 and writes `resource_profile.json` (each value = `measured × (1 + MEM_SAFETY_TOLERANCE)`):
 
-- `bash tests/redamon_mem_calibrate.sh baseline`, samples the always-on core services →
+- `bash tests/nisarghunter_mem_calibrate.sh baseline`, samples the always-on core services →
   `service_baseline_bytes` (accurate, steady-state).
-- `bash tests/redamon_mem_calibrate.sh scan <project_id>`, starts a real scan and samples
+- `bash tests/nisarghunter_mem_calibrate.sh scan <project_id>`, starts a real scan and samples
   the recon container + sibling tools → per-scan-type and per-tool envelopes.
 
 Safety detail: an envelope is a worst-case upper bound, but a fixed-window sample only sees
@@ -420,7 +420,7 @@ All are optional; defaults live in code (empty/unset → default). Documented in
 
 | Var | Default | Meaning |
 |---|---|---|
-| `REDAMON_MEM_GOVERNOR` | on | Master on/off. When off, every dynamic cap collapses to the configured ceiling (legacy behavior). |
+| `NISARGHUNTER_MEM_GOVERNOR` | on | Master on/off. When off, every dynamic cap collapses to the configured ceiling (legacy behavior). |
 
 ### RATIO model (in-process concurrency)
 
@@ -489,15 +489,15 @@ Each is computed at spawn from the RAM-scaled envelope × headroom, clamped to
 | `BROKER_TOOL_MEM_BYTES` | `2g` | hard memory cap injected into every sibling tool container (katana/nuclei/…). |
 | `BROKER_TOOL_PIDS` | `0` (unset) | optional PIDs limit for sibling containers; `0` = don't set. Parsed defensively (a bad value can't crash the broker). |
 
-### Startup gate & zram (redamon.sh)
+### Startup gate & zram (nisarghunter.sh)
 
 | Var | Default | Meaning |
 |---|---|---|
-| `REDAMON_SKIP_RAM_GATE` | unset | set `1` to skip the startup RAM-sufficiency check. |
-| `REDAMON_MIN_RAM_MB` | derived from baseline+headroom | explicit minimum-RAM threshold (MB) for the gate. |
-| `REDAMON_ENABLE_ZRAM` | off | set `1` to set up a one-time compressed-RAM (zram) swap cushion on a native Linux host. |
-| `REDAMON_ZRAM_SIZE` | half of RAM, capped 8 GB | explicit zram device size. |
-| `REDAMON_BUILD_PARALLEL` | derived | (pre-existing) caps image-build parallelism; part of the same adaptive-memory build path. |
+| `NISARGHUNTER_SKIP_RAM_GATE` | unset | set `1` to skip the startup RAM-sufficiency check. |
+| `NISARGHUNTER_MIN_RAM_MB` | derived from baseline+headroom | explicit minimum-RAM threshold (MB) for the gate. |
+| `NISARGHUNTER_ENABLE_ZRAM` | off | set `1` to set up a one-time compressed-RAM (zram) swap cushion on a native Linux host. |
+| `NISARGHUNTER_ZRAM_SIZE` | half of RAM, capped 8 GB | explicit zram device size. |
+| `NISARGHUNTER_BUILD_PARALLEL` | derived | (pre-existing) caps image-build parallelism; part of the same adaptive-memory build path. |
 
 ---
 
@@ -509,7 +509,7 @@ blocking legitimate work:
 - **`/proc/meminfo` unreadable** → `read_mem()` returns `None`; `scale()` returns `1.0`,
   `scaled_cap()` returns the env ceiling, and admission **admits** (both halves agree). Behavior
   reverts to legacy static limits.
-- **Governor disabled** (`REDAMON_MEM_GOVERNOR` off) → identical to the unreadable case.
+- **Governor disabled** (`NISARGHUNTER_MEM_GOVERNOR` off) → identical to the unreadable case.
 - **Profile absent/corrupt** → built-in conservative fallback constants are used.
 - **A cap sized too small** → an ephemeral scan/tool is OOM-killed in isolation (exit 137),
   the job reports the tool failure gracefully, the reaper logs the event, and the host
@@ -529,10 +529,10 @@ blocking legitimate work:
 | [tests/test_broker_inject.py](../tests/test_broker_inject.py) | `inject_limits` add/cap/respect-lower, size parsing, body re-serialisation. |
 | [tests/test_recon_mem_governor.py](../tests/test_recon_mem_governor.py) | recon `apply_memory_governor` ratio + byte-budget scaling, `[RESOURCE-CAP]` emission, guards. |
 | [tests/test_agent_mem_governor.py](../tests/test_agent_mem_governor.py) | agent byte-budget scaling of fireteam/plan keys, small-host throttle, guards. |
-| [tests/redamon_governor_test.sh](../tests/redamon_governor_test.sh) | bash: `_size_to_mb`, `preflight_ram_gate`, `export_resource_caps` (incl. neo4j heap coherence), `setup_zram` guards. |
+| [tests/nisarghunter_governor_test.sh](../tests/nisarghunter_governor_test.sh) | bash: `_size_to_mb`, `preflight_ram_gate`, `export_resource_caps` (incl. neo4j heap coherence), `setup_zram` guards. |
 
 Run the Python suites with `python3 -m unittest tests.test_resource_governor …` and the bash
-suite with `bash tests/redamon_governor_test.sh`. The governor and ledger modules are pure
+suite with `bash tests/nisarghunter_governor_test.sh`. The governor and ledger modules are pure
 stdlib and run on the host with no Docker.
 
 ---
@@ -550,17 +550,17 @@ headers={'X-Orchestrator-Key':k})).read().decode())"
 docker compose logs recon-orchestrator | grep '\[governor\]'
 
 # Per-scan parameter throttling (red in the UI drawer)
-docker logs <redamon-recon-...> | grep RESOURCE-CAP
+docker logs <nisarghunter-recon-...> | grep RESOURCE-CAP
 
 # Confirm every container carries a hard mem_limit (0 = uncapped)
-for c in $(docker ps --format '{{.Names}}' | grep redamon); do \
+for c in $(docker ps --format '{{.Names}}' | grep nisarghunter); do \
   echo "$c $(docker inspect $c --format '{{.HostConfig.Memory}}')"; done
 
 # Confirm broker injects the sibling cap (during a scan)
 docker compose logs docker-broker | grep 'ALLOW create'   # shows mem=<bytes>
 
 # Re-measure this host's envelopes
-bash tests/redamon_mem_calibrate.sh baseline
+bash tests/nisarghunter_mem_calibrate.sh baseline
 ```
 
 Common questions:

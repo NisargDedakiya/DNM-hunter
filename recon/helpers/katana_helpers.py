@@ -1,5 +1,5 @@
 """
-RedAmon - Katana Crawler Helpers
+NisargHunter AI - Katana Crawler Helpers
 ================================
 Functions for running the Katana web crawler to discover URLs with parameters.
 """

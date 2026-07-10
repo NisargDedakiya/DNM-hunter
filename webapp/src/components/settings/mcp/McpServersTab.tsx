@@ -477,7 +477,7 @@ export default function McpServersTab({ userId }: Props) {
                     key={preset.key}
                     className={styles.presetCard}
                     onClick={() => startFromPreset(preset)}
-                    title={preset.whyForRedamon}
+                    title={preset.whyForNisargHunter}
                   >
                     <div className={styles.presetCardTop}>
                       <span className={styles.presetCardLabel}>{preset.label}</span>

@@ -1,5 +1,5 @@
 """
-RedAmon Brute Force Credential Guess Prompts — THC Hydra
+NisargHunter AI Brute Force Credential Guess Prompts — THC Hydra
 
 Prompts for Hydra-based brute force credential guessing attack workflows.
 Replaces the legacy Metasploit auxiliary/scanner login module workflow.

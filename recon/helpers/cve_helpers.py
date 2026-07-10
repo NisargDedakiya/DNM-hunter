@@ -1,5 +1,5 @@
 """
-RedAmon - CVE Lookup Helpers
+NisargHunter AI - CVE Lookup Helpers
 ============================
 Functions for looking up CVEs from NVD and Vulners APIs based on detected technologies.
 """

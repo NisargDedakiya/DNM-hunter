@@ -1,5 +1,5 @@
 """
-RedAmon - Kiterunner API Discovery Helpers
+NisargHunter AI - Kiterunner API Discovery Helpers
 ==========================================
 API endpoint bruteforcing using Kiterunner.
 """
@@ -22,8 +22,8 @@ from .classification import classify_endpoint
 
 
 def _create_temp_dir(prefix: str = "kr") -> Path:
-    """Create a temp directory under /tmp/redamon for Docker-in-Docker compatibility."""
-    temp_dir = Path(f"/tmp/redamon/.{prefix}_{uuid.uuid4().hex[:8]}")
+    """Create a temp directory under /tmp/nisarghunter for Docker-in-Docker compatibility."""
+    temp_dir = Path(f"/tmp/nisarghunter/.{prefix}_{uuid.uuid4().hex[:8]}")
     temp_dir.mkdir(parents=True, exist_ok=True)
     return temp_dir
 
@@ -50,7 +50,7 @@ def ensure_kiterunner_binary(wordlist_name: str) -> Tuple[Optional[str], Optiona
         Tuple of (binary_path, wordlist_path) or (None, None) if failed
     """
     # Determine paths
-    tools_dir = Path.home() / ".redamon" / "tools"
+    tools_dir = Path.home() / ".nisarghunter" / "tools"
     kr_dir = tools_dir / "kiterunner"
     kr_dir.mkdir(parents=True, exist_ok=True)
 
@@ -96,7 +96,7 @@ def ensure_kiterunner_binary(wordlist_name: str) -> Tuple[Optional[str], Optiona
             # Download archive with User-Agent header
             request = urllib.request.Request(
                 download_url,
-                headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) RedAmon/1.0'}
+                headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) NisargHunter AI/1.0'}
             )
             with urllib.request.urlopen(request) as response:
                 with open(archive_path, 'wb') as f:
@@ -144,7 +144,7 @@ def ensure_kiterunner_binary(wordlist_name: str) -> Tuple[Optional[str], Optiona
                 # Download compressed wordlist with User-Agent header (required by CDN)
                 request = urllib.request.Request(
                     wordlist_url,
-                    headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) RedAmon/1.0'}
+                    headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) NisargHunter AI/1.0'}
                 )
                 with urllib.request.urlopen(request) as response:
                     with open(archive_path, 'wb') as f:
@@ -242,7 +242,7 @@ def run_kiterunner_discovery(
         print(f"[!][Kiterunner] Wordlist not found: {wordlist_path}")
         return discovered_endpoints
 
-    # Create temp directory for targets file (use /tmp/redamon for Docker-in-Docker compatibility)
+    # Create temp directory for targets file (use /tmp/nisarghunter for Docker-in-Docker compatibility)
     temp_path = _create_temp_dir("kr_scan")
     try:
         targets_file = temp_path / "targets.txt"
@@ -602,7 +602,7 @@ def detect_kiterunner_methods(
             if method not in url_methods[url]:
                 url_methods[url].append(method)
 
-    # Use /tmp/redamon for Docker-in-Docker compatibility (avoids paths with spaces)
+    # Use /tmp/nisarghunter for Docker-in-Docker compatibility (avoids paths with spaces)
     temp_path = _create_temp_dir("kr_methods")
     try:
         if mode == "options":

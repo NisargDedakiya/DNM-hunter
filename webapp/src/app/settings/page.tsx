@@ -733,7 +733,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'redamon-api-keys-template.json'
+    a.download = 'nisarghunter-api-keys-template.json'
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Template downloaded')
@@ -1937,7 +1937,7 @@ function SystemSection() {
   const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set())
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText('./redamon.sh update').then(() => {
+    navigator.clipboard.writeText('./nisarghunter.sh update').then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
@@ -2003,7 +2003,7 @@ function SystemSection() {
               fontFamily: 'var(--font-mono)',
             }}>
               <code style={{ flex: 1, fontSize: '13px', color: 'var(--color-success)' }}>
-                ./redamon.sh update
+                ./nisarghunter.sh update
               </code>
               <button
                 onClick={handleCopy}
@@ -2075,7 +2075,7 @@ function SystemSection() {
         {/* Links */}
         <div style={{ display: 'flex', gap: '12px', fontSize: '11px' }}>
           <a
-            href="https://github.com/samugit83/redamon/blob/master/CHANGELOG.md"
+            href="https://github.com/nisargdedakiya/dnm-hunter/blob/master/CHANGELOG.md"
             target="_blank"
             rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-tertiary)', textDecoration: 'none' }}

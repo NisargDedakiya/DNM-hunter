@@ -1,5 +1,5 @@
 """
-RedAmon Agent Tools
+NisargHunter AI Agent Tools
 
 MCP tools and Neo4j graph query tool definitions.
 Includes phase-aware tool management.

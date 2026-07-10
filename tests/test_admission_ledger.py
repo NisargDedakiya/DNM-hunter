@@ -19,7 +19,7 @@ GB = 1024 ** 3
 
 class LedgerTestBase(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        for k in ("REDAMON_MEM_GOVERNOR", "OS_HEADROOM_MEM", "SERVICE_BASELINE_MEM",
+        for k in ("NISARGHUNTER_MEM_GOVERNOR", "OS_HEADROOM_MEM", "SERVICE_BASELINE_MEM",
                   "RECON_JOB_ENVELOPE_MEM", "RECON_MAX_CONCURRENT_GLOBAL",
                   "RESOURCE_PROFILE_PATH"):
             os.environ.pop(k, None)
@@ -33,7 +33,7 @@ class LedgerTestBase(unittest.IsolatedAsyncioTestCase):
     def tearDown(self):
         rg.set_mem_override(None, None)
         for k in ("OS_HEADROOM_MEM", "SERVICE_BASELINE_MEM", "RECON_JOB_ENVELOPE_MEM",
-                  "RECON_MAX_CONCURRENT_GLOBAL", "REDAMON_MEM_GOVERNOR"):
+                  "RECON_MAX_CONCURRENT_GLOBAL", "NISARGHUNTER_MEM_GOVERNOR"):
             os.environ.pop(k, None)
 
 
@@ -113,7 +113,7 @@ class TestAdmission(LedgerTestBase):
         self.assertEqual(r.limit_type, "ram")
 
     async def test_disabled_always_admits(self):
-        os.environ["REDAMON_MEM_GOVERNOR"] = "false"
+        os.environ["NISARGHUNTER_MEM_GOVERNOR"] = "false"
         led = al.ReservationLedger()
         for i in range(20):
             self.assertTrue((await led.try_admit(f"job{i}", 4 * GB)).admitted)

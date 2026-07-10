@@ -1,5 +1,5 @@
 """
-RedAmon - Resource Enumeration Module
+NisargHunter AI - Resource Enumeration Module
 =====================================
 Comprehensive endpoint discovery and classification.
 Discovers all endpoints (GET, POST, APIs) and organizes them by base URL.
@@ -236,7 +236,7 @@ def run_resource_enum(recon_data: dict, output_file: Optional[Path] = None, sett
         Updated recon_data with resource_enum results
     """
     print("\n" + "=" * 70)
-    print("[*][ResourceEnum] RedAmon - Resource Enumeration")
+    print("[*][ResourceEnum] NisargHunter AI - Resource Enumeration")
     print("[*][ResourceEnum] (Katana + Hakrawler + GAU + jsluice + FFuf + ZAP Ajax Spider + Kiterunner + Arjun)")
     print("=" * 70)
 

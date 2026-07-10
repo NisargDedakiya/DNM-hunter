@@ -1,18 +1,18 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: redamon-postgres
+    container_name: nisarghunter-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-redamon}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redamon_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-redamon}
+      POSTGRES_USER: ${POSTGRES_USER:-nisarghunter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nisarghunter_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-nisarghunter}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-redamon} -d ${POSTGRES_DB:-redamon}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nisarghunter} -d ${POSTGRES_DB:-nisarghunter}"]
       interval: 10s
       timeout: 5s
       retries: 5

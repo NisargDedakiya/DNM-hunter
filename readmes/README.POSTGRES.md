@@ -1,6 +1,6 @@
 # PostgreSQL Database
 
-PostgreSQL database for storing RedAmon project configurations and user data. Uses Prisma ORM for schema management and query building.
+PostgreSQL database for storing NisargHunter AI project configurations and user data. Uses Prisma ORM for schema management and query building.
 
 ## Overview
 
@@ -19,7 +19,7 @@ cd postgres_db
 docker-compose up -d
 
 # 2. Verify connection
-docker exec redamon-postgres pg_isready -U redamon -d redamon
+docker exec nisarghunter-postgres pg_isready -U nisarghunter -d nisarghunter
 
 # 3. Initialize schema (from webapp)
 cd ../webapp
@@ -130,18 +130,18 @@ For the complete schema, see [webapp/prisma/schema.prisma](../webapp/prisma/sche
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: redamon-postgres
+    container_name: nisarghunter-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-redamon}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redamon_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-redamon}
+      POSTGRES_USER: ${POSTGRES_USER:-nisarghunter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nisarghunter_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-nisarghunter}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U redamon -d redamon"]
+      test: ["CMD-SHELL", "pg_isready -U nisarghunter -d nisarghunter"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -155,9 +155,9 @@ volumes:
 Create a `.env` file:
 
 ```bash
-POSTGRES_USER=redamon
+POSTGRES_USER=nisarghunter
 POSTGRES_PASSWORD=your_secure_password
-POSTGRES_DB=redamon
+POSTGRES_DB=nisarghunter
 ```
 
 ## Prisma Integration
@@ -165,11 +165,11 @@ POSTGRES_DB=redamon
 ### Connection URL
 
 In `webapp/.env.local` (replace `<POSTGRES_PASSWORD>` with the value from your
-root `.env` — `redamon.sh` generates a strong one on a fresh install; the host
+root `.env` — `nisarghunter.sh` generates a strong one on a fresh install; the host
 port is published on `127.0.0.1` only):
 
 ```bash
-DATABASE_URL="postgresql://redamon:<POSTGRES_PASSWORD>@127.0.0.1:5432/redamon?schema=public"
+DATABASE_URL="postgresql://nisarghunter:<POSTGRES_PASSWORD>@127.0.0.1:5432/nisarghunter?schema=public"
 ```
 
 ### Common Commands
@@ -218,27 +218,27 @@ This allows each project to have its own configuration without modifying `params
 
 ```bash
 # Create backup
-docker exec redamon-postgres pg_dump -U redamon redamon > backup.sql
+docker exec nisarghunter-postgres pg_dump -U nisarghunter nisarghunter > backup.sql
 
 # Create compressed backup
-docker exec redamon-postgres pg_dump -U redamon redamon | gzip > backup.sql.gz
+docker exec nisarghunter-postgres pg_dump -U nisarghunter nisarghunter | gzip > backup.sql.gz
 ```
 
 ### Restore
 
 ```bash
 # Restore from backup
-docker exec -i redamon-postgres psql -U redamon redamon < backup.sql
+docker exec -i nisarghunter-postgres psql -U nisarghunter nisarghunter < backup.sql
 
 # Restore from compressed backup
-gunzip -c backup.sql.gz | docker exec -i redamon-postgres psql -U redamon redamon
+gunzip -c backup.sql.gz | docker exec -i nisarghunter-postgres psql -U nisarghunter nisarghunter
 ```
 
 ## Useful Commands
 
 ```bash
 # Connect to PostgreSQL shell
-docker exec -it redamon-postgres psql -U redamon -d redamon
+docker exec -it nisarghunter-postgres psql -U nisarghunter -d nisarghunter
 
 # List tables
 \dt
@@ -250,7 +250,7 @@ docker exec -it redamon-postgres psql -U redamon -d redamon
 SELECT id, name, target_domain FROM projects;
 
 # Check database size
-SELECT pg_size_pretty(pg_database_size('redamon'));
+SELECT pg_size_pretty(pg_database_size('nisarghunter'));
 ```
 
 ## Troubleshooting
@@ -264,7 +264,7 @@ SELECT pg_size_pretty(pg_database_size('redamon'));
 
 2. Verify health check:
    ```bash
-   docker exec redamon-postgres pg_isready -U redamon -d redamon
+   docker exec nisarghunter-postgres pg_isready -U nisarghunter -d nisarghunter
    ```
 
 ### Schema Out of Sync
@@ -289,5 +289,5 @@ Check `.env` credentials match `webapp/.env.local`:
 POSTGRES_PASSWORD=your_password
 
 # webapp/.env.local
-DATABASE_URL="postgresql://redamon:your_password@localhost:5432/redamon"
+DATABASE_URL="postgresql://nisarghunter:your_password@localhost:5432/nisarghunter"
 ```

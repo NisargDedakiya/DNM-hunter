@@ -1,4 +1,4 @@
-# RedAmon MCP Servers - Python Dependencies
+# NisargHunter AI MCP Servers - Python Dependencies
 
 # FastMCP - Fast Python MCP server framework
 fastmcp>=2.0.0

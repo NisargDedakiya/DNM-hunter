@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# RedAmon BadDNS batch runner.
+# NisargHunter AI BadDNS batch runner.
 # =========================================================================
 # Usage:
-#   docker run --rm -v /host/work:/work redamon-baddns:latest \
+#   docker run --rm -v /host/work:/work nisarghunter-baddns:latest \
 #       /work/targets.txt [modules] [nameservers]
 #
 # Arguments (positional):

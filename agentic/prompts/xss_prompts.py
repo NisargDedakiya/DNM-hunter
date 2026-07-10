@@ -1,5 +1,5 @@
 """
-RedAmon Cross-Site Scripting (XSS) Prompts
+NisargHunter AI Cross-Site Scripting (XSS) Prompts
 
 Prompts for XSS attack workflows covering reflected, stored, DOM-based, and blind XSS.
 Uses Playwright for DOM-sink detection and dialog-based proof, dalfox for WAF evasion,

@@ -1,5 +1,5 @@
 # =============================================================================
-# RedAmon - Unified Docker Compose
+# NisargHunter AI - Unified Docker Compose
 # =============================================================================
 # Start:  docker compose up -d
 # Stop:   docker compose down
@@ -19,14 +19,14 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: redamon-postgres
+    container_name: nisarghunter-postgres
     mem_limit: ${POSTGRES_MEM:-1g}          # Memory governor (Part 4)
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-redamon}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redamon_secret}
-      POSTGRES_DB: ${POSTGRES_DB:-redamon}
+      POSTGRES_USER: ${POSTGRES_USER:-nisarghunter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nisarghunter_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-nisarghunter}
     ports:
-      # Loopback-only: app tier reaches Postgres over the internal `redamon`
+      # Loopback-only: app tier reaches Postgres over the internal `nisarghunter`
       # bridge (postgres:5432); host publish is debug-only. Prevents LAN/remote
       # reach to a default-credentialed DB (STRIDE S13). Override via .env if you
       # genuinely need host access (e.g. POSTGRES_PORT=0.0.0.0:5432 is NOT valid;
@@ -36,18 +36,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-redamon} -d ${POSTGRES_DB:-redamon}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nisarghunter} -d ${POSTGRES_DB:-nisarghunter}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - redamon
+      - nisarghunter
 
   neo4j:
     image: neo4j:5.26-community
-    container_name: redamon-neo4j
+    container_name: nisarghunter-neo4j
     # Memory governor (Part 4): container hard cap MUST exceed heap + pagecache or
-    # the JVM is OOM-killed. redamon.sh export_resource_caps sizes these to the
+    # the JVM is OOM-killed. nisarghunter.sh export_resource_caps sizes these to the
     # host; the defaults keep heap+pagecache (3G) well inside the 4.5G limit.
     mem_limit: ${NEO4J_MEM:-4608m}
     environment:
@@ -59,7 +59,7 @@ services:
       NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP:-2g}
       NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE:-1g}
     ports:
-      # Loopback-only: the agent/webapp reach Neo4j over the internal `redamon`
+      # Loopback-only: the agent/webapp reach Neo4j over the internal `nisarghunter`
       # bridge (neo4j:7687); host publish is debug-only. Prevents LAN/remote reach
       # to a default-credentialed graph DB (STRIDE S13).
       - "127.0.0.1:${NEO4J_HTTP_PORT:-7474}:7474"
@@ -77,7 +77,7 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - redamon
+      - nisarghunter
 
   # ===========================================================================
   # GVM / OpenVAS — Vulnerability Scanner Stack
@@ -88,7 +88,7 @@ services:
 
   gvm-vt:
     image: registry.community.greenbone.net/community/vulnerability-tests
-    container_name: redamon-gvm-vt
+    container_name: nisarghunter-gvm-vt
     environment:
       FEED_RELEASE: "24.10"
     volumes:
@@ -96,25 +96,25 @@ services:
 
   gvm-notus-data:
     image: registry.community.greenbone.net/community/notus-data
-    container_name: redamon-gvm-notus-data
+    container_name: nisarghunter-gvm-notus-data
     volumes:
       - notus_data:/mnt
 
   gvm-scap-data:
     image: registry.community.greenbone.net/community/scap-data
-    container_name: redamon-gvm-scap-data
+    container_name: nisarghunter-gvm-scap-data
     volumes:
       - scap_data:/mnt
 
   gvm-cert-bund-data:
     image: registry.community.greenbone.net/community/cert-bund-data
-    container_name: redamon-gvm-cert-data
+    container_name: nisarghunter-gvm-cert-data
     volumes:
       - cert_data:/mnt
 
   gvm-dfn-cert-data:
     image: registry.community.greenbone.net/community/dfn-cert-data
-    container_name: redamon-gvm-dfn-cert
+    container_name: nisarghunter-gvm-dfn-cert
     volumes:
       - cert_data:/mnt
     depends_on:
@@ -122,7 +122,7 @@ services:
 
   gvm-data-objects:
     image: registry.community.greenbone.net/community/data-objects
-    container_name: redamon-gvm-data-objects
+    container_name: nisarghunter-gvm-data-objects
     environment:
       FEED_RELEASE: "24.10"
     volumes:
@@ -130,7 +130,7 @@ services:
 
   gvm-report-formats:
     image: registry.community.greenbone.net/community/report-formats
-    container_name: redamon-gvm-report-formats
+    container_name: nisarghunter-gvm-report-formats
     environment:
       FEED_RELEASE: "24.10"
     volumes:
@@ -140,7 +140,7 @@ services:
 
   gvm-gpg-data:
     image: registry.community.greenbone.net/community/gpg-data
-    container_name: redamon-gvm-gpg-data
+    container_name: nisarghunter-gvm-gpg-data
     volumes:
       - gpg_data:/mnt
 
@@ -148,14 +148,14 @@ services:
 
   gvm-redis:
     image: registry.community.greenbone.net/community/redis-server:stable
-    container_name: redamon-gvm-redis
+    container_name: nisarghunter-gvm-redis
     restart: on-failure
     volumes:
       - gvm_redis_socket:/run/redis/
 
   gvm-postgres-init:
     image: alpine:3.20
-    container_name: redamon-gvm-postgres-init
+    container_name: nisarghunter-gvm-postgres-init
     volumes:
       - gvm_psql_data:/var/lib/postgresql
       - gvm_psql_socket:/var/run/postgresql
@@ -163,7 +163,7 @@ services:
 
   gvm-postgres:
     image: registry.community.greenbone.net/community/pg-gvm:stable
-    container_name: redamon-gvm-postgres
+    container_name: nisarghunter-gvm-postgres
     restart: on-failure
     volumes:
       - gvm_psql_data:/var/lib/postgresql
@@ -180,7 +180,7 @@ services:
 
   gvmd:
     image: registry.community.greenbone.net/community/gvmd:stable
-    container_name: redamon-gvm-gvmd
+    container_name: nisarghunter-gvm-gvmd
     mem_limit: ${GVMD_MEM:-3g}              # Memory governor (Part 4)
     restart: on-failure
     volumes:
@@ -209,7 +209,7 @@ services:
 
   gvm-ospd:
     image: registry.community.greenbone.net/community/ospd-openvas:stable
-    container_name: redamon-gvm-ospd
+    container_name: nisarghunter-gvm-ospd
     restart: on-failure
     hostname: ospd-openvas.local
     cap_add:
@@ -253,28 +253,28 @@ services:
       context: .
       dockerfile: recon/Dockerfile
       network: host
-    image: redamon-recon:latest
+    image: nisarghunter-recon:latest
     profiles: ["tools"]
 
   vuln-scanner:
     build:
       context: .
       dockerfile: gvm_scan/Dockerfile
-    image: redamon-vuln-scanner:latest
+    image: nisarghunter-vuln-scanner:latest
     profiles: ["tools"]
 
   github-secret-hunter:
     build:
       context: .
       dockerfile: github_secret_hunt/Dockerfile
-    image: redamon-github-hunter:latest
+    image: nisarghunter-github-hunter:latest
     profiles: ["tools"]
 
   trufflehog-scanner:
     build:
       context: .
       dockerfile: trufflehog_scan/Dockerfile
-    image: redamon-trufflehog:latest
+    image: nisarghunter-trufflehog:latest
     profiles: ["tools"]
 
   # WCVS (Web Cache Vulnerability Scanner) — breadth engine for the cache
@@ -284,22 +284,22 @@ services:
     build:
       context: ./wcvs
       dockerfile: Dockerfile
-    image: redamon-wcvs:latest
+    image: nisarghunter-wcvs:latest
     profiles: ["tools"]
 
   # CodeFix build sandbox: runs the UNTRUSTED clone+build+test step of the
   # CypherFix agent in isolation (threats T6/E10). Spawned ephemerally per job by
   # recon_orchestrator/container_manager.py with no secrets, cap_drop=ALL,
   # no-new-privileges, read-only rootfs, resource limits, on codefix-net (no
-  # RedAmon peer). Build-only here; never run as a long-lived compose service.
+  # NisargHunter AI peer). Build-only here; never run as a long-lived compose service.
   codefix-sandbox:
     build:
       context: .
       dockerfile: codefix_sandbox/Dockerfile
-    image: redamon-codefix-sandbox:latest
+    image: nisarghunter-codefix-sandbox:latest
     profiles: ["tools"]
 
-  # BadDNS (AGPL-3.0) runs isolated in its own container. RedAmon never
+  # BadDNS (AGPL-3.0) runs isolated in its own container. NisargHunter AI never
   # imports or links against it -- the recon container spawns this image
   # via Docker-in-Docker and receives NDJSON on stdout. See baddns_scan/
   # Dockerfile and THIRD-PARTY-LICENSES.md for the license boundary.
@@ -307,7 +307,7 @@ services:
     build:
       context: .
       dockerfile: baddns_scan/Dockerfile
-    image: redamon-baddns:latest
+    image: nisarghunter-baddns:latest
     profiles: ["tools"]
 
   # AI Attack Surface — deterministic offensive testing of the discovered AI
@@ -317,7 +317,7 @@ services:
     build:
       context: .
       dockerfile: ai_attack_surface_scan/Dockerfile
-    image: redamon-ai-attack-surface:latest
+    image: nisarghunter-ai-attack-surface:latest
     profiles: ["tools"]
 
   # ===========================================================================
@@ -329,18 +329,18 @@ services:
   # /var/run/docker.sock, so a compromised recon container cannot escape to the
   # host (no -v /:/host, no --privileged, no non-allowlisted image). The broker
   # holds the REAL socket (it is trusted, like the orchestrator) and serves its
-  # filtered socket on the redamon_broker_socket named volume (which lives inside
+  # filtered socket on the nisarghunter_broker_socket named volume (which lives inside
   # the Linux VM, so the unix socket is shareable on macOS + Linux). See
   # docker_broker/.
   docker-broker:
     build: ./docker_broker
-    image: redamon-docker-broker:latest
-    container_name: redamon-docker-broker
+    image: nisarghunter-docker-broker:latest
+    container_name: nisarghunter-docker-broker
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock          # real socket (forward target)
-      - redamon_broker_socket:/var/run/broker              # named volume; lives in the Linux VM so the unix socket is shareable on macOS + Linux
-      - /tmp/redamon:/tmp/redamon                           # shared scratch dir (recon output, temp files)
+      - nisarghunter_broker_socket:/var/run/broker              # named volume; lives in the Linux VM so the unix socket is shareable on macOS + Linux
+      - /tmp/nisarghunter:/tmp/nisarghunter                           # shared scratch dir (recon output, temp files)
     environment:
       DOCKER_BROKER_UPSTREAM: /var/run/docker.sock
       DOCKER_BROKER_LISTEN: /var/run/broker/docker.sock
@@ -350,7 +350,7 @@ services:
       # Host bind sources the tools legitimately mount: the shared scratch dir and
       # anything under the repo root (recon output, wordlists, custom templates).
       # Everything else (/, /etc, /root, the docker socket) is denied.
-      DOCKER_BROKER_ALLOWED_BIND_PREFIXES: /tmp/redamon,${PWD:-/home/samuele/Progetti didattici/redamon}
+      DOCKER_BROKER_ALLOWED_BIND_PREFIXES: /tmp/nisarghunter,${PWD:-/home/samuele/Progetti didattici/nisarghunter}
       DOCKER_BROKER_ALLOWED_VOLUMES: nuclei-templates
       # Memory governor (Part 4d): hard memory cap injected into every sibling
       # tool container (katana/nuclei/httpx/...). Default ~2g; PIDS 0 = unset.
@@ -365,7 +365,7 @@ services:
 
   recon-orchestrator:
     build: ./recon_orchestrator
-    container_name: redamon-recon-orchestrator
+    container_name: nisarghunter-recon-orchestrator
     mem_limit: ${RECON_ORCHESTRATOR_MEM:-1g}   # Memory governor (Part 4)
     ports:
       # V1 isolation: bind to host loopback only. Reachable from the host (debug)
@@ -384,21 +384,21 @@ services:
       - ./trufflehog_scan/output:/app/trufflehog_scan/output:rw
       - ./ai_attack_surface_scan:/app/ai_attack_surface_scan:ro
       - ./mcp/nuclei-templates:/app/nuclei-templates:ro
-      - /tmp/redamon:/tmp/redamon:rw
+      - /tmp/nisarghunter:/tmp/nisarghunter:rw
       # Shared with the agent: the orchestrator resolves this volume's host path
       # (via mount auto-detection) to bind per-job worktrees into the CodeFix build
       # sandbox it spawns (T6/E10).
       - cypherfix-work:/app/codefix-work
     environment:
       # Host paths are auto-detected from container mounts (no hardcoded paths needed)
-      RECON_IMAGE: redamon-recon:latest
-      GVM_IMAGE: redamon-vuln-scanner:latest
-      GITHUB_HUNT_IMAGE: redamon-github-hunter:latest
-      TRUFFLEHOG_IMAGE: redamon-trufflehog:latest
-      AI_ATTACK_SURFACE_IMAGE: redamon-ai-attack-surface:latest
+      RECON_IMAGE: nisarghunter-recon:latest
+      GVM_IMAGE: nisarghunter-vuln-scanner:latest
+      GITHUB_HUNT_IMAGE: nisarghunter-github-hunter:latest
+      TRUFFLEHOG_IMAGE: nisarghunter-trufflehog:latest
+      AI_ATTACK_SURFACE_IMAGE: nisarghunter-ai-attack-surface:latest
       # CodeFix build sandbox image + the docker network it attaches to (T6/E10).
-      CODEFIX_SANDBOX_IMAGE: redamon-codefix-sandbox:latest
-      CODEFIX_SANDBOX_NETWORK: redamon-codefix-net
+      CODEFIX_SANDBOX_IMAGE: nisarghunter-codefix-sandbox:latest
+      CODEFIX_SANDBOX_NETWORK: nisarghunter-codefix-net
       # Auth (forwarded to spawned containers)
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-changeme}
       # Inbound API auth: the orchestrator validates this on every request (except
@@ -435,7 +435,7 @@ services:
       GVM_PASSWORD: ${GVM_PASSWORD:-admin}
       # On-demand local LLM (Ollama) judge/attacker for the AI Attack Surface
       # layer. Spawned on scan launch, torn down when the last job finishes;
-      # weights persist in the redamon_llm_models volume. Host network -> the
+      # weights persist in the nisarghunter_llm_models volume. Host network -> the
       # spawned scan containers reach it at localhost:11434.
       LOCAL_LLM_IMAGE: ${LOCAL_LLM_IMAGE:-ollama/ollama:latest}
       LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-qwen2.5:7b}
@@ -443,7 +443,7 @@ services:
       LOCAL_LLM_GPU: ${LOCAL_LLM_GPU:-}
       # V1 isolation: the on-demand Ollama judge must spawn on the orchestrator's
       # own (worker-isolated) network so the orchestrator reaches it by DNS.
-      LOCAL_LLM_NETWORK: redamon-orchestrator-net
+      LOCAL_LLM_NETWORK: nisarghunter-orchestrator-net
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8010/health"]
@@ -451,7 +451,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-    # V1 isolation: orchestrator lives on its own network, NOT on `redamon`, so a
+    # V1 isolation: orchestrator lives on its own network, NOT on `nisarghunter`, so a
     # compromised worker cannot reach the privileged orchestration API. Only the
     # webapp (multi-homed) and the Ollama judge share this network.
     networks:
@@ -462,7 +462,7 @@ services:
       context: ./mcp
       dockerfile: kali-sandbox/Dockerfile
       network: host
-    container_name: redamon-kali
+    container_name: nisarghunter-kali
     mem_limit: ${KALI_MEM:-1g}              # Memory governor (Part 4)
     dns:
       - 8.8.8.8
@@ -481,7 +481,7 @@ services:
     ports:
       # SECURITY (STRIDE S10/E1/I9): the MCP tool servers, progress streams,
       # tunnel-manager and ngrok API are consumed ONLY by the agent/webapp over
-      # the internal `redamon` bridge (http://kali-sandbox:PORT) — never from the
+      # the internal `nisarghunter` bridge (http://kali-sandbox:PORT) — never from the
       # host. They are published on 127.0.0.1 for local debugging only, so a
       # LAN/remote client can no longer reach the unauthenticated tool surface.
       # The container still binds 0.0.0.0 INSIDE the netns (MCP_HOST below), so
@@ -550,7 +550,7 @@ services:
       # worker holds NO Neo4j credentials. The agent enforces read-only + tenant
       # scoping server-side. Do not re-add NEO4J_PASSWORD here: a compromised
       # worker would otherwise get master read/write access to the whole graph.
-      REDAMON_AGENT_URL: http://agent:8080
+      NISARGHUNTER_AGENT_URL: http://agent:8080
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python3", "-c", "import socket; s=socket.socket(); s.connect(('localhost', 8000)); s.close()"]
@@ -559,7 +559,7 @@ services:
       retries: 3
       start_period: 180s
     networks:
-      redamon:
+      nisarghunter:
       pentest-net:
 
   agent:
@@ -568,7 +568,7 @@ services:
       dockerfile: agentic/Dockerfile
       args:
         SKIP_KB: "${SKIP_KB:-false}"
-    container_name: redamon-agent
+    container_name: nisarghunter-agent
     mem_limit: ${AGENT_MEM:-3g}             # Memory governor (Part 4)
     env_file:
       - path: .env
@@ -605,7 +605,7 @@ services:
       KB_PATH: /app/knowledge_base/data
       # Fireteam requires AsyncPostgresSaver for safe mid-wave checkpointing.
       PERSISTENT_CHECKPOINTER: "true"
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-redamon}:${POSTGRES_PASSWORD:-redamon_secret}@postgres:5432/${POSTGRES_DB:-redamon}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-nisarghunter}:${POSTGRES_PASSWORD:-nisarghunter_secret}@postgres:5432/${POSTGRES_DB:-nisarghunter}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -636,7 +636,7 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - redamon
+      - nisarghunter
 
   # ===========================================================================
   # Knowledge Base Refresh Sidecar
@@ -653,7 +653,7 @@ services:
   # Enable with:
   #   KB_REFRESH_ENABLED=true docker compose --profile kb-refresh up -d kb-refresh
   #
-  # Or via redamon.sh once that integration lands. Default is OFF — users opt in.
+  # Or via nisarghunter.sh once that integration lands. Default is OFF — users opt in.
   # ===========================================================================
 
   kb-refresh:
@@ -661,8 +661,8 @@ services:
     build:
       context: .
       dockerfile: agentic/Dockerfile
-    image: redamon-agent
-    container_name: redamon-kb-refresh
+    image: nisarghunter-agent
+    container_name: nisarghunter-kb-refresh
     environment:
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
@@ -677,7 +677,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - redamon
+      - nisarghunter
     # Sleep loop scheduler — runs source updates on cadence.
     # Production setups should replace this with a real cron container or
     # external scheduler (host cron, systemd timer, GitHub Actions).
@@ -731,14 +731,14 @@ services:
     build:
       context: ./webapp
       args:
-        REDAMON_VERSION: "${REDAMON_VERSION:-0.0.0}"
-    container_name: redamon-webapp
+        NISARGHUNTER_VERSION: "${NISARGHUNTER_VERSION:-0.0.0}"
+    container_name: nisarghunter-webapp
     mem_limit: ${WEBAPP_MEM:-1g}            # Memory governor (Part 4)
     ports:
       - "${WEBAPP_PORT:-3000}:3000"
     environment:
       # PostgreSQL (Prisma)
-      DATABASE_URL: "postgresql://${POSTGRES_USER:-redamon}:${POSTGRES_PASSWORD:-redamon_secret}@postgres:5432/${POSTGRES_DB:-redamon}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-nisarghunter}:${POSTGRES_PASSWORD:-nisarghunter_secret}@postgres:5432/${POSTGRES_DB:-nisarghunter}"
       # Neo4j (server-side graph queries)
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
@@ -788,10 +788,10 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Multi-homed: `redamon` for the worker/agent/db, `orchestrator-net` so the
+    # Multi-homed: `nisarghunter` for the worker/agent/db, `orchestrator-net` so the
     # webapp (the only legitimate caller) can still reach the isolated orchestrator.
     networks:
-      - redamon
+      - nisarghunter
       - orchestrator-net
 
 # =============================================================================
@@ -799,14 +799,14 @@ services:
 # =============================================================================
 
 networks:
-  redamon:
-    name: redamon-network
+  nisarghunter:
+    name: nisarghunter-network
     driver: bridge
   # V1 isolation: dedicated network for the privileged orchestrator. Explicit
   # name so LOCAL_LLM_NETWORK (orchestrator env) matches the spawned Ollama's net.
   # The worker (kali-sandbox) is NOT on this network and so cannot reach :8010.
   orchestrator-net:
-    name: redamon-orchestrator-net
+    name: nisarghunter-orchestrator-net
     driver: bridge
     # Explicit subnet so Docker never auto-assigns this net the same /16 that
     # pentest-net reserves below. Without it, orchestrator-net (created first)
@@ -820,14 +820,14 @@ networks:
       config:
         - subnet: 172.28.0.0/16
   # CodeFix build sandboxes attach here at spawn. Deliberately a plain bridge with
-  # NAT egress (builds fetch npm/pip deps) but NO RedAmon service joins it, so a
+  # NAT egress (builds fetch npm/pip deps) but NO NisargHunter AI service joins it, so a
   # malicious build has internet but cannot reach webapp/neo4j/postgres/agent.
   # Because no service is attached, Compose never creates it — the recon
   # orchestrator creates it on demand (`_ensure_codefix_network`) with an
   # auto-assigned subnet. This declaration documents intent and keeps
   # `docker compose config` aware of it.
   codefix-net:
-    name: redamon-codefix-net
+    name: nisarghunter-codefix-net
     driver: bridge
 
 # =============================================================================
@@ -844,45 +844,45 @@ volumes:
   neo4j_import:
   neo4j_plugins:
   kb_data:
-    name: redamon_kb_data
+    name: nisarghunter_kb_data
   tradecraft_cache:
-    name: redamon_tradecraft_cache
+    name: nisarghunter_tradecraft_cache
   # On-demand local LLM (Ollama) model weights for the AI Attack Surface layer.
   # The container is spawned/torn down per scan; this volume persists the pulled
   # judge/attacker models so restarts reload from RAM, not a re-download.
   # Name must match LLM_MODELS_VOLUME in recon_orchestrator/local_llm_manager.py.
   llm_models:
-    name: redamon_llm_models
+    name: nisarghunter_llm_models
   # GVM volumes (names must match container_manager.py references)
   vt_data:
-    name: redamon_vt_data
+    name: nisarghunter_vt_data
   notus_data:
-    name: redamon_notus_data
+    name: nisarghunter_notus_data
   scap_data:
-    name: redamon_scap_data
+    name: nisarghunter_scap_data
   cert_data:
-    name: redamon_cert_data
+    name: nisarghunter_cert_data
   data_objects:
-    name: redamon_data_objects
+    name: nisarghunter_data_objects
   gpg_data:
-    name: redamon_gpg_data
+    name: nisarghunter_gpg_data
   gvm_redis_socket:
-    name: redamon_gvm_redis_socket
+    name: nisarghunter_gvm_redis_socket
   gvm_psql_data:
-    name: redamon_gvm_psql_data
+    name: nisarghunter_gvm_psql_data
   gvm_psql_socket:
-    name: redamon_gvm_psql_socket
+    name: nisarghunter_gvm_psql_socket
   gvmd_data:
-    name: redamon_gvmd_data
+    name: nisarghunter_gvmd_data
   gvmd_socket:
-    name: redamon_gvmd_socket
+    name: nisarghunter_gvmd_socket
   ospd_socket:
-    name: redamon_ospd_socket
+    name: nisarghunter_ospd_socket
   cypherfix-repos:  # Temp storage for cloned GitHub repos (CodeFix agent)
   # Shared between the agent (clones here) and the orchestrator (bind-mounts the
   # per-job worktree into the build sandbox). NOT shared with scanners (unlike
-  # /tmp/redamon), so a low-trust scanner cannot tamper with a repo before its PR.
+  # /tmp/nisarghunter), so a low-trust scanner cannot tamper with a repo before its PR.
   cypherfix-work:
-    name: redamon_cypherfix_work
-  redamon_broker_socket:  # Holds the docker-broker filtered socket; in-VM so it is shareable on macOS + Linux
-    name: redamon_broker_socket
+    name: nisarghunter_cypherfix_work
+  nisarghunter_broker_socket:  # Holds the docker-broker filtered socket; in-VM so it is shareable on macOS + Linux
+    name: nisarghunter_broker_socket

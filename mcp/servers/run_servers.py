@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Server Runner - Launches all MCP servers for RedAmon Agentic AI
+MCP Server Runner - Launches all MCP servers for NisargHunter AI Agentic AI
 
 This script starts all MCP servers (naabu, nuclei, curl, metasploit) either
 in stdio mode (for direct integration) or SSE mode (for network access).
@@ -119,7 +119,7 @@ def run_server(name: str, config: dict, transport: str = "sse"):
                 logger.info(f"Started Hydra progress server on port {hydra_progress_port}")
 
             # Bind 0.0.0.0 INSIDE the container so the agent can reach us over
-            # the internal `redamon` bridge; host publish is loopback-only. Wrap
+            # the internal `nisarghunter` bridge; host publish is loopback-only. Wrap
             # the SSE app in bearer-token auth (STRIDE S10). serve_sse_with_auth
             # fails open (with a warning) when MCP_AUTH_TOKEN is unset and falls
             # back to a plain mcp.run() if the wrapper cannot bind on this
@@ -243,7 +243,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="RedAmon MCP Server Runner"
+        description="NisargHunter AI MCP Server Runner"
     )
     parser.add_argument(
         "--stdio",

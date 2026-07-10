@@ -1,5 +1,5 @@
 # ============================================
-# RedAmon Web Application - Production Dockerfile
+# NisargHunter AI Web Application - Production Dockerfile
 # Multi-stage build for optimized production image
 # ============================================
 
@@ -21,8 +21,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . ./
 
-ARG REDAMON_VERSION=0.0.0
-ENV NEXT_PUBLIC_REDAMON_VERSION=$REDAMON_VERSION
+ARG NISARGHUNTER_VERSION=0.0.0
+ENV NEXT_PUBLIC_NISARGHUNTER_VERSION=$NISARGHUNTER_VERSION
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 # Dummy DATABASE_URL for Prisma client generation at build time (not used at runtime)

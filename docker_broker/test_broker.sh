@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Standalone test for the Docker broker (V4). Starts the broker against the host
 # Docker socket, points a docker client at the broker socket, and asserts the
-# allow/deny policy. No impact on the RedAmon stack.
+# allow/deny policy. No impact on the NisargHunter AI stack.
 #
 # Run: bash docker_broker/test_broker.sh
 set -uo pipefail

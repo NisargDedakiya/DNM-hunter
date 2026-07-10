@@ -1,7 +1,7 @@
 # Guinea Pigs
 
 Deliberately vulnerable, self-contained Docker targets for **end-to-end validation**
-of RedAmon recon/scan modules against realistic, real-world behaviour (not mocks).
+of NisargHunter AI recon/scan modules against realistic, real-world behaviour (not mocks).
 
 Each subdirectory is one module's validation harness with its own `docker-compose.yml`
 and a README mapping every endpoint to the exact pipeline step it exercises.

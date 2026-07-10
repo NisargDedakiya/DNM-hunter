@@ -1,5 +1,5 @@
 # =============================================================================
-# RedAmon AI Attack Surface Scanner — Python Container
+# NisargHunter AI AI Attack Surface Scanner — Python Container
 # =============================================================================
 # One image, PER-TOOL VIRTUALENVS. The attack tools' dependencies conflict and
 # cannot share one environment (garak needs datasets<4.0; pyrit needs >=4.8.0;
@@ -10,8 +10,8 @@
 
 FROM python:3.12-slim
 
-LABEL maintainer="RedAmon Project"
-LABEL description="AI Attack Surface deterministic offensive scanner for RedAmon"
+LABEL maintainer="NisargHunter AI Project"
+LABEL description="AI Attack Surface deterministic offensive scanner for NisargHunter AI"
 
 WORKDIR /app
 

@@ -102,7 +102,7 @@ describe('createToken / verifyToken', () => {
 
 describe('AUTH_COOKIE_NAME', () => {
   test('is a non-empty string', () => {
-    expect(AUTH_COOKIE_NAME).toBe('redamon-auth')
+    expect(AUTH_COOKIE_NAME).toBe('nisarghunter-auth')
   })
 })
 

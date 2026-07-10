@@ -59,5 +59,5 @@ exec docker run --rm \
     -v "$REPO_ROOT/webapp:/webapp" \
     -w /app \
     -e PYTHONPATH=/app:/mcp/servers \
-    redamon-agent:latest \
+    nisarghunter-agent:latest \
     python -m unittest $ARGS

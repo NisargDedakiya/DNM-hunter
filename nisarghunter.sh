@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# RedAmon CLI - Simplified installation, update, and lifecycle management
+# NisargHunter AI CLI - Simplified installation, update, and lifecycle management
 # =============================================================================
 set -euo pipefail
 
@@ -14,23 +14,23 @@ LEGACY_SKIPKBASE_FLAG_FILE="$SCRIPT_DIR/.skipkbase"
 # Service lists
 CORE_SERVICES="postgres neo4j docker-broker recon-orchestrator kali-sandbox agent webapp"
 # Build-only images run on demand (NOT long-running services). All live under the
-# compose `tools` profile and the redamon-* tag namespace. ai-attack-surface is the
+# compose `tools` profile and the nisarghunter-* tag namespace. ai-attack-surface is the
 # AI Attack Surface scanner (garak/pyrit/giskard/promptfoo). wcvs is the Web Cache
 # Vulnerability Scanner, run docker-in-docker by the recon container for the web
 # cache poisoning module.
-TOOL_IMAGES="redamon-recon:latest redamon-vuln-scanner:latest redamon-github-hunter:latest redamon-trufflehog:latest redamon-baddns:latest redamon-ai-attack-surface:latest redamon-codefix-sandbox:latest redamon-wcvs:latest"
+TOOL_IMAGES="nisarghunter-recon:latest nisarghunter-vuln-scanner:latest nisarghunter-github-hunter:latest nisarghunter-trufflehog:latest nisarghunter-baddns:latest nisarghunter-ai-attack-surface:latest nisarghunter-codefix-sandbox:latest nisarghunter-wcvs:latest"
 DEV_COMPOSE="-f docker-compose.yml -f docker-compose.dev.yml"
 
 # Orchestrator-spawned containers that docker compose does NOT manage (they are
 # created at runtime via the Docker API, so `compose down` leaves them behind and
 # they must be wiped explicitly):
-#   - AI Attack Surface scan containers:  redamon-ai-attack-<proj>-<run>
-#   - On-demand local LLM (Ollama) judge/attacker:  redamon-local-llm
-#   - CodeFix build sandboxes (T6/E10):  redamon-codefix-<job>
-SPAWNED_CONTAINER_NAME_FILTERS=(--filter "name=redamon-ai-attack-" --filter "name=redamon-local-llm" --filter "name=redamon-codefix-")
+#   - AI Attack Surface scan containers:  nisarghunter-ai-attack-<proj>-<run>
+#   - On-demand local LLM (Ollama) judge/attacker:  nisarghunter-local-llm
+#   - CodeFix build sandboxes (T6/E10):  nisarghunter-codefix-<job>
+SPAWNED_CONTAINER_NAME_FILTERS=(--filter "name=nisarghunter-ai-attack-" --filter "name=nisarghunter-local-llm" --filter "name=nisarghunter-codefix-")
 # The on-demand local LLM image (pulled at runtime, not built) + its models volume.
 LOCAL_LLM_IMAGE="${LOCAL_LLM_IMAGE:-ollama/ollama:latest}"
-LOCAL_LLM_VOLUME="${LOCAL_LLM_VOLUME:-redamon_llm_models}"
+LOCAL_LLM_VOLUME="${LOCAL_LLM_VOLUME:-nisarghunter_llm_models}"
 
 # Colors
 RED='\033[0;31m'
@@ -78,7 +78,7 @@ error()   { echo -e "${RED}[ERROR]${NC} $*"; }
 # be misleading. `docker info` reports the engine's real limits and is correct on
 # Linux, macOS and Windows alike; host probing (/proc, sysctl) is only a fallback.
 #
-# Override: REDAMON_BUILD_PARALLEL=N forces the limit (N>=1), =0 leaves it
+# Override: NISARGHUNTER_BUILD_PARALLEL=N forces the limit (N>=1), =0 leaves it
 # unbounded. webapp isolation always applies regardless of the override.
 
 BUILD_MEM_MB=0
@@ -154,8 +154,8 @@ detect_build_resources() {
 # Assumes detect_build_resources() has already run.
 pick_parallelism() {
     # Explicit override wins and skips heuristics entirely.
-    if [[ -n "${REDAMON_BUILD_PARALLEL:-}" ]]; then
-        local ov="${REDAMON_BUILD_PARALLEL//[^0-9]/}"
+    if [[ -n "${NISARGHUNTER_BUILD_PARALLEL:-}" ]]; then
+        local ov="${NISARGHUNTER_BUILD_PARALLEL//[^0-9]/}"
         if [[ -z "$ov" ]]; then ov=1; fi
         printf '%s' "$ov"
         return
@@ -167,7 +167,7 @@ pick_parallelism() {
         return
     fi
 
-    # Reserve headroom for the OS plus RedAmon containers that stay running
+    # Reserve headroom for the OS plus NisargHunter AI containers that stay running
     # during `update` (neo4j/postgres/agent), and budget ~2GB per concurrent
     # heavy build.
     local reserve=2560 per_build=2048 usable mem_bound parallel
@@ -236,13 +236,13 @@ _size_to_mb() {
 
 # Refuse to start when the host/VM can't hold the always-on core services, with
 # a clear message, instead of failing mysteriously later. Returns 1 to abort.
-# Override with REDAMON_SKIP_RAM_GATE=1 or REDAMON_MIN_RAM_MB=<mb>.
+# Override with NISARGHUNTER_SKIP_RAM_GATE=1 or NISARGHUNTER_MIN_RAM_MB=<mb>.
 preflight_ram_gate() {
-    [[ "${REDAMON_SKIP_RAM_GATE:-}" == "1" ]] && return 0
+    [[ "${NISARGHUNTER_SKIP_RAM_GATE:-}" == "1" ]] && return 0
     detect_build_resources
     local required_mb baseline_mb headroom_mb
-    if [[ -n "${REDAMON_MIN_RAM_MB:-}" ]]; then
-        required_mb="${REDAMON_MIN_RAM_MB//[^0-9]/}"
+    if [[ -n "${NISARGHUNTER_MIN_RAM_MB:-}" ]]; then
+        required_mb="${NISARGHUNTER_MIN_RAM_MB//[^0-9]/}"
     else
         baseline_mb="$(_size_to_mb "${SERVICE_BASELINE_MEM:-6g}")"; [[ -z "$baseline_mb" ]] && baseline_mb=6144
         headroom_mb="$(_size_to_mb "${OS_HEADROOM_MEM:-2g}")";      [[ -z "$headroom_mb" ]] && headroom_mb=2048
@@ -254,8 +254,8 @@ preflight_ram_gate() {
     local threshold=$(( required_mb - 512 ))
     [[ "$threshold" -lt 0 ]] && threshold="$required_mb"
     if [[ "${BUILD_MEM_MB:-0}" -gt 0 && "$BUILD_MEM_MB" -lt "$threshold" ]]; then
-        error "Insufficient memory for RedAmon core services: ~$(( BUILD_MEM_MB / 1024 ))GB available to Docker (source: ${BUILD_RES_SOURCE}), need ~$(( required_mb / 1024 ))GB."
-        error "Free up memory, raise the Docker VM memory, or set REDAMON_SKIP_RAM_GATE=1 to override."
+        error "Insufficient memory for NisargHunter AI core services: ~$(( BUILD_MEM_MB / 1024 ))GB available to Docker (source: ${BUILD_RES_SOURCE}), need ~$(( required_mb / 1024 ))GB."
+        error "Free up memory, raise the Docker VM memory, or set NISARGHUNTER_SKIP_RAM_GATE=1 to override."
         return 1
     fi
     return 0
@@ -303,9 +303,9 @@ export_resource_caps() {
 # Optional one-time compressed-RAM (zram) swap cushion so brief memory overshoots
 # degrade gracefully (swap to compressed RAM) instead of OOM-killing. Linux-native
 # host only; a NO-OP on macOS/Windows (Docker Desktop's VM manages its own swap)
-# and when REDAMON_ENABLE_ZRAM != 1. Best-effort: never fatal, never interactive.
+# and when NISARGHUNTER_ENABLE_ZRAM != 1. Best-effort: never fatal, never interactive.
 setup_zram() {
-    [[ "${REDAMON_ENABLE_ZRAM:-}" == "1" ]] || return 0
+    [[ "${NISARGHUNTER_ENABLE_ZRAM:-}" == "1" ]] || return 0
 
     # Docker Desktop / WSL2 / mac: cannot add zram to the host VM from here.
     case "$(uname -s 2>/dev/null || echo unknown)" in
@@ -324,10 +324,10 @@ setup_zram() {
     fi
 
     detect_build_resources
-    local size="${REDAMON_ZRAM_SIZE:-}"
+    local size="${NISARGHUNTER_ZRAM_SIZE:-}"
     if [[ -z "$size" ]]; then
         if [[ "${BUILD_MEM_MB:-0}" -le 0 ]]; then
-            warn "zram: cannot size (RAM undetectable); set REDAMON_ZRAM_SIZE to enable"; return 0
+            warn "zram: cannot size (RAM undetectable); set NISARGHUNTER_ZRAM_SIZE to enable"; return 0
         fi
         # Default: half of detected RAM, clamped to [512M, 8G].
         local half=$(( BUILD_MEM_MB / 2 ))
@@ -401,7 +401,7 @@ compose_build() {
     if [[ -n "$parallel" && "$parallel" -ge 1 ]]; then
         COMPOSE_PARALLEL_LIMIT="$parallel" docker compose "$@"
     else
-        docker compose "$@"   # REDAMON_BUILD_PARALLEL=0 -> unbounded
+        docker compose "$@"   # NISARGHUNTER_BUILD_PARALLEL=0 -> unbounded
     fi
 }
 
@@ -421,7 +421,7 @@ is_kbase_enabled() {
     [[ -f "$KBASE_FLAG_FILE" ]]
 }
 
-# One-time migration from the legacy `.skipkbase` flag (RedAmon <=4.9.3) to the
+# One-time migration from the legacy `.skipkbase` flag (NisargHunter AI <=4.9.3) to the
 # new explicit flag pair (`.kbase-enabled` / `.kbase-disabled`). cmd_install
 # always writes one of the two markers so the user's explicit choice is sticky
 # across `clean` (which keeps KB data on disk). Behavior per case:
@@ -471,8 +471,8 @@ check_prerequisites() {
 }
 
 export_version() {
-    export REDAMON_VERSION
-    REDAMON_VERSION="$(get_version)"
+    export NISARGHUNTER_VERSION
+    NISARGHUNTER_VERSION="$(get_version)"
 }
 
 ensure_auth_secrets() {
@@ -540,7 +540,7 @@ ensure_db_secrets() {
 
     # (var, volume suffix, compose default) triples.
     local specs=(
-        "POSTGRES_PASSWORD:postgres_data:redamon_secret"
+        "POSTGRES_PASSWORD:postgres_data:nisarghunter_secret"
         "NEO4J_PASSWORD:neo4j_data:changeme123"
     )
 
@@ -644,10 +644,10 @@ remove_spawned_containers() {
     fi
 }
 
-remove_redamon_images() {
-    # Remove locally-built redamon images
+remove_nisarghunter_images() {
+    # Remove locally-built nisarghunter images
     docker images --format '{{.Repository}}:{{.Tag}}' \
-        | grep '^redamon-' \
+        | grep '^nisarghunter-' \
         | xargs -r docker rmi 2>/dev/null || true
 
     # Remove GVM / Greenbone images
@@ -750,7 +750,7 @@ pull_gvm_images() {
         echo ""
         echo -e "  ${YELLOW}This is often caused by a Docker+Go 1.24 bug (moby/moby#49513).${NC}"
         echo -e "  ${YELLOW}Try: echo '{\"max-concurrent-downloads\":1}' | sudo tee /etc/docker/daemon.json${NC}"
-        echo -e "  ${YELLOW}Then: sudo systemctl restart docker && ./redamon.sh up${NC}"
+        echo -e "  ${YELLOW}Then: sudo systemctl restart docker && ./nisarghunter.sh up${NC}"
         exit 1
     fi
     success "All GVM images pulled successfully."
@@ -812,7 +812,7 @@ _kb_export_env() {
 # Wait for the Neo4j container to become healthy. Starts it if not running.
 # Returns 0 on success, 1 on timeout.
 _kb_wait_neo4j() {
-    if ! docker ps --format '{{.Names}}' | grep -q '^redamon-neo4j$'; then
+    if ! docker ps --format '{{.Names}}' | grep -q '^nisarghunter-neo4j$'; then
         info "Neo4j not running — starting it..."
         docker compose up -d neo4j
     fi
@@ -823,7 +823,7 @@ _kb_wait_neo4j() {
     while [[ $waited -lt $max_wait ]]; do
         local health
         health=$(docker inspect --format='{{.State.Health.Status}}' \
-                   redamon-neo4j 2>/dev/null || echo "unknown")
+                   nisarghunter-neo4j 2>/dev/null || echo "unknown")
         if [[ "$health" == "healthy" ]]; then
             success "Neo4j is healthy"
             return 0
@@ -833,13 +833,13 @@ _kb_wait_neo4j() {
     done
 
     error "Neo4j did not become healthy within ${max_wait}s"
-    error "Check: docker logs redamon-neo4j"
+    error "Check: docker logs nisarghunter-neo4j"
     return 1
 }
 
 # Check if the agent container has a CUDA-capable GPU available.
 _kb_has_gpu() {
-    docker exec redamon-agent python -c \
+    docker exec nisarghunter-agent python -c \
         "import torch; exit(0 if torch.cuda.is_available() else 1)" &>/dev/null
 }
 
@@ -880,7 +880,7 @@ _kb_choose_profile() {
     # CPU-only with existing FAISS data: skip the interactive prompt.
     # The manifest dedup will skip unchanged chunks anyway, so a re-run
     # finishes in seconds. To upgrade the profile, use:
-    #   ./redamon.sh kb build lite
+    #   ./nisarghunter.sh kb build lite
     #
     # Note: FAISS files are created by Docker (root-owned, mode 600), so
     # we cannot read their contents as a normal user. Use -s (non-zero size)
@@ -950,7 +950,7 @@ _kb_bootstrap() {
 
 # Status helpers: read KB and Tavily state directly from disk/env without
 # requiring Python deps, running containers, or Neo4j connections. These
-# should always succeed (or return a safe fallback) so `./redamon.sh status`
+# should always succeed (or return a safe fallback) so `./nisarghunter.sh status`
 # works in any state.
 
 # Count FAISS vectors by reading chunk_ids.json directly. No Python dep
@@ -976,14 +976,14 @@ except Exception:
 # Count Neo4j KBChunk nodes via cypher-shell inside the neo4j container.
 # Returns "0" if the container isn't running, "unknown" if the query fails.
 _kb_get_neo4j_count() {
-    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^redamon-neo4j$'; then
+    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^nisarghunter-neo4j$'; then
         echo "0"
         return
     fi
     local pass="${NEO4J_PASSWORD:-changeme123}"
     local user="${NEO4J_USER:-neo4j}"
     local count
-    count=$(docker exec redamon-neo4j cypher-shell \
+    count=$(docker exec nisarghunter-neo4j cypher-shell \
         -u "$user" -p "$pass" --format plain \
         "MATCH (c:KBChunk) RETURN count(c) AS total" 2>/dev/null \
         | tail -n 1 | tr -d '[:space:]"' || true)
@@ -1017,7 +1017,7 @@ cmd_install() {
 
     local version
     version="$(get_version)"
-    info "Installing RedAmon v${version}..."
+    info "Installing NisargHunter AI v${version}..."
     if [[ "$gvm_mode" == "true" ]]; then
         info "Mode: Full stack (with GVM/OpenVAS)"
         touch "$GVM_FLAG_FILE"
@@ -1072,7 +1072,7 @@ cmd_install() {
     # is already usable (they can Ctrl+C the KB question and start working).
     echo ""
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
-    echo -e "  ${GREEN}${BOLD}  RedAmon v${version} is ready!${NC}"
+    echo -e "  ${GREEN}${BOLD}  NisargHunter AI v${version} is ready!${NC}"
     echo -e "  ${GREEN}${BOLD}  Open ${CYAN}http://localhost:3000${GREEN}${BOLD} in your browser${NC}"
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
     echo ""
@@ -1094,17 +1094,17 @@ cmd_install() {
             success "Knowledge Base ready (profile: ${kb_profile})"
         else
             warn "KB bootstrap failed -- agent will start with an empty KB"
-            warn "Retry with: ./redamon.sh kb build ${kb_profile}"
+            warn "Retry with: ./nisarghunter.sh kb build ${kb_profile}"
         fi
     else
         info "KB_ENABLED=false -- skipping Knowledge Base bootstrap"
     fi
 
     echo ""
-    echo -e "  ${CYAN}Status:${NC}  ./redamon.sh status"
+    echo -e "  ${CYAN}Status:${NC}  ./nisarghunter.sh status"
     echo ""
-    echo -e "  ${YELLOW}If RedAmon is useful to you, a GitHub star helps others find the project:${NC}"
-    echo -e "  ${CYAN}https://github.com/samugit83/redamon${NC}"
+    echo -e "  ${YELLOW}If NisargHunter AI is useful to you, a GitHub star helps others find the project:${NC}"
+    echo -e "  ${CYAN}https://github.com/nisargdedakiya/dnm-hunter${NC}"
     echo ""
     if [[ "$gvm_mode" == "true" ]]; then
         warn "GVM/OpenVAS feed sync takes ~30 minutes on first run."
@@ -1127,11 +1127,11 @@ cmd_update() {
 
     # Save current HEAD
     local old_head new_head
-    if [[ -n "${REDAMON_UPDATE_FROM:-}" ]]; then
+    if [[ -n "${NISARGHUNTER_UPDATE_FROM:-}" ]]; then
         # We were re-exec'd by our previous self after the pull (see below). Reuse
         # the recorded pre-pull HEAD and do NOT pull again — just run the rebuild
         # logic from the freshly-pulled (newer) script.
-        old_head="$REDAMON_UPDATE_FROM"
+        old_head="$NISARGHUNTER_UPDATE_FROM"
         new_head="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
     else
         old_head="$(git -C "$SCRIPT_DIR" rev-parse HEAD)"
@@ -1142,8 +1142,8 @@ cmd_update() {
                 error "Could not pull updates. You may have local changes."
                 echo ""
                 echo "  Try one of:"
-                echo "    git stash && ./redamon.sh update && git stash pop"
-                echo "    git commit -am 'local changes' && ./redamon.sh update"
+                echo "    git stash && ./nisarghunter.sh update && git stash pop"
+                echo "    git commit -am 'local changes' && ./nisarghunter.sh update"
                 exit 1
             fi
         fi
@@ -1158,10 +1158,10 @@ cmd_update() {
         # Self-heal across versions: re-exec the freshly-pulled script so the
         # update logic from the version being INSTALLED runs (it may know about
         # services or build rules this older copy does not — e.g. a new service
-        # added in the target release). Guarded by REDAMON_UPDATE_FROM so we do
+        # added in the target release). Guarded by NISARGHUNTER_UPDATE_FROM so we do
         # not pull or loop again.
-        export REDAMON_UPDATE_FROM="$old_head"
-        exec bash "$SCRIPT_DIR/redamon.sh" update
+        export NISARGHUNTER_UPDATE_FROM="$old_head"
+        exec bash "$SCRIPT_DIR/nisarghunter.sh" update
     fi
 
     local new_version
@@ -1371,7 +1371,7 @@ cmd_up_dev() {
     ensure_auth_secrets
     ensure_db_secrets
 
-    info "Starting RedAmon in DEV mode (GVM: ${gvm_flag})..."
+    info "Starting NisargHunter AI in DEV mode (GVM: ${gvm_flag})..."
 
     if [[ "$gvm_flag" == "true" ]]; then
         pull_gvm_images
@@ -1386,7 +1386,7 @@ cmd_up_dev() {
     # is already usable (they can Ctrl+C the KB question and start working).
     echo ""
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
-    echo -e "  ${GREEN}${BOLD}  RedAmon DEV is ready!${NC}"
+    echo -e "  ${GREEN}${BOLD}  NisargHunter AI DEV is ready!${NC}"
     echo -e "  ${GREEN}${BOLD}  Open ${CYAN}http://localhost:3000${GREEN}${BOLD} in your browser (hot-reload)${NC}"
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
     echo ""
@@ -1406,7 +1406,7 @@ cmd_up_dev() {
             success "Knowledge Base ready (profile: ${kb_profile})"
         else
             warn "KB refresh failed -- agent will start with the existing KB state"
-            warn "Retry with: ./redamon.sh kb build ${kb_profile}"
+            warn "Retry with: ./nisarghunter.sh kb build ${kb_profile}"
         fi
     fi
 }
@@ -1426,13 +1426,13 @@ cmd_up() {
         exit 1
     fi
     export_resource_caps
-    setup_zram   # optional one-time compressed-swap cushion (REDAMON_ENABLE_ZRAM=1)
+    setup_zram   # optional one-time compressed-swap cushion (NISARGHUNTER_ENABLE_ZRAM=1)
 
     ensure_tool_images
     ensure_auth_secrets
     ensure_db_secrets
 
-    info "Starting RedAmon (GVM: ${gvm_mode})..."
+    info "Starting NisargHunter AI (GVM: ${gvm_mode})..."
 
     # Pull GVM images with retry (large images, unreliable registry)
     if [[ "$gvm_mode" == "true" ]]; then
@@ -1450,7 +1450,7 @@ cmd_up() {
     # is already usable (they can Ctrl+C the KB question and start working).
     echo ""
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
-    echo -e "  ${GREEN}${BOLD}  RedAmon is ready!${NC}"
+    echo -e "  ${GREEN}${BOLD}  NisargHunter AI is ready!${NC}"
     echo -e "  ${GREEN}${BOLD}  Open ${CYAN}http://localhost:3000${GREEN}${BOLD} in your browser${NC}"
     echo -e "  ${GREEN}${BOLD}==========================================================${NC}"
     echo ""
@@ -1473,13 +1473,13 @@ cmd_up() {
             success "Knowledge Base ready (profile: ${kb_profile})"
         else
             warn "KB refresh failed -- agent will start with the existing KB state"
-            warn "Retry with: ./redamon.sh kb build ${kb_profile}"
+            warn "Retry with: ./nisarghunter.sh kb build ${kb_profile}"
         fi
     fi
 }
 
 cmd_down() {
-    info "Stopping RedAmon..."
+    info "Stopping NisargHunter AI..."
     # The on-demand LLM + any in-flight AI scan containers are orchestrator-spawned
     # (not compose-managed), so stop them too — otherwise the local LLM keeps
     # holding RAM after `down`.
@@ -1489,7 +1489,7 @@ cmd_down() {
 }
 
 cmd_clean() {
-    warn "This will remove all RedAmon containers and images."
+    warn "This will remove all NisargHunter AI containers and images."
     warn "Your data (databases, reports, scan results) will be preserved in Docker volumes."
     echo ""
     read -rp "Continue? [y/N] " confirm
@@ -1502,19 +1502,19 @@ cmd_clean() {
     remove_spawned_containers
     docker compose --profile tools down
 
-    info "Removing RedAmon images..."
-    remove_redamon_images
+    info "Removing NisargHunter AI images..."
+    remove_nisarghunter_images
     docker image prune -f >/dev/null 2>&1 || true
 
-    success "All RedAmon containers and images removed. Volumes preserved."
+    success "All NisargHunter AI containers and images removed. Volumes preserved."
     echo ""
-    info "To reinstall: ./redamon.sh install"
+    info "To reinstall: ./nisarghunter.sh install"
 }
 
 cmd_purge() {
     echo ""
     warn "This will PERMANENTLY DELETE:"
-    warn "  - All RedAmon containers and images"
+    warn "  - All NisargHunter AI containers and images"
     warn "  - ALL DATA: PostgreSQL, Neo4j, GVM feeds, reports, scan results"
     warn "  - Host-side KB index state (FAISS index, manifest, last-ingest marker)"
     warn "  - KB dedup state (.manifest.json, .file_hashes.json)"
@@ -1539,10 +1539,10 @@ cmd_purge() {
     docker volume rm "$LOCAL_LLM_VOLUME" >/dev/null 2>&1 || true
     # The CodeFix sandbox network is created at runtime by the orchestrator (no
     # compose service is attached), so `compose down` never removes it.
-    docker network rm redamon-codefix-net >/dev/null 2>&1 || true
+    docker network rm nisarghunter-codefix-net >/dev/null 2>&1 || true
 
-    info "Removing RedAmon images..."
-    remove_redamon_images
+    info "Removing NisargHunter AI images..."
+    remove_nisarghunter_images
     docker image prune -f >/dev/null 2>&1 || true
 
     # Host-side KB state files that must be wiped in lockstep with the
@@ -1595,9 +1595,9 @@ cmd_purge() {
     rm -f "$KBASE_FLAG_FILE"
     rm -f "$KBASE_DISABLED_FLAG_FILE"
     rm -f "$LEGACY_SKIPKBASE_FLAG_FILE"
-    success "Full cleanup complete. All RedAmon data and images have been removed."
+    success "Full cleanup complete. All NisargHunter AI data and images have been removed."
     echo ""
-    info "To reinstall: ./redamon.sh install"
+    info "To reinstall: ./nisarghunter.sh install"
 }
 
 cmd_status() {
@@ -1641,9 +1641,9 @@ cmd_status() {
 
     echo ""
 
-    # Container list — filter to redamon containers only. Keeps the header
-    # row and any container whose name starts with "redamon-".
-    docker compose ps | grep -E '^(NAME|redamon-)' || {
+    # Container list — filter to nisarghunter containers only. Keeps the header
+    # row and any container whose name starts with "nisarghunter-".
+    docker compose ps | grep -E '^(NAME|nisarghunter-)' || {
         # grep returns non-zero if no lines match (no containers running).
         # Fall back to plain ps so the user still sees the "no services" message.
         docker compose ps
@@ -1671,7 +1671,7 @@ cmd_kb_build() {
         cpu-lite|lite|standard|full) ;;
         *)
             error "Unknown KB profile: $profile"
-            echo "Usage: ./redamon.sh kb build [lite|standard|full]"
+            echo "Usage: ./nisarghunter.sh kb build [lite|standard|full]"
             exit 1
             ;;
     esac
@@ -1740,7 +1740,7 @@ cmd_kb_rebuild() {
         cpu-lite|lite|standard|full) ;;
         *)
             error "Invalid profile '$profile'. Use cpu-lite, lite, standard, or full."
-            echo "Usage: ./redamon.sh kb rebuild [cpu-lite|lite|standard|full]"
+            echo "Usage: ./nisarghunter.sh kb rebuild [cpu-lite|lite|standard|full]"
             exit 1
             ;;
     esac
@@ -1771,7 +1771,7 @@ cmd_kb_stats() {
 }
 
 cmd_kb_help() {
-    echo -e "${BOLD}Usage:${NC} ./redamon.sh kb <command> [args]"
+    echo -e "${BOLD}Usage:${NC} ./nisarghunter.sh kb <command> [args]"
     echo ""
     echo -e "${BOLD}Commands:${NC}"
     echo -e "  ${GREEN}build [profile]${NC}    Build KB — profile: lite (default) | standard | full"
@@ -1783,27 +1783,27 @@ cmd_kb_help() {
     echo -e "${BOLD}Profiles:${NC}"
     echo "  lite      tool_docs + metasploit + gtfobins + lolbas + owasp + exploitdb + NVD (90 days)"
     echo "  standard  same sources as lite + NVD (2 years)"
-    echo "  full      standard + Nuclei (requires redamon-kali container running)"
+    echo "  full      standard + Nuclei (requires nisarghunter-kali container running)"
     echo ""
     echo -e "${BOLD}Examples:${NC}"
-    echo "  ./redamon.sh kb build             # Build lite KB (default)"
-    echo "  ./redamon.sh kb build standard    # Build with 2 years of NVD"
-    echo "  ./redamon.sh kb rebuild           # Wipe + rebuild standard (default)"
-    echo "  ./redamon.sh kb rebuild lite      # Wipe + rebuild lite profile"
-    echo "  ./redamon.sh kb rebuild full      # Wipe + rebuild full profile (incl. nuclei)"
-    echo "  ./redamon.sh kb update nvd        # Incremental NVD refresh"
-    echo "  ./redamon.sh kb update            # Update all sources"
-    echo "  ./redamon.sh kb stats             # See what's in the KB"
+    echo "  ./nisarghunter.sh kb build             # Build lite KB (default)"
+    echo "  ./nisarghunter.sh kb build standard    # Build with 2 years of NVD"
+    echo "  ./nisarghunter.sh kb rebuild           # Wipe + rebuild standard (default)"
+    echo "  ./nisarghunter.sh kb rebuild lite      # Wipe + rebuild lite profile"
+    echo "  ./nisarghunter.sh kb rebuild full      # Wipe + rebuild full profile (incl. nuclei)"
+    echo "  ./nisarghunter.sh kb update nvd        # Incremental NVD refresh"
+    echo "  ./nisarghunter.sh kb update            # Update all sources"
+    echo "  ./nisarghunter.sh kb stats             # See what's in the KB"
     echo ""
 }
 
 cmd_help() {
     print_banner
-    echo -e "${BOLD}Usage:${NC} ./redamon.sh <command> [options]"
+    echo -e "${BOLD}Usage:${NC} ./nisarghunter.sh <command> [options]"
     echo ""
     echo -e "${BOLD}Commands:${NC}"
-    echo -e "  ${GREEN}install${NC}              Build and start RedAmon (no GVM, no Knowledge Base)"
-    echo -e "  ${GREEN}install --gvm${NC}        Build and start RedAmon (with GVM/OpenVAS)"
+    echo -e "  ${GREEN}install${NC}              Build and start NisargHunter AI (no GVM, no Knowledge Base)"
+    echo -e "  ${GREEN}install --gvm${NC}        Build and start NisargHunter AI (with GVM/OpenVAS)"
     echo -e "  ${GREEN}install --kbase${NC}      Build with Knowledge Base (~4.4 GB heavier, local KB enabled)"
     echo -e "  ${GREEN}update${NC}           Pull latest version and smart-rebuild changed services"
     echo -e "  ${GREEN}up${NC}               Start services"
@@ -1816,17 +1816,17 @@ cmd_help() {
     echo -e "  ${GREEN}help${NC}             Show this help message"
     echo ""
     echo -e "${BOLD}Examples:${NC}"
-    echo "  ./redamon.sh install               # First-time setup (lightweight: no GVM, no KB)"
-    echo "  ./redamon.sh install --kbase       # First-time setup with local Knowledge Base"
-    echo "  ./redamon.sh install --gvm         # First-time setup with GVM/OpenVAS"
-    echo "  ./redamon.sh install --gvm --kbase # First-time setup with everything"
-    echo "  ./redamon.sh update           # Update to latest version"
-    echo "  ./redamon.sh up               # Start after reboot"
-    echo "  ./redamon.sh up dev           # Dev mode with hot-reload (auto-detects GVM)"
-    echo "  ./redamon.sh reset-password   # Reset a user's password"
-    echo "  ./redamon.sh kb build lite    # Build Knowledge Base"
-    echo "  ./redamon.sh kb update        # Refresh all KB sources"
-    echo "  ./redamon.sh kb stats         # Show KB chunk counts"
+    echo "  ./nisarghunter.sh install               # First-time setup (lightweight: no GVM, no KB)"
+    echo "  ./nisarghunter.sh install --kbase       # First-time setup with local Knowledge Base"
+    echo "  ./nisarghunter.sh install --gvm         # First-time setup with GVM/OpenVAS"
+    echo "  ./nisarghunter.sh install --gvm --kbase # First-time setup with everything"
+    echo "  ./nisarghunter.sh update           # Update to latest version"
+    echo "  ./nisarghunter.sh up               # Start after reboot"
+    echo "  ./nisarghunter.sh up dev           # Dev mode with hot-reload (auto-detects GVM)"
+    echo "  ./nisarghunter.sh reset-password   # Reset a user's password"
+    echo "  ./nisarghunter.sh kb build lite    # Build Knowledge Base"
+    echo "  ./nisarghunter.sh kb update        # Refresh all KB sources"
+    echo "  ./nisarghunter.sh kb stats         # Show KB chunk counts"
     echo ""
 }
 
@@ -1835,7 +1835,7 @@ cmd_help() {
 # ---------------------------------------------------------------------------
 
 # Dispatch only when executed directly. When the script is sourced (e.g. by the
-# test suite in tests/redamon_build_test.sh) this guard prevents the cd and the
+# test suite in tests/nisarghunter_build_test.sh) this guard prevents the cd and the
 # command dispatch from running, so the helper functions can be loaded and unit-
 # tested in isolation.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

@@ -4,7 +4,7 @@
 
 ### Purpose and Intended Use
 
-RedAmon is an **educational and research tool** designed exclusively for:
+NisargHunter AI is an **educational and research tool** designed exclusively for:
 
 - Authorized penetration testing engagements
 - Security research and academic study
@@ -173,7 +173,7 @@ This software shall **NOT** be used for:
 
 ### Autonomous AI Agent — Unintended Effects
 
-RedAmon's AI agent operates **autonomously**, making real-time decisions about which tools to invoke, which vulnerabilities to exploit, and how to chain attack steps — with minimal or no human intervention. By using this tool in autonomous mode (i.e., with approval gates disabled), you acknowledge and accept that:
+NisargHunter AI's AI agent operates **autonomously**, making real-time decisions about which tools to invoke, which vulnerabilities to exploit, and how to chain attack steps — with minimal or no human intervention. By using this tool in autonomous mode (i.e., with approval gates disabled), you acknowledge and accept that:
 
 - **Unpredictable behavior**: The AI agent may take actions that were not explicitly anticipated, including targeting services, ports, or endpoints outside the user's intended scope, depending on the information it discovers during operation
 - **Collateral impact**: Autonomous exploitation, brute-force attacks, and post-exploitation activities can cause **service degradation, data corruption, account lockouts, or unintended denial-of-service** on target systems
@@ -206,7 +206,7 @@ The techniques demonstrated are already publicly known and documented. This tool
 
 ### Third-Party Security Tools and Licenses
 
-RedAmon integrates, bundles, or invokes the following third-party open-source tools. Each tool is governed by its own license and terms. **The authors of RedAmon do not own, maintain, or provide warranty for any of these tools.** Users must independently comply with each tool's license:
+NisargHunter AI integrates, bundles, or invokes the following third-party open-source tools. Each tool is governed by its own license and terms. **The authors of NisargHunter AI do not own, maintain, or provide warranty for any of these tools.** Users must independently comply with each tool's license:
 
 | Tool | Purpose | License |
 |------|---------|---------|
@@ -227,7 +227,7 @@ RedAmon integrates, bundles, or invokes the following third-party open-source to
 
 - **No warranty on third-party behavior**: The authors make no guarantees about the accuracy, reliability, or safety of any third-party tool's output
 - **License compliance**: Some tools use **AGPL-3.0** or **GPL** licenses, which impose specific obligations on distribution and modification. Users must review and comply with each license independently
-- **AGPL-3.0 source code availability**: Several tools bundled in RedAmon's Docker images (including Nuclei, Naabu, Katana, HTTPx, Subfinder, Hydra, GVM/OpenVAS, and Kiterunner) are licensed under AGPL-3.0. The complete corresponding source code for all AGPL-licensed components is available at their respective upstream repositories. See **[THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md)** for the full list of tools, their licenses, and source code locations
+- **AGPL-3.0 source code availability**: Several tools bundled in NisargHunter AI's Docker images (including Nuclei, Naabu, Katana, HTTPx, Subfinder, Hydra, GVM/OpenVAS, and Kiterunner) are licensed under AGPL-3.0. The complete corresponding source code for all AGPL-licensed components is available at their respective upstream repositories. See **[THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md)** for the full list of tools, their licenses, and source code locations
 - **Tool updates**: Third-party tools may update their templates, modules, or databases automatically (e.g., Nuclei templates, Metasploit modules). The authors are not responsible for changes introduced by upstream tool updates
 
 ### AI Regulation and EU AI Act

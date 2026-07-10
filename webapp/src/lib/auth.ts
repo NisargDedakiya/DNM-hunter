@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 
-export const AUTH_COOKIE_NAME = 'redamon-auth'
+export const AUTH_COOKIE_NAME = 'nisarghunter-auth'
 const BCRYPT_ROUNDS = 12
 const TOKEN_EXPIRY = '7d'
 

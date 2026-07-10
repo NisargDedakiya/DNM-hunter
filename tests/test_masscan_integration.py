@@ -1,5 +1,5 @@
 """
-RedAmon - Masscan Integration Tests
+NisargHunter AI - Masscan Integration Tests
 ====================================
 Tests for the masscan port scanner module and its pipeline integration:
 

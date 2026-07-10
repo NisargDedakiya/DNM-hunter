@@ -2,7 +2,7 @@
 TruffleHog Runner - Executes TruffleHog binary and parses JSONL output
 
 Builds CLI commands from project settings, runs TruffleHog as a subprocess,
-and normalizes the JSONL output into the RedAmon findings format.
+and normalizes the JSONL output into the NisargHunter AI findings format.
 """
 
 import json

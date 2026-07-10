@@ -1,4 +1,4 @@
-# RedAmon Neo4j Graph Schema
+# NisargHunter AI Neo4j Graph Schema
 
 ## Overview
 

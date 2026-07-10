@@ -1,4 +1,4 @@
-# Contributing to RedAmon
+# Contributing to NisargHunter AI
 
 > *"Every scanner starts with a single packet."*
 
@@ -40,7 +40,7 @@ Harassment, trolling, or abusive behavior of any kind will not be tolerated.
 
 ## Legal and Ethical Responsibilities
 
-RedAmon is a security assessment framework. **All contributors must adhere to ethical and legal standards.**
+NisargHunter AI is a security assessment framework. **All contributors must adhere to ethical and legal standards.**
 
 Before contributing, read the [DISCLAIMER.md](DISCLAIMER.md) in full. Key points:
 
@@ -61,11 +61,11 @@ From zero to merged PR. Follow these steps.
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/<your-username>/RedAmon.git
-cd RedAmon
+git clone https://github.com/<your-username>/NisargHunter AI.git
+cd NisargHunter AI
 
 # Add the main repo as upstream (you'll need this to stay in sync)
-git remote add upstream https://github.com/samugit83/redamon.git
+git remote add upstream https://github.com/nisargdedakiya/dnm-hunter.git
 
 # No .env file needed — all settings are configured from the webapp UI at /settings
 
@@ -85,7 +85,7 @@ Open `http://localhost:3000` -- you should see the dashboard. See the [README Qu
 
 Three starting points, ordered by difficulty:
 
-1. **Good First Issues** — look for the `good-first-issue` label on [GitHub Issues](https://github.com/samugit83/redamon/issues)
+1. **Good First Issues** — look for the `good-first-issue` label on [GitHub Issues](https://github.com/nisargdedakiya/dnm-hunter/issues)
 2. **"Up for Grabs" column** on the [Project Board](https://github.com/users/samugit83/projects/1)
 3. **Bug you found** — file an issue first, then fix it
 4. **Your own idea** — have a feature or improvement that's not on the roadmap? Just open a PR! All contributions are welcome, even if they're outside the current project plan
@@ -166,7 +166,7 @@ Pick items from the [Roadmap Project Board](https://github.com/users/samugit83/p
 
 ### Docs & Wiki
 
-**Difficulty:** Beginner-friendly | **Components:** `redamon.wiki/`, README files
+**Difficulty:** Beginner-friendly | **Components:** `nisarghunter.wiki/`, README files
 
 Improve wiki pages. Write guides for specific features. Improve inline code documentation. Translate docs for non-English speakers.
 
@@ -190,12 +190,12 @@ Add new recon modules. Integrate new OSINT data sources. Improve the agent's exp
 
 **Difficulty:** Any level | **Components:** YouTube, LinkedIn, blogs, social media
 
-Share your RedAmon experience with the community — record videos, write about real-world engagements, or post case studies. This is one of the most impactful ways to contribute because it brings visibility to the project, helps new users understand what RedAmon can do, and demonstrates real-world value to the security community.
+Share your NisargHunter AI experience with the community — record videos, write about real-world engagements, or post case studies. This is one of the most impactful ways to contribute because it brings visibility to the project, helps new users understand what NisargHunter AI can do, and demonstrates real-world value to the security community.
 
 **What counts:**
 - **Videos** — full attack chain demos, feature walkthroughs, setup guides, tool comparisons
-- **Real-world case studies** — LinkedIn posts or blog articles describing how you used RedAmon in an actual engagement, internship, or lab environment
-- **Writeups** — technical breakdowns of findings, workflows, or integrations you built with RedAmon
+- **Real-world case studies** — LinkedIn posts or blog articles describing how you used NisargHunter AI in an actual engagement, internship, or lab environment
+- **Writeups** — technical breakdowns of findings, workflows, or integrations you built with NisargHunter AI
 
 **Rules:**
 - **Only use authorized infrastructure** — your own lab, HackTheBox, TryHackMe, or systems you have explicit written permission to test
@@ -207,7 +207,7 @@ Share your RedAmon experience with the community — record videos, write about 
 
 1. Publish your content (YouTube, LinkedIn, blog, etc.)
 2. Send an email to **devergo.sam@gmail.com** with:
-   - **Subject:** `[RedAmon Showcase] <your content title>`
+   - **Subject:** `[NisargHunter AI Showcase] <your content title>`
    - **Link** to the video, post, or article
    - **Your LinkedIn profile URL** (so we can tag you in the announcement)
    - **Your GitHub username**
@@ -233,7 +233,7 @@ Your contributions earn you ranks. The naming follows red team terminology becau
 | Rank | How to earn it | Key reward |
 |------|---------------|------------|
 | **Scout** | 5 merged PRs or 5 confirmed bug reports + 1 merged PR | Name in Wall of Fame |
-| **Broadcaster** | 1 published YouTube video featuring RedAmon | Video in README showcase, name in Wall of Fame |
+| **Broadcaster** | 1 published YouTube video featuring NisargHunter AI | Video in README showcase, name in Wall of Fame |
 | **Hunter** | 10 merged PRs across at least 2 tracks | LinkedIn recommendation from maintainer |
 | **Elite** | 15 merged PRs including at least 1 major roadmap feature | Blog co-authorship, private contributor channel |
 | **Core** | Sustained contribution + demonstrated deep codebase knowledge | Push access, roadmap vote, release credits |
@@ -270,7 +270,7 @@ Every rank unlocks real rewards. No empty promises.
 
 > For a comprehensive deep dive into the codebase — architecture, project layout, subsystem internals, and development checklists — see the **[Developer Guide](readmes/README.DEV.md)**.
 
-RedAmon runs as a Docker Compose stack. Here's what each service does and how changes propagate:
+NisargHunter AI runs as a Docker Compose stack. Here's what each service does and how changes propagate:
 
 | Service | Language | Directory | What it does |
 |---------|----------|-----------|-------------|
@@ -337,9 +337,9 @@ When your work is ready:
 
 Use the structured issue templates — they guide you through everything we need:
 
-- [**Bug Report**](https://github.com/samugit83/redamon/issues/new?template=bug_report.yml) — something is broken
-- [**Feature Request**](https://github.com/samugit83/redamon/issues/new?template=feature_request.yml) — something should exist
-- [**Test Report**](https://github.com/samugit83/redamon/issues/new?template=test_report.yml) — you tested a PR or feature
+- [**Bug Report**](https://github.com/nisargdedakiya/dnm-hunter/issues/new?template=bug_report.yml) — something is broken
+- [**Feature Request**](https://github.com/nisargdedakiya/dnm-hunter/issues/new?template=feature_request.yml) — something should exist
+- [**Test Report**](https://github.com/nisargdedakiya/dnm-hunter/issues/new?template=test_report.yml) — you tested a PR or feature
 
 Each template includes component dropdowns, required fields, and placeholders to help you write a complete report. The better your report, the faster we can act on it.
 
@@ -347,9 +347,9 @@ Each template includes component dropdowns, required fields, and placeholders to
 
 ## Security Vulnerabilities
 
-If you discover a security vulnerability in RedAmon itself (not in target systems being scanned), **do not open a public issue**. Instead:
+If you discover a security vulnerability in NisargHunter AI itself (not in target systems being scanned), **do not open a public issue**. Instead:
 
-1. Use [GitHub Security Advisories](https://github.com/samugit83/redamon/security/advisories) to report privately
+1. Use [GitHub Security Advisories](https://github.com/nisargdedakiya/dnm-hunter/security/advisories) to report privately
 2. Include steps to reproduce and potential impact
 3. Allow reasonable time for a fix before any public disclosure
 

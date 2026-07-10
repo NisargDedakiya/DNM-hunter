@@ -39,21 +39,21 @@ def deny(desc, body, must_mention=None):
     check(f"DENY  {desc} (reason={reason!r})", cond)
 
 
-# Make the test independent of env: pin the bind allowlist to /tmp/redamon.
-broker.ALLOWED_BIND_PREFIXES = ["/tmp/redamon"]
+# Make the test independent of env: pin the bind allowlist to /tmp/nisarghunter.
+broker.ALLOWED_BIND_PREFIXES = ["/tmp/nisarghunter"]
 
 NAABU = "projectdiscovery/naabu:latest"
 
 print("=== ALLOW: legitimate tool runs ===")
 allow("plain tool image", {"Image": NAABU})
 allow("net=host (needed for SYN/loopback)", {"Image": NAABU, "HostConfig": {"NetworkMode": "host"}})
-allow("bind under allowed prefix", {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/redamon/x:/targets:ro"]}})
+allow("bind under allowed prefix", {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/nisarghunter/x:/targets:ro"]}})
 allow("named volume on allowlist", {"Image": "projectdiscovery/nuclei:latest",
       "HostConfig": {"Mounts": [{"Type": "volume", "Source": "nuclei-templates", "Target": "/root/nuclei-templates"}]}})
 allow("NET_RAW capability", {"Image": NAABU, "HostConfig": {"CapAdd": ["NET_RAW"]}})
-allow("alpine cleanup helper", {"Image": "alpine", "HostConfig": {"Binds": ["/tmp/redamon/c:/cleanup"]}})
+allow("alpine cleanup helper", {"Image": "alpine", "HostConfig": {"Binds": ["/tmp/nisarghunter/c:/cleanup"]}})
 allow("bind via Mounts type=bind under prefix", {"Image": NAABU,
-      "HostConfig": {"Mounts": [{"Type": "bind", "Source": "/tmp/redamon/o", "Target": "/output"}]}})
+      "HostConfig": {"Mounts": [{"Type": "bind", "Source": "/tmp/nisarghunter/o", "Target": "/output"}]}})
 
 print("=== DENY: host-escape attempts ===")
 deny("mount host root /", {"Image": NAABU, "HostConfig": {"Binds": ["/:/host"]}}, "bind")
@@ -66,8 +66,8 @@ deny("cap SYS_ADMIN", {"Image": NAABU, "HostConfig": {"CapAdd": ["SYS_ADMIN"]}},
 deny("cap ALL", {"Image": NAABU, "HostConfig": {"CapAdd": ["ALL"]}}, "capability")
 deny("device passthrough", {"Image": NAABU, "HostConfig": {"Devices": [{"PathOnHost": "/dev/sda"}]}}, "device")
 deny("pid=host", {"Image": NAABU, "HostConfig": {"PidMode": "host"}}, "PidMode")
-deny("pid=container:other (join another ns)", {"Image": NAABU, "HostConfig": {"PidMode": "container:redamon-recon-orchestrator"}}, "PidMode")
-deny("net=container:orchestrator (join its netns)", {"Image": NAABU, "HostConfig": {"NetworkMode": "container:redamon-recon-orchestrator"}}, "NetworkMode")
+deny("pid=container:other (join another ns)", {"Image": NAABU, "HostConfig": {"PidMode": "container:nisarghunter-recon-orchestrator"}}, "PidMode")
+deny("net=container:orchestrator (join its netns)", {"Image": NAABU, "HostConfig": {"NetworkMode": "container:nisarghunter-recon-orchestrator"}}, "NetworkMode")
 deny("ipc=host", {"Image": NAABU, "HostConfig": {"IpcMode": "host"}}, "IpcMode")
 deny("userns=host", {"Image": NAABU, "HostConfig": {"UsernsMode": "host"}}, "UsernsMode")
 deny("seccomp unconfined", {"Image": NAABU, "HostConfig": {"SecurityOpt": ["seccomp=unconfined"]}}, "SecurityOpt")
@@ -80,16 +80,16 @@ deny("bind sneaking root via Mounts", {"Image": NAABU,
      "HostConfig": {"Mounts": [{"Type": "bind", "Source": "/", "Target": "/host"}]}}, "bind")
 
 print("=== BYPASS attempts (adversarial) ===")
-# A. path traversal in the bind source: starts with /tmp/redamon but escapes to /
-deny("traversal bind /tmp/redamon/../../etc",
-     {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/redamon/../../etc:/e"]}}, "bind")
-deny("traversal bind /tmp/redamon/../../",
-     {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/redamon/../..:/host"]}}, "bind")
+# A. path traversal in the bind source: starts with /tmp/nisarghunter but escapes to /
+deny("traversal bind /tmp/nisarghunter/../../etc",
+     {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/nisarghunter/../../etc:/e"]}}, "bind")
+deny("traversal bind /tmp/nisarghunter/../../",
+     {"Image": NAABU, "HostConfig": {"Binds": ["/tmp/nisarghunter/../..:/host"]}}, "bind")
 deny("traversal via Mounts source",
-     {"Image": NAABU, "HostConfig": {"Mounts": [{"Type": "bind", "Source": "/tmp/redamon/../../", "Target": "/h"}]}}, "bind")
+     {"Image": NAABU, "HostConfig": {"Mounts": [{"Type": "bind", "Source": "/tmp/nisarghunter/../../", "Target": "/h"}]}}, "bind")
 # B. VolumesFrom: inherit another container's mounts (e.g. the orchestrator's docker.sock)
 deny("VolumesFrom inherits another container's mounts",
-     {"Image": NAABU, "HostConfig": {"VolumesFrom": ["redamon-recon-orchestrator"]}}, "VolumesFrom")
+     {"Image": NAABU, "HostConfig": {"VolumesFrom": ["nisarghunter-recon-orchestrator"]}}, "VolumesFrom")
 # C. emptying the default masked/readonly /proc paths
 deny("MaskedPaths emptied (unmask /proc)",
      {"Image": NAABU, "HostConfig": {"MaskedPaths": []}}, "MaskedPaths")

@@ -9,7 +9,7 @@ Reference for HTTP/S liveness probing, fingerprinting, and stored-response captu
 
 Upstream: https://docs.projectdiscovery.io/opensource/httpx/usage
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

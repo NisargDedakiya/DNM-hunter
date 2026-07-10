@@ -9,7 +9,7 @@ Reference for parameter-targeted SQL injection probing, technique tuning, WAF ev
 
 Upstream: https://github.com/sqlmapproject/sqlmap/wiki/usage
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

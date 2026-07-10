@@ -9,7 +9,7 @@ Reference for passive subdomain enumeration with Subfinder: source selection, re
 
 Upstream: https://docs.projectdiscovery.io/opensource/subfinder/usage
 
-## RedAmon wiring
+## NisargHunter AI wiring
 
 | Action | Tool | Notes |
 |---|---|---|

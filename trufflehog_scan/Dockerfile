@@ -1,5 +1,5 @@
 # =============================================================================
-# RedAmon TruffleHog Secret Scanner - Container
+# NisargHunter AI TruffleHog Secret Scanner - Container
 # =============================================================================
 # This container runs TruffleHog deep secret scanning with 700+ detectors
 # and optional credential verification against live APIs.
@@ -7,8 +7,8 @@
 
 FROM python:3.12-slim
 
-LABEL maintainer="RedAmon Project"
-LABEL description="TruffleHog-based secret scanner for RedAmon"
+LABEL maintainer="NisargHunter AI Project"
+LABEL description="TruffleHog-based secret scanner for NisargHunter AI"
 
 # Set working directory
 WORKDIR /app

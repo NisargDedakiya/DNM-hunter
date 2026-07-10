@@ -1,10 +1,10 @@
-# RedAmon - Resource Enumeration Module
+# NisargHunter AI - Resource Enumeration Module
 
 ## Complete Technical Documentation
 
 > **Module:** `recon/resource_enum.py`
 > **Purpose:** Endpoint discovery, classification, and parameter extraction
-> **Author:** RedAmon Security Suite
+> **Author:** NisargHunter AI Security Suite
 
 ---
 
@@ -401,7 +401,7 @@ Kiterunner provides API endpoint bruteforcing using real Swagger/OpenAPI specifi
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `KITERUNNER_ENABLED` | `bool` | `True` | Enable/disable Kiterunner discovery |
-| (Binary auto-download) | - | `~/.redamon/tools/kiterunner/kr` | Auto-downloaded from GitHub releases |
+| (Binary auto-download) | - | `~/.nisarghunter/tools/kiterunner/kr` | Auto-downloaded from GitHub releases |
 | `KITERUNNER_WORDLIST` | `str` | `"apiroutes-251227"` | Wordlist (354k+ API routes) |
 | `KITERUNNER_RATE_LIMIT` | `int` | `100` | Requests per second |
 | `KITERUNNER_CONNECTIONS` | `int` | `100` | Concurrent connections |
@@ -548,7 +548,7 @@ jsluice is a JavaScript analysis tool compiled into the recon container (no Dock
 jsluice sends HTTP requests to download each JS file from the target, then analyzes them locally:
 
 1. **Filter**: Selects `.js` and `.mjs` URLs from all URLs discovered by Katana/Hakrawler/GAU
-2. **Download**: Fetches JS files to a temporary directory (`/tmp/redamon/jsluice_<pid>/`)
+2. **Download**: Fetches JS files to a temporary directory (`/tmp/nisarghunter/jsluice_<pid>/`)
 3. **Analyze URLs**: Runs `jsluice urls` to extract embedded URLs and API endpoints
 4. **Analyze Secrets**: Runs `jsluice secrets` to detect API keys, tokens, credentials
 5. **Scope filter**: Extracted URLs are filtered against `allowed_hosts`; out-of-scope URLs become `ExternalDomain` nodes
@@ -621,7 +621,7 @@ jsluice runs **sequentially after** the parallel crawling phase (Katana + Hakraw
                               ▼
 3b. JSLUICE ANALYSIS (sequential, after parallel discovery)
    └── Filter discovered URLs to .js/.mjs files
-   └── Download JS files to /tmp/redamon/jsluice_<pid>/
+   └── Download JS files to /tmp/nisarghunter/jsluice_<pid>/
    └── Run jsluice urls (extract endpoints)
    └── Run jsluice secrets (detect API keys, tokens, credentials)
    └── Scope-filter extracted URLs
@@ -744,7 +744,7 @@ jsluice runs **sequentially after** the parallel crawling phase (Katana + Hakraw
       },
 
       "kiterunner_enabled": true,
-      "kiterunner_binary_path": "~/.redamon/tools/kiterunner/kr",
+      "kiterunner_binary_path": "~/.nisarghunter/tools/kiterunner/kr",
       "kiterunner_wordlist": "apiroutes-251227",
       "kiterunner_endpoints_found": 45,
       "kiterunner_stats": {
@@ -1358,12 +1358,12 @@ docker run --rm \
   example.com
 ```
 
-Run Kiterunner manually (binary auto-downloads to ~/.redamon/tools/kiterunner/):
+Run Kiterunner manually (binary auto-downloads to ~/.nisarghunter/tools/kiterunner/):
 
 ```bash
 # Binary location after first run
 # Use -A flag for auto-downloaded wordlists
-~/.redamon/tools/kiterunner/kr scan https://example.com \
+~/.nisarghunter/tools/kiterunner/kr scan https://example.com \
   -A apiroutes-251227:20000 \
   -x 50 \
   -j 25 \
@@ -1408,7 +1408,7 @@ KITERUNNER_THREADS = 20
 | Docker | Container runtime for Katana, GAU, and httpx |
 | `projectdiscovery/katana:latest` | Katana Docker image (auto-pulled) |
 | `sxcurity/gau:latest` | GAU Docker image (auto-pulled) |
-| Kiterunner binary | Auto-downloaded from GitHub releases to `~/.redamon/tools/kiterunner/` |
+| Kiterunner binary | Auto-downloaded from GitHub releases to `~/.nisarghunter/tools/kiterunner/` |
 | `projectdiscovery/httpx:latest` | httpx Docker image for URL verification (auto-pulled) |
 | Python 3.8+ | Script runtime |
 | `html.parser` | Built-in HTML form parsing |
@@ -1440,4 +1440,4 @@ KITERUNNER_THREADS = 20
 
 ---
 
-*Documentation generated for RedAmon v1.0 - Resource Enumeration Module*
+*Documentation generated for NisargHunter AI v1.0 - Resource Enumeration Module*

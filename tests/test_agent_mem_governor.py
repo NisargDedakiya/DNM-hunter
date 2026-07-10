@@ -28,7 +28,7 @@ GB = 1024 ** 3
 
 class AgentGovTestBase(unittest.TestCase):
     def setUp(self):
-        os.environ.pop('REDAMON_MEM_GOVERNOR', None)
+        os.environ.pop('NISARGHUNTER_MEM_GOVERNOR', None)
         rg.set_mem_override(None, None)
         rg.reset_profile_cache()
 
@@ -69,7 +69,7 @@ class TestByteBudgetScaling(AgentGovTestBase):
 
 class TestGuards(AgentGovTestBase):
     def test_governor_off(self):
-        os.environ['REDAMON_MEM_GOVERNOR'] = 'false'
+        os.environ['NISARGHUNTER_MEM_GOVERNOR'] = 'false'
         rg.set_mem_override(32 * GB, 1 * GB)
         s = {'FIRETEAM_MAX_CONCURRENT': 5, 'PLAN_MAX_PARALLEL_TOOLS': 10}
         out = aps.apply_memory_governor(dict(s))

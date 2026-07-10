@@ -111,19 +111,19 @@ _host_mounts = _detect_host_mounts()
 
 # Configuration — resolved dynamically, no hardcoded machine paths
 RECON_PATH = _get_host_path(_host_mounts, "/app/recon", "RECON_PATH")
-RECON_IMAGE = os.getenv("RECON_IMAGE", "redamon-recon:latest")
+RECON_IMAGE = os.getenv("RECON_IMAGE", "nisarghunter-recon:latest")
 GVM_SCAN_PATH = _get_host_path(_host_mounts, "/app/gvm_scan", "GVM_SCAN_PATH")
-GVM_IMAGE = os.getenv("GVM_IMAGE", "redamon-vuln-scanner:latest")
+GVM_IMAGE = os.getenv("GVM_IMAGE", "nisarghunter-vuln-scanner:latest")
 GITHUB_HUNT_PATH = _get_host_path(_host_mounts, "/app/github_secret_hunt", "GITHUB_HUNT_PATH")
-GITHUB_HUNT_IMAGE = os.getenv("GITHUB_HUNT_IMAGE", "redamon-github-hunter:latest")
+GITHUB_HUNT_IMAGE = os.getenv("GITHUB_HUNT_IMAGE", "nisarghunter-github-hunter:latest")
 TRUFFLEHOG_PATH = _get_host_path(_host_mounts, "/app/trufflehog_scan", "TRUFFLEHOG_PATH")
-TRUFFLEHOG_IMAGE = os.getenv("TRUFFLEHOG_IMAGE", "redamon-trufflehog:latest")
+TRUFFLEHOG_IMAGE = os.getenv("TRUFFLEHOG_IMAGE", "nisarghunter-trufflehog:latest")
 try:
     AI_ATTACK_SURFACE_PATH = _get_host_path(_host_mounts, "/app/ai_attack_surface_scan", "AI_ATTACK_SURFACE_PATH")
 except RuntimeError:
     AI_ATTACK_SURFACE_PATH = ""
     logger.info("AI Attack Surface source not mounted — feature disabled until mounted")
-AI_ATTACK_SURFACE_IMAGE = os.getenv("AI_ATTACK_SURFACE_IMAGE", "redamon-ai-attack-surface:latest")
+AI_ATTACK_SURFACE_IMAGE = os.getenv("AI_ATTACK_SURFACE_IMAGE", "nisarghunter-ai-attack-surface:latest")
 try:
     CUSTOM_TEMPLATES_PATH = _get_host_path(_host_mounts, "/app/nuclei-templates", "CUSTOM_TEMPLATES_PATH")
 except RuntimeError:
@@ -227,7 +227,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="RedAmon Recon Orchestrator",
+    title="NisargHunter AI Recon Orchestrator",
     description="Container orchestration service for recon processes",
     version=VERSION,
     lifespan=lifespan,
@@ -339,7 +339,7 @@ async def local_llm_ensure(model: Optional[str] = None):
 @app.post("/local-llm/release")
 async def local_llm_release():
     """Release one lease. When the last lease is freed the container is stopped
-    and removed; the model-weights volume (redamon_llm_models) persists."""
+    and removed; the model-weights volume (nisarghunter_llm_models) persists."""
     if not local_llm_manager:
         raise HTTPException(status_code=503, detail="Local LLM manager not initialized")
     status = await asyncio.to_thread(local_llm_manager.release)

@@ -9,7 +9,7 @@ import { AppLayout } from '@/components/layout'
 import { ThemeDbBridge } from '@/components/ThemeDbBridge'
 
 export const metadata: Metadata = {
-  title: 'RedAmon',
+  title: 'NisargHunter AI',
   description: 'Security reconnaissance and vulnerability assessment dashboard',
   icons: {
     icon: '/favicon.ico',
@@ -31,7 +31,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('redamon-theme');
+                  var theme = localStorage.getItem('nisarghunter-theme');
                   if (theme === 'dark' || theme === 'light') {
                     document.documentElement.setAttribute('data-theme', theme);
                   } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {

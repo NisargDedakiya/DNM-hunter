@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const AUTH_COOKIE_NAME = 'redamon-auth'
+const AUTH_COOKIE_NAME = 'nisarghunter-auth'
 
 const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync']
 

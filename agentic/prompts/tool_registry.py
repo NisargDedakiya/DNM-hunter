@@ -1,5 +1,5 @@
 """
-RedAmon Tool Registry
+NisargHunter AI Tool Registry
 
 Single source of truth for tool metadata used by dynamic prompt builders.
 Dict insertion order defines tool priority (first = highest).

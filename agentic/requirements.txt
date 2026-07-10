@@ -1,4 +1,4 @@
-# RedAmon Agent Dependencies
+# NisargHunter AI Agent Dependencies
 
 # LangChain core
 langchain>=0.3.0

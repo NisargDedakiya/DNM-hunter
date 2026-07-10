@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RedAmon - Main Reconnaissance Controller
+NisargHunter AI - Main Reconnaissance Controller
 =========================================
 Orchestrates all OSINT reconnaissance modules:
 1. WHOIS lookup (integrated into domain recon JSON)
@@ -537,7 +537,7 @@ def run_ip_recon(target_ips: list, settings: dict) -> dict:
     from recon.main_recon_modules.domain_recon import dns_lookup
 
     print("\n" + "=" * 70)
-    print("               RedAmon - IP-Based Reconnaissance")
+    print("               NisargHunter AI - IP-Based Reconnaissance")
     print("=" * 70)
     print(f"  [*][Pipeline] Target IPs/CIDRs: {', '.join(target_ips)}")
     print("=" * 70 + "\n")

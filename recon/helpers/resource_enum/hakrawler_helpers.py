@@ -1,5 +1,5 @@
 """
-RedAmon - Hakrawler Crawler Helpers for Resource Enumeration
+NisargHunter AI - Hakrawler Crawler Helpers for Resource Enumeration
 ============================================================
 Active URL discovery using Hakrawler web crawler (Docker-in-Docker).
 """

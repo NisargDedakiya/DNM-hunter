@@ -1,5 +1,5 @@
 """
-RedAmon - Arjun Parameter Discovery Helpers for Resource Enumeration
+NisargHunter AI - Arjun Parameter Discovery Helpers for Resource Enumeration
 =====================================================================
 Active/passive HTTP parameter discovery using Arjun.
 Tests common parameter names against endpoints to find hidden query/body
@@ -51,7 +51,7 @@ def _run_arjun_single_method(
     Returns:
         Tuple of (results_list, external_domains_list)
     """
-    tmp_dir = tempfile.mkdtemp(prefix="redamon_arjun_")
+    tmp_dir = tempfile.mkdtemp(prefix="nisarghunter_arjun_")
     results = []
     external_domains = []
 

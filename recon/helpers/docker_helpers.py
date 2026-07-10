@@ -1,5 +1,5 @@
 """
-RedAmon - Docker Helper Functions
+NisargHunter AI - Docker Helper Functions
 =================================
 Utilities for Docker container operations, image management, and file permissions.
 """

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Test suite for the secret-generation logic in redamon.sh
+# Test suite for the secret-generation logic in nisarghunter.sh
 #   - ensure_auth_secrets  -> now also emits MCP_AUTH_TOKEN (STRIDE S10)
 #   - ensure_db_secrets     -> fresh-install generation + existing-install warn
 #                              for POSTGRES_PASSWORD / NEO4J_PASSWORD (STRIDE S13)
 #
 # Pure unit tests: `docker` is stubbed, `.env` lives in a temp dir. No daemon
-# needed, CI-friendly. Run:  bash tests/redamon_secrets_test.sh
+# needed, CI-friendly. Run:  bash tests/nisarghunter_secrets_test.sh
 # =============================================================================
 set -uo pipefail
 
@@ -14,7 +14,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Source the script (BASH_SOURCE guard prevents command dispatch).
 # shellcheck disable=SC1090
-source "$REPO_ROOT/redamon.sh"
+source "$REPO_ROOT/nisarghunter.sh"
 set +e
 
 PASS=0; FAIL=0

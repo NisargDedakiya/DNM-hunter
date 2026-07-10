@@ -1,5 +1,5 @@
 """
-RedAmon - FFuf Directory Fuzzer Helpers for Resource Enumeration
+NisargHunter AI - FFuf Directory Fuzzer Helpers for Resource Enumeration
 ================================================================
 Active endpoint/directory discovery using FFuf (Fuzz Faster U Fool).
 Brute-forces common directory and file paths using wordlists to find
@@ -214,7 +214,7 @@ def run_ffuf_discovery(
     fuzz_targets = _build_fuzz_targets(target_urls, discovered_base_paths)
     print(f"[*][FFuf] Fuzz targets (root + base paths): {len(fuzz_targets)}")
 
-    output_dir = tempfile.mkdtemp(prefix="redamon_ffuf_")
+    output_dir = tempfile.mkdtemp(prefix="nisarghunter_ffuf_")
 
     try:
         effective_threads = max(threads // parallelism, 5)

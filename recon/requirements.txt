@@ -1,4 +1,4 @@
-# RedAmon Reconnaissance Module - Python Dependencies
+# NisargHunter AI Reconnaissance Module - Python Dependencies
 # ====================================================
 # Install with: pip install -r requirements.txt
 

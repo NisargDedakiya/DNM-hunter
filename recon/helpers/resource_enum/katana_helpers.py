@@ -1,5 +1,5 @@
 """
-RedAmon - Katana Crawler Helpers for Resource Enumeration
+NisargHunter AI - Katana Crawler Helpers for Resource Enumeration
 =========================================================
 Active URL discovery using Katana web crawler.
 """
@@ -92,12 +92,12 @@ def run_katana_crawler(
 
     print(f"[*][Katana] Target URLs: {len(valid_urls)}")
 
-    # Write target URLs to /tmp/redamon (bind-mounted same path host<->recon
+    # Write target URLs to /tmp/nisarghunter (bind-mounted same path host<->recon
     # container, see docker-compose.yml). Plain /tmp doesn't work under
     # Docker-in-Docker: the spawned katana container's -v /tmp:/tmp resolves
     # against the host daemon's /tmp, not the recon container's /tmp.
-    os.makedirs("/tmp/redamon", exist_ok=True)
-    url_file = f"/tmp/redamon/katana_targets_{uuid.uuid4().hex[:8]}.txt"
+    os.makedirs("/tmp/nisarghunter", exist_ok=True)
+    url_file = f"/tmp/nisarghunter/katana_targets_{uuid.uuid4().hex[:8]}.txt"
 
     try:
         with open(url_file, 'w') as f:
@@ -116,7 +116,7 @@ def run_katana_crawler(
         # so the flag is strictly an upgrade.
         cmd = ["docker", "run", "--rm", "--net=host"]
 
-        cmd.extend(["-v", "/tmp/redamon:/tmp/redamon"])
+        cmd.extend(["-v", "/tmp/nisarghunter:/tmp/nisarghunter"])
 
         cmd.extend([
             docker_image,

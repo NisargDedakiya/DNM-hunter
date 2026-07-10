@@ -1,4 +1,4 @@
-# RedAmon Reconnaissance Module - Docker Compose (standalone)
+# NisargHunter AI Reconnaissance Module - Docker Compose (standalone)
 # For full stack, use the root docker-compose.yml instead.
 #
 # Usage:
@@ -17,7 +17,7 @@ services:
       context: ..
       dockerfile: recon/Dockerfile
       network: host
-    container_name: redamon-recon
+    container_name: nisarghunter-recon
 
     # Mount Docker socket to allow container to run Docker commands
     # This enables Docker-in-Docker for ProjectDiscovery tools
@@ -102,7 +102,7 @@ services:
   # Uncomment to enable Tor support without host Tor installation
   tor:
     image: dperson/torproxy:latest
-    container_name: redamon-tor
+    container_name: nisarghunter-tor
     profiles:
       - tor  # Only starts with: docker-compose --profile tor up
     ports:
@@ -118,5 +118,5 @@ volumes:
   #     - recon-output:/data/recon-output:ro
   recon-output:
     driver: local
-    name: redamon-recon-output
+    name: nisarghunter-recon-output
 

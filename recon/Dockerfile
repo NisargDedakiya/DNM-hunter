@@ -1,4 +1,4 @@
-# RedAmon Reconnaissance Module - Dockerfile
+# NisargHunter AI Reconnaissance Module - Dockerfile
 # ============================================
 # Fully containerized OSINT reconnaissance framework
 # Supports Docker-in-Docker for ProjectDiscovery tools
@@ -40,8 +40,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Stage 2: Main recon image
 FROM python:3.11-slim-bookworm
 
-LABEL maintainer="RedAmon Team"
-LABEL description="RedAmon Reconnaissance Module - Automated OSINT Framework"
+LABEL maintainer="NisargHunter AI Team"
+LABEL description="NisargHunter AI Reconnaissance Module - Automated OSINT Framework"
 LABEL version="1.0"
 
 # Prevent interactive prompts during package installation
@@ -121,10 +121,10 @@ RUN mkdir -p /var/run/tor && \
 
 # Create non-root user for security (but allow Docker access)
 RUN groupadd -f docker && \
-    groupadd -r redamon && \
-    useradd -r -g redamon -G docker redamon && \
-    mkdir -p /home/redamon && \
-    chown -R redamon:redamon /home/redamon
+    groupadd -r nisarghunter && \
+    useradd -r -g nisarghunter -G docker nisarghunter && \
+    mkdir -p /home/nisarghunter && \
+    chown -R nisarghunter:nisarghunter /home/nisarghunter
 
 # Create necessary directories
 RUN mkdir -p /app/recon/output \
@@ -132,7 +132,7 @@ RUN mkdir -p /app/recon/output \
              /app/utils \
              /data/output \
              /data/.env \
-    && chown -R redamon:redamon /app /data
+    && chown -R nisarghunter:nisarghunter /app /data
 
 # Copy requirements first (for better Docker layer caching)
 COPY recon/requirements.txt /app/recon/requirements.txt
@@ -191,7 +191,7 @@ ENV PROJECT_ID="default_project"
 
 # Use non-root user by default
 # Note: May need root for some operations (Naabu SYN scan)
-# USER redamon
+# USER nisarghunter
 
 # Health check - verify Docker socket and Python are working
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
