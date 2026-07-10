@@ -167,7 +167,7 @@ describe('GlobalHeader – structure', () => {
 
   test('header contains all core nav links', () => {
     render(<GlobalHeader />)
-    const expectedLabels = ['Dashboard', 'Red Zone', 'CypherFix', 'Insights', 'Reports']
+    const expectedLabels = ['Dashboard', 'Programs', 'Red Zone', 'CypherFix', 'Insights', 'Reports']
     for (const label of expectedLabels) {
       const link = screen.getByRole('link', { name: new RegExp(label, 'i') })
       expect(link).toBeDefined()

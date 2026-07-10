@@ -46,16 +46,14 @@ export default function DashboardPage() {
       )}
 
       <div className={styles.statGrid}>
-        <div className={styles.statCard}>
+        <Link href="/programs" className={styles.statCard}>
           <div className={styles.statIcon}><Radar size={18} /></div>
           <div className={styles.statBody}>
             <span className={styles.statValue}>{isLoading ? '—' : data?.programs.total ?? 0}</span>
             <span className={styles.statLabel}>Programs</span>
-            <span className={styles.statHint}>
-              {isLoading ? '' : `${data?.programs.active ?? 0} active · manager coming soon`}
-            </span>
+            <span className={styles.statHint}>{isLoading ? '' : `${data?.programs.active ?? 0} active`}</span>
           </div>
-        </div>
+        </Link>
 
         <Link href="/projects" className={styles.statCard}>
           <div className={styles.statIcon}><Target size={18} /></div>
