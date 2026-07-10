@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch, LayoutDashboard, Radar } from 'lucide-react'
+import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch, LayoutDashboard, Radar, Sparkles } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ProjectSelector } from './ProjectSelector'
 import { UserSelector } from './UserSelector'
@@ -21,7 +21,10 @@ export function GlobalHeader() {
     { label: 'Programs', href: '/programs', icon: <Radar size={14} /> },
     { label: 'Red Zone', href: '/graph', icon: <Crosshair size={14} /> },
     ...(projectId
-      ? [{ label: 'Recon Pipeline', href: `/projects/${projectId}/settings`, icon: <GitBranch size={14} /> }]
+      ? [
+          { label: 'Recon Pipeline', href: `/projects/${projectId}/settings`, icon: <GitBranch size={14} /> },
+          { label: 'AI Summary', href: `/projects/${projectId}/summary`, icon: <Sparkles size={14} /> },
+        ]
       : []),
     { label: 'CypherFix', href: '/cypherfix', icon: <Shield size={14} /> },
     { label: 'Insights', href: '/insights', icon: <TrendingUp size={14} /> },

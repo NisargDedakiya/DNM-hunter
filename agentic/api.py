@@ -919,6 +919,101 @@ async def llm_recon_plan(body: ReconPlanRequest):
     }
 
 
+class ReconSummaryRequest(BaseModel):
+    domain: str
+    findings: dict
+    model: str
+    user_id: Optional[str] = None
+    project_id: Optional[str] = None
+
+
+_RECON_SUMMARY_SYSTEM_PROMPT = """You are a bug-bounty recon assistant writing the
+"Company Overview" and "Potential Attack Surface" narrative for a completed
+reconnaissance pass. You are given AGGREGATE COUNTS already computed from the
+knowledge graph (technology names, endpoint category counts, vulnerability
+severity counts, etc.) — not raw evidence. Write ONLY from those counts; do
+not invent specific vulnerabilities, CVEs, or facts the data doesn't support.
+
+Produce two short fields:
+- company_overview: 2-4 sentences describing what the recon data suggests
+  about this target's scale and posture (e.g. "a mid-size web app with a
+  Node/React stack, moderate attack surface across 12 subdomains, no
+  authentication endpoints discovered yet"). Ground every claim in the
+  counts given — if a category is empty, say so plainly rather than
+  speculating.
+- attack_surface_narrative: 2-4 sentences on where a bug hunter should look
+  first, given the endpoint categories, tech stack, and vulnerability counts
+  provided. Prioritize concretely (e.g. "the 3 admin panels and 8 API
+  endpoints are the highest-value starting points; no GraphQL surface was
+  found").
+
+Be honest about thin data — a target with few discovered assets should get a
+short, modest summary, not padded speculation.
+
+Respond with ONLY a JSON object of this exact shape, no prose:
+{"company_overview": "...", "attack_surface_narrative": "..."}"""
+
+
+@app.post("/llm/recon-summary", tags=["LLM"])
+async def llm_recon_summary(body: ReconSummaryRequest):
+    """AI recon summary narrative (Phase 05): given aggregate graph counts
+    already computed by the webapp (tech stack, endpoint categories, vuln
+    severities, JS/secret counts), write a short company-overview and
+    attack-surface narrative. Called by
+    /api/projects/[id]/ai-summary in the webapp; the structured counts
+    themselves are computed by that route via Cypher, not by this endpoint —
+    this only adds the narrative layer on top.
+    """
+    import json as json_mod
+
+    logger.info(
+        "recon-summary: domain=%s model=%s user=%s",
+        body.domain, body.model, body.user_id,
+    )
+
+    try:
+        llm = _build_llm_with_model_for_user(body.model, body.user_id)
+    except Exception as e:
+        logger.error(f"recon-summary: cannot set up LLM: {e}")
+        return JSONResponse(content={"error": f"LLM not configured: {e}"}, status_code=503)
+
+    user_msg = f"Domain: {body.domain}\nAggregate recon findings: {json_mod.dumps(body.findings)}"
+
+    try:
+        response = await llm.ainvoke([
+            SystemMessage(content=_RECON_SUMMARY_SYSTEM_PROMPT),
+            HumanMessage(content=user_msg),
+        ])
+    except Exception as e:
+        logger.error(f"recon-summary: LLM call failed: {e}")
+        return JSONResponse(content={"error": f"LLM call failed: {e}"}, status_code=502)
+
+    raw_text = normalize_content(getattr(response, 'content', None)).strip()
+    if raw_text.startswith('```'):
+        raw_text = raw_text.strip('`')
+        if raw_text.startswith('json'):
+            raw_text = raw_text[4:].strip()
+
+    try:
+        data = json_mod.loads(raw_text)
+    except (json_mod.JSONDecodeError, ValueError) as e:
+        logger.warning(f"recon-summary: model returned non-JSON ({e}): {raw_text[:200]}")
+        return JSONResponse(content={"error": "Model returned non-JSON", "raw": raw_text[:500]}, status_code=502)
+
+    if not isinstance(data, dict):
+        return JSONResponse(content={"error": "Model returned non-object", "raw": str(data)[:500]}, status_code=502)
+
+    overview = data.get('company_overview')
+    narrative = data.get('attack_surface_narrative')
+    if not isinstance(overview, str) or not isinstance(narrative, str):
+        return JSONResponse(content={"error": "Model returned malformed schema", "raw": str(data)[:500]}, status_code=502)
+
+    return {
+        "company_overview": overview[:1500],
+        "attack_surface_narrative": narrative[:1500],
+    }
+
+
 class NucleiFpFilterRequest(BaseModel):
     template_id: str
     tags: list[str] = []

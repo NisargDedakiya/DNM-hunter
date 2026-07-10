@@ -340,6 +340,48 @@ class ReconPlanProviderCompatTests(_LLMEndpointFixture):
 
 
 # ---------------------------------------------------------------------------
+# /llm/recon-summary (Phase 05 — AI recon summary narrative)
+# ---------------------------------------------------------------------------
+
+class ReconSummaryProviderCompatTests(_LLMEndpointFixture):
+    REQUEST = {
+        "domain": "acme.example",
+        "findings": {
+            "subdomains": {"total": 12, "resolved": 10},
+            "techStack": ["React", "Node.js"],
+            "adminPanelCount": 1,
+            "totalVulns": 3,
+            "riskScore": 22,
+        },
+        "model": "test-model",
+    }
+    PAYLOAD = {
+        "company_overview": "A mid-size web app with a React/Node stack across 12 subdomains.",
+        "attack_surface_narrative": "Start with the single admin panel; 3 low-severity findings so far.",
+    }
+
+    def test_openai_string_content(self):
+        r = self._post_with_stub_llm("/llm/recon-summary", self.REQUEST, _openai_str(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIn("React/Node", r.json()["company_overview"])
+
+    def test_bedrock_list_content(self):
+        r = self._post_with_stub_llm("/llm/recon-summary", self.REQUEST, _bedrock_blocks(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertIn("admin panel", r.json()["attack_surface_narrative"])
+
+    def test_bedrock_with_tool_use_block(self):
+        r = self._post_with_stub_llm("/llm/recon-summary", self.REQUEST, _bedrock_with_tool_use(self.PAYLOAD))
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertEqual(r.json(), self.PAYLOAD)
+
+    def test_malformed_schema_returns_502(self):
+        bad_payload = {"company_overview": "missing the narrative field"}
+        r = self._post_with_stub_llm("/llm/recon-summary", self.REQUEST, _openai_str(bad_payload))
+        self.assertEqual(r.status_code, 502, r.text)
+
+
+# ---------------------------------------------------------------------------
 # Regression: would-have-crashed-pre-fix proof
 # ---------------------------------------------------------------------------
 
