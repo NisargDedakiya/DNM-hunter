@@ -885,6 +885,9 @@ model Project {
   // Upfront AI recon planner (Phase 04) — runs before the discovery fan-out
   reconAiPlannerEnabled                 Boolean  @default(true)  @map("recon_ai_planner_enabled")
 
+  // OpenAPI/Swagger auto-discovery (Phase 06 API analyzer)
+  openapiAutoDiscoveryEnabled            Boolean  @default(true)  @map("openapi_auto_discovery_enabled")
+
   // ========== PHISHING / SOCIAL ENGINEERING SETTINGS ==========
   phishingSmtpConfig                    String   @default("") @map("phishing_smtp_config")
 

@@ -481,6 +481,9 @@ def run_resource_enum(recon_data: dict, output_file: Optional[Path] = None, sett
     PARAMSPIDER_TIMEOUT = settings.get('PARAMSPIDER_TIMEOUT', 120)
     PARAMSPIDER_WORKERS = settings.get('PARAMSPIDER_WORKERS', 5)
 
+    # OpenAPI/Swagger auto-discovery settings (Phase 06 API analyzer)
+    OPENAPI_AUTO_DISCOVERY_ENABLED = settings.get('OPENAPI_AUTO_DISCOVERY_ENABLED', True)
+
     # Kiterunner settings
     KITERUNNER_ENABLED = settings.get('KITERUNNER_ENABLED', False)
     KITERUNNER_WORDLISTS = settings.get('KITERUNNER_WORDLISTS', ['apiroutes-210228'])
@@ -1316,6 +1319,29 @@ def run_resource_enum(recon_data: dict, output_file: Optional[Path] = None, sett
             print(f"[+][Kiterunner] Methods found: {kr_stats['kr_methods']}")
         if KITERUNNER_DETECT_METHODS and kr_stats.get('kr_with_multiple_methods', 0) > 0:
             print(f"[+][Kiterunner] Endpoints with multiple methods: {kr_stats['kr_with_multiple_methods']}")
+
+    # OpenAPI/Swagger auto-discovery (Phase 06 API analyzer) — probe every
+    # base URL discovered so far for a self-hosted spec at common paths.
+    # Off-path from the crawl-based sources above: this is a handful of
+    # extra GET requests per host, not a new scanner container, so it stays
+    # cheap even when a target has no spec (the common case).
+    if OPENAPI_AUTO_DISCOVERY_ENABLED and organized_data.get('by_base_url'):
+        from recon.helpers.api_analyzer.openapi_importer import discover_openapi_spec, parse_openapi_spec
+        from recon.helpers.api_analyzer.merge import merge_api_endpoints_into_by_base_url
+
+        base_urls = list(organized_data['by_base_url'].keys())
+        print(f"\n[*][OpenAPI] Probing {len(base_urls)} host(s) for a self-hosted spec...")
+        for base_url in base_urls:
+            spec_text = discover_openapi_spec(base_url, settings)
+            if not spec_text:
+                continue
+            openapi_endpoints = parse_openapi_spec(spec_text)
+            if not openapi_endpoints:
+                continue
+            organized_data['by_base_url'], oa_stats = merge_api_endpoints_into_by_base_url(
+                openapi_endpoints, organized_data['by_base_url'], base_url, 'openapi',
+            )
+            print(f"[+][OpenAPI] {base_url}: {oa_stats['openapi_new']} new, {oa_stats['openapi_overlap']} overlap")
 
     end_time = datetime.now()
     duration = (end_time - start_time).total_seconds()

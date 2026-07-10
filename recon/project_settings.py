@@ -676,6 +676,12 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     # never silently flips a tool the user explicitly configured.
     'RECON_AI_PLANNER_ENABLED': True,
 
+    # OpenAPI/Swagger auto-discovery (Phase 06 API analyzer) — probes every
+    # discovered base URL for a self-hosted spec at common paths, parses it,
+    # and merges endpoints into the same by_base_url structure every other
+    # resource_enum source uses.
+    'OPENAPI_AUTO_DISCOVERY_ENABLED': True,
+
     # Rules of Engagement (recon-relevant fields only)
     'ROE_ENABLED': False,
     'ROE_EXCLUDED_HOSTS': [],
@@ -1372,6 +1378,7 @@ def fetch_project_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     settings['DNSX_ENABLED'] = project.get('dnsxEnabled', DEFAULT_SETTINGS['DNSX_ENABLED'])
     settings['DNSX_THREADS'] = project.get('dnsxThreads', DEFAULT_SETTINGS['DNSX_THREADS'])
     settings['RECON_AI_PLANNER_ENABLED'] = project.get('reconAiPlannerEnabled', DEFAULT_SETTINGS['RECON_AI_PLANNER_ENABLED'])
+    settings['OPENAPI_AUTO_DISCOVERY_ENABLED'] = project.get('openapiAutoDiscoveryEnabled', DEFAULT_SETTINGS['OPENAPI_AUTO_DISCOVERY_ENABLED'])
 
     # Puredns (wildcard filtering)
     settings['PUREDNS_ENABLED'] = project.get('purednsEnabled', DEFAULT_SETTINGS['PUREDNS_ENABLED'])
