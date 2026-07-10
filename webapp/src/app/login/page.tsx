@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className={styles.logoRow}>
             <Image src="/logo.png" alt="NisargHunter AI" width={63} height={40} priority />
             <span className={styles.logoText}>
-              <span className={styles.logoAccent}>Red</span>Amon
+              <span className={styles.logoAccent}>NisargHunter</span> AI
             </span>
           </div>
           <p className={styles.subtitle}>Sign in to your account</p>

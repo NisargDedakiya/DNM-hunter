@@ -112,11 +112,11 @@ describe('GlobalHeader – logo link', () => {
     expect(img.getAttribute('height')).toBe('28')
   })
 
-  test('logo contains the "Red" accent and "Amon" text', () => {
+  test('logo contains the "NisargHunter" accent and "AI" text', () => {
     render(<GlobalHeader />)
     const logoLink = getLogoLink()
-    expect(logoLink.textContent).toContain('Red')
-    expect(logoLink.textContent).toContain('Amon')
+    expect(logoLink.textContent).toContain('NisargHunter')
+    expect(logoLink.textContent).toContain('AI')
   })
 
   test('logo link has the logo CSS class applied', () => {
