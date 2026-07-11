@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getSession, isInternalRequest } from '@/lib/session'
 import { hasPermission, isKnownRole } from '@/lib/rbac'
+import { createRequestLogger } from '@/lib/logger'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -9,6 +10,7 @@ interface RouteParams {
 
 // GET /api/users/[id] - Get user by ID
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const log = createRequestLogger(request, 'api.users')
   try {
     const { id } = await params
 
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(user)
   } catch (error) {
-    console.error('Failed to fetch user:', error)
+    log.error('failed to fetch user', { error: error instanceof Error ? error.message : String(error) })
     return NextResponse.json(
       { error: 'Failed to fetch user' },
       { status: 500 }
@@ -67,6 +69,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/users/[id] - Update user
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const log = createRequestLogger(request, 'api.users')
   try {
     const { id } = await params
     const body = await request.json()
@@ -113,9 +116,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }
     })
 
+    if (role && isKnownRole(role)) log.info('user role changed', { targetUserId: id, newRole: role })
     return NextResponse.json(user)
   } catch (error: unknown) {
-    console.error('Failed to update user:', error)
+    log.error('failed to update user', { error: error instanceof Error ? error.message : String(error) })
 
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
@@ -133,6 +137,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/users/[id] - Delete user (admin only)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const log = createRequestLogger(request, 'api.users')
   try {
     const { id } = await params
 
@@ -155,9 +160,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id }
     })
 
+    log.info('user deleted', { targetUserId: id })
     return NextResponse.json({ success: true })
   } catch (error: unknown) {
-    console.error('Failed to delete user:', error)
+    log.error('failed to delete user', { error: error instanceof Error ? error.message : String(error) })
 
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(

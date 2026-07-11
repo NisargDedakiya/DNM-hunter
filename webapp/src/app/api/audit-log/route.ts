@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { hasPermission } from '@/lib/rbac'
+import { createRequestLogger } from '@/lib/logger'
 
 /**
  * GET /api/audit-log?limit=100 — global security/activity log, gated on the
@@ -12,8 +13,10 @@ import { hasPermission } from '@/lib/rbac'
  * centrally (lib/rbac.ts ROUTE_PERMISSIONS); this is defense-in-depth.
  */
 export async function GET(request: NextRequest) {
+  const log = createRequestLogger(request, 'api.audit-log')
   const role = request.headers.get('x-user-role') || ''
   if (!hasPermission(role, 'audit_log.view')) {
+    log.warn('audit log access denied', { role })
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
     })
     return NextResponse.json(logs)
   } catch (error) {
-    console.error('Fetch audit log failed:', error)
+    log.error('fetch audit log failed', { error: error instanceof Error ? error.message : String(error) })
     return NextResponse.json({ error: 'Failed to fetch audit log' }, { status: 500 })
   }
 }

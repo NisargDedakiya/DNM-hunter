@@ -4,6 +4,7 @@ import { consumeRateLimit, tierForPath } from '@/lib/rateLimit'
 import { hasPermission, requiredPermissionForPath } from '@/lib/rbac'
 
 const AUTH_COOKIE_NAME = 'nisarghunter-auth'
+const REQUEST_ID_HEADER = 'x-request-id'
 
 const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/login-2fa', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync']
 
@@ -83,7 +84,17 @@ function enforceRoutePermission(request: NextRequest, role: string): NextRespons
   return NextResponse.redirect(new URL('/graph', request.url))
 }
 
-export async function middleware(request: NextRequest) {
+/** NextResponse.next() but always carrying x-request-id through to the route handler. */
+function next(request: NextRequest, requestId: string, extraHeaders?: Record<string, string>): NextResponse {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(REQUEST_ID_HEADER, requestId)
+  if (extraHeaders) {
+    for (const [key, value] of Object.entries(extraHeaders)) requestHeaders.set(key, value)
+  }
+  return NextResponse.next({ request: { headers: requestHeaders } })
+}
+
+async function handleRequest(request: NextRequest, requestId: string): Promise<NextResponse> {
   const { pathname } = request.nextUrl
 
   // Allow static assets and Next.js internals — never rate limited or authed
@@ -93,7 +104,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/logo.png' ||
     pathname === '/js_logo.png'
   ) {
-    return NextResponse.next()
+    return next(request, requestId)
   }
 
   // Internal service-to-service calls (Docker network) — trusted infra, not
@@ -101,7 +112,7 @@ export async function middleware(request: NextRequest) {
   const internalKey = request.headers.get('x-internal-key')
   const expectedKey = process.env.INTERNAL_API_KEY
   if (internalKey && expectedKey && expectedKey !== 'changeme' && internalKey === expectedKey) {
-    return NextResponse.next()
+    return next(request, requestId)
   }
 
   // Rate limit everything else by client IP, before auth resolution — this
@@ -114,7 +125,7 @@ export async function middleware(request: NextRequest) {
 
   // Allow public paths
   if (PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
-    return NextResponse.next()
+    return next(request, requestId)
   }
 
   // Bearer API token (Phase 12) — programmatic access, checked before the
@@ -126,10 +137,7 @@ export async function middleware(request: NextRequest) {
     if (apiPayload) {
       const denied = enforceRoutePermission(request, apiPayload.role)
       if (denied) return denied
-      const requestHeaders = new Headers(request.headers)
-      requestHeaders.set('x-user-id', apiPayload.sub)
-      requestHeaders.set('x-user-role', apiPayload.role)
-      return NextResponse.next({ request: { headers: requestHeaders } })
+      return next(request, requestId, { 'x-user-id': apiPayload.sub, 'x-user-role': apiPayload.role })
     }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -157,12 +165,18 @@ export async function middleware(request: NextRequest) {
   const denied = enforceRoutePermission(request, payload.role)
   if (denied) return denied
 
-  // Inject user info into request headers for downstream API routes
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-user-id', payload.sub)
-  requestHeaders.set('x-user-role', payload.role)
+  return next(request, requestId, { 'x-user-id': payload.sub, 'x-user-role': payload.role })
+}
 
-  return NextResponse.next({ request: { headers: requestHeaders } })
+export async function middleware(request: NextRequest) {
+  // Correlation id (Phase 16): reuse one an upstream proxy/client already
+  // set, or mint a fresh one. Threaded onto both the outgoing request (so
+  // route handlers can log with it via lib/logger.ts) and the response (so
+  // it shows up in browser devtools / can be handed to support).
+  const requestId = request.headers.get(REQUEST_ID_HEADER) || crypto.randomUUID()
+  const response = await handleRequest(request, requestId)
+  response.headers.set(REQUEST_ID_HEADER, requestId)
+  return response
 }
 
 export const config = {

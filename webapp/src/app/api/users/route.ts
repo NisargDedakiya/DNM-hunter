@@ -3,9 +3,11 @@ import prisma from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
 import { getSession, isInternalRequest } from '@/lib/session'
 import { hasPermission, isKnownRole } from '@/lib/rbac'
+import { createRequestLogger } from '@/lib/logger'
 
 // GET /api/users - List users (admin: all, standard: self only, internal: all)
 export async function GET(request: NextRequest) {
+  const log = createRequestLogger(request, 'api.users')
   try {
     let where = {}
 
@@ -46,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(safeUsers)
   } catch (error) {
-    console.error('Failed to fetch users:', error)
+    log.error('failed to fetch users', { error: error instanceof Error ? error.message : String(error) })
     return NextResponse.json(
       { error: 'Failed to fetch users' },
       { status: 500 }
@@ -56,6 +58,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/users - Create a new user (admin only or internal)
 export async function POST(request: NextRequest) {
+  const log = createRequestLogger(request, 'api.users')
   try {
     // Allow internal service calls
     if (!isInternalRequest(request)) {
@@ -84,6 +87,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    log.info('user created', { userId: user.id, role: user.role })
     return NextResponse.json({
       id: user.id,
       name: user.name,
@@ -94,7 +98,7 @@ export async function POST(request: NextRequest) {
       updatedAt: user.updatedAt,
     }, { status: 201 })
   } catch (error: unknown) {
-    console.error('Failed to create user:', error)
+    log.error('failed to create user', { error: error instanceof Error ? error.message : String(error) })
 
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(

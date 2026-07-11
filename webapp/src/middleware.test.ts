@@ -422,3 +422,49 @@ describe('middleware - RBAC route permissions', () => {
     expect(res.status).not.toBe(403)
   })
 })
+
+/* ------------------------------------------------------------------ */
+/*  Request-ID correlation (Phase 16)                                  */
+/* ------------------------------------------------------------------ */
+
+describe('middleware - request-id correlation', () => {
+  test('every response carries an x-request-id header, even a 401', async () => {
+    const res = await middleware(makeRequest('/api/projects'))
+    expect(res.status).toBe(401)
+    expect(res.headers.get('x-request-id')).toBeTruthy()
+  })
+
+  test('an incoming x-request-id is echoed back unchanged', async () => {
+    const res = await middleware(makeRequest('/api/health', { headers: { 'x-request-id': 'trace-abc-123' } }))
+    expect(res.headers.get('x-request-id')).toBe('trace-abc-123')
+  })
+
+  test('no incoming header: a fresh id is generated', async () => {
+    const res = await middleware(makeRequest('/api/health'))
+    const id = res.headers.get('x-request-id')
+    expect(id).toBeTruthy()
+    expect(id).toMatch(/^[0-9a-f-]{36}$/) // crypto.randomUUID() shape
+  })
+
+  test('two requests without a header get different generated ids', async () => {
+    const res1 = await middleware(makeRequest('/api/health'))
+    const res2 = await middleware(makeRequest('/api/health'))
+    expect(res1.headers.get('x-request-id')).not.toBe(res2.headers.get('x-request-id'))
+  })
+
+  test('a 429 rate-limited response still carries an x-request-id', async () => {
+    const ip = '203.0.113.60'
+    for (let i = 0; i < 10; i++) {
+      await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ip } }))
+    }
+    const res = await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ip } }))
+    expect(res.status).toBe(429)
+    expect(res.headers.get('x-request-id')).toBeTruthy()
+  })
+
+  test('a login-page redirect still carries an x-request-id', async () => {
+    const res = await middleware(makeRequest('/graph'))
+    expect(res.headers.get('location')).toContain('/login')
+    expect(res.headers.get('x-request-id')).toBeTruthy()
+  })
+})

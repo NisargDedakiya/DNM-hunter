@@ -21,13 +21,13 @@ from typing import Optional
 
 import httpx
 import websockets
-from fastapi import FastAPI, File, Form, Query, UploadFile, WebSocket
+from fastapi import FastAPI, File, Form, Query, Request, UploadFile, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel
 
-from logging_config import setup_logging
+from logging_config import setup_logging, request_context
 from orchestrator import AgentOrchestrator
 from orchestrator_helpers import normalize_content
 from startup_guard import check_single_worker
@@ -124,6 +124,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """
+    Correlation id (Phase 16): reuse an incoming X-Request-ID (e.g. one the
+    webapp already generated for this browser request) or mint a new one,
+    scope it for the lifetime of this request via logging_config's
+    contextvar, and echo it back so every log line across the request —
+    including deep in the orchestrator/tool-call stack — and every response
+    can be tied together and back to the webapp's own request log.
+    """
+    incoming = request.headers.get("x-request-id")
+    with request_context(incoming) as request_id:
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
 
 
 # =============================================================================
