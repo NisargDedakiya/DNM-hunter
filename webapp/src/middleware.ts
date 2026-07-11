@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose'
 
 const AUTH_COOKIE_NAME = 'nisarghunter-auth'
 
-const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync']
+const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/login-2fa', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync']
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET
@@ -18,6 +18,29 @@ async function verifyJwt(token: string): Promise<{ sub: string; role: string } |
     const { payload } = await jwtVerify(token, secret)
     if (!payload.sub || !payload.role) return null
     return { sub: payload.sub, role: payload.role as string }
+  } catch {
+    return null
+  }
+}
+
+// API tokens (Phase 12) are bearer credentials for programmatic access,
+// hashed at rest -- resolving one requires a Postgres lookup, which Edge
+// middleware can't do directly. Delegate to a Node-runtime route handler,
+// authenticating that internal call the same way service-to-service calls
+// already are (X-Internal-Key) so the route only ever answers middleware.
+async function verifyApiToken(origin: string, rawToken: string): Promise<{ sub: string; role: string } | null> {
+  const internalKey = process.env.INTERNAL_API_KEY
+  if (!internalKey || internalKey === 'changeme') return null
+  try {
+    const resp = await fetch(`${origin}/api/auth/verify-api-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Internal-Key': internalKey },
+      body: JSON.stringify({ token: rawToken }),
+    })
+    if (!resp.ok) return null
+    const data = await resp.json()
+    if (!data.userId || !data.role) return null
+    return { sub: data.userId, role: data.role }
   } catch {
     return null
   }
@@ -46,6 +69,21 @@ export async function middleware(request: NextRequest) {
   const expectedKey = process.env.INTERNAL_API_KEY
   if (internalKey && expectedKey && expectedKey !== 'changeme' && internalKey === expectedKey) {
     return NextResponse.next()
+  }
+
+  // Bearer API token (Phase 12) — programmatic access, checked before the
+  // cookie so a script that only sends Authorization doesn't need a session.
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const rawToken = authHeader.slice('Bearer '.length).trim()
+    const apiPayload = rawToken ? await verifyApiToken(request.nextUrl.origin, rawToken) : null
+    if (apiPayload) {
+      const requestHeaders = new Headers(request.headers)
+      requestHeaders.set('x-user-id', apiPayload.sub)
+      requestHeaders.set('x-user-role', apiPayload.role)
+      return NextResponse.next({ request: { headers: requestHeaders } })
+    }
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   // Check JWT cookie

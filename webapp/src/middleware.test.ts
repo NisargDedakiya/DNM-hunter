@@ -152,6 +152,78 @@ describe('middleware - unauthenticated', () => {
 })
 
 /* ------------------------------------------------------------------ */
+/*  Bearer API tokens (Phase 12)                                       */
+/* ------------------------------------------------------------------ */
+
+describe('middleware - Bearer API tokens', () => {
+  const originalFetch = global.fetch
+
+  beforeEach(() => {
+    global.fetch = originalFetch
+  })
+
+  test('allows a request with a valid Bearer token (delegated verification succeeds)', async () => {
+    global.fetch = vi.fn(async () => new Response(
+      JSON.stringify({ userId: 'user-42', role: 'standard' }),
+      { status: 200 }
+    )) as unknown as typeof fetch
+
+    const req = makeRequest('/api/projects', { headers: { authorization: 'Bearer nh_validtoken' } })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(401)
+    expect(res.headers.get('location')).toBeNull()
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/auth/verify-api-token'),
+      expect.objectContaining({ method: 'POST' })
+    )
+  })
+
+  test('rejects a request when the token verification route reports invalid', async () => {
+    global.fetch = vi.fn(async () => new Response(
+      JSON.stringify({ error: 'Invalid token' }),
+      { status: 401 }
+    )) as unknown as typeof fetch
+
+    const req = makeRequest('/api/projects', { headers: { authorization: 'Bearer nh_revoked' } })
+    const res = await middleware(req)
+    expect(res.status).toBe(401)
+  })
+
+  test('rejects an empty Bearer value without calling the verification route', async () => {
+    global.fetch = vi.fn() as unknown as typeof fetch
+    const req = makeRequest('/api/projects', { headers: { authorization: 'Bearer ' } })
+    const res = await middleware(req)
+    expect(res.status).toBe(401)
+    expect(global.fetch).not.toHaveBeenCalled()
+  })
+
+  test('rejects Bearer auth entirely when INTERNAL_API_KEY is unset (no fetch attempted)', async () => {
+    vi.stubEnv('INTERNAL_API_KEY', '')
+    global.fetch = vi.fn() as unknown as typeof fetch
+
+    const req = makeRequest('/api/projects', { headers: { authorization: 'Bearer nh_anything' } })
+    const res = await middleware(req)
+    expect(res.status).toBe(401)
+    expect(global.fetch).not.toHaveBeenCalled()
+
+    vi.stubEnv('INTERNAL_API_KEY', 'internal-secret-abc')
+  })
+
+  test('a request with BOTH a Bearer header and a valid cookie is authenticated via Bearer (checked first)', async () => {
+    global.fetch = vi.fn(async () => new Response(
+      JSON.stringify({ userId: 'bearer-user', role: 'admin' }),
+      { status: 200 }
+    )) as unknown as typeof fetch
+
+    const token = await createTestToken('cookie-user', 'standard')
+    const req = makeRequest('/api/projects', { cookie: token, headers: { authorization: 'Bearer nh_valid' } })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(401)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+/* ------------------------------------------------------------------ */
 /*  Authenticated requests                                             */
 /* ------------------------------------------------------------------ */
 

@@ -11,6 +11,7 @@ import { SolutionSection } from './SolutionSection'
 import { ValidatorSection } from './ValidatorSection'
 import { CodeFixButton } from './CodeFixButton'
 import { PlatformSubmissionSection } from './PlatformSubmissionSection'
+import { CommentsSection } from './CommentsSection'
 import type { Remediation, ValidatorStatus } from '@/lib/cypherfix-types'
 import styles from './RemediationDetail.module.css'
 
@@ -101,6 +102,9 @@ export function RemediationDetail({
 
         {/* CodeFix */}
         <CodeFixButton remediation={remediation} onStartCodeFix={onStartCodeFix} missingSettings={missingSettings} projectId={projectId} />
+
+        {/* Comments */}
+        <CommentsSection remediationId={remediation.id} userId={userId} />
       </div>
     </div>
   )

@@ -31,6 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         role: true,
         defaultAgentModel: true,
         defaultAiPipelineModel: true,
+        twoFactorEnabled: true,
         createdAt: true,
         updatedAt: true,
         projects: {
