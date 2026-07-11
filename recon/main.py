@@ -29,6 +29,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+_STARTUP_BANNER = r"""
+ _   _ _                       _   _             _             _    ___
+| \ | (_)___  __ _ _ __ __ _  | | | |_   _ _ __ | |_ ___ _ __  / \  |_ _|
+|  \| | / __|/ _` | '__/ _` | | |_| | | | | '_ \| __/ _ \ '__|/ _ \  | |
+| |\  | \__ \ (_| | | | (_| | |  _  | |_| | | | | ||  __/ |  / ___ \ | |
+|_| \_|_|___/\__,_|_|  \__,_| |_| |_|\__,_|_| |_|\__\___|_| /_/   \_\___|
+                                                          Recon Pipeline
+"""
+
 # Import settings from project_settings (fetches from API or falls back to params.py)
 from recon.project_settings import get_settings
 
@@ -1634,6 +1643,7 @@ def main():
     - Empty list []: Full subdomain discovery (discover and scan all subdomains)
     - With entries ["testphp.", "www."]: Filtered mode (only scan specified subdomains)
     """
+    print(_STARTUP_BANNER, flush=True)
     start_time = datetime.now()
 
     # IP Mode: skip domain verification and run IP-based recon instead

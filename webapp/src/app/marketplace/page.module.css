@@ -116,6 +116,33 @@
   color: var(--accent-primary);
 }
 
+.healthDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.healthHealthy,
+.healthActive {
+  background: var(--success, #16a34a);
+}
+
+.healthUnreachable {
+  background: var(--danger, #dc2626);
+}
+
+.healthUnknown {
+  background: var(--text-tertiary);
+}
+
+.healthLabel {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: capitalize;
+}
+
 .cardDescription {
   font-size: var(--text-xs);
   color: var(--text-secondary);

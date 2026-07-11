@@ -26,14 +26,45 @@ const CATEGORY_META: Record<Plugin['category'], { label: string; icon: React.Rea
 
 const CATEGORY_ORDER: Plugin['category'][] = ['recon', 'scanner', 'validator', 'reporter', 'export']
 
+interface PluginHealth {
+  id: string
+  health: 'healthy' | 'active' | 'unreachable' | 'unknown'
+  latencyMs: number | null
+  detail: string | null
+}
+
+const HEALTH_CLASS: Record<PluginHealth['health'], string> = {
+  healthy: 'healthHealthy',
+  active: 'healthActive',
+  unreachable: 'healthUnreachable',
+  unknown: 'healthUnknown',
+}
+
 async function fetchPlugins(): Promise<{ plugins: Plugin[] }> {
   const res = await fetch('/api/plugins')
+  return res.json()
+}
+
+async function fetchPluginsHealth(): Promise<{ health: PluginHealth[] }> {
+  const res = await fetch('/api/plugins/health')
   return res.json()
 }
 
 export default function MarketplacePage() {
   const { data, isLoading } = useQuery({ queryKey: ['plugins'], queryFn: fetchPlugins })
   const plugins = data?.plugins ?? []
+
+  const { data: healthData } = useQuery({
+    queryKey: ['plugins-health'],
+    queryFn: fetchPluginsHealth,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  })
+  const healthById = useMemo(() => {
+    const map = new Map<string, PluginHealth>()
+    for (const h of healthData?.health ?? []) map.set(h.id, h)
+    return map
+  }, [healthData])
 
   const byCategory = useMemo(() => {
     const map = new Map<Plugin['category'], Plugin[]>()
@@ -73,21 +104,33 @@ export default function MarketplacePage() {
           <section key={cat} className={styles.categorySection}>
             <h2 className={styles.categoryTitle}>{CATEGORY_META[cat].icon} {CATEGORY_META[cat].label}</h2>
             <div className={styles.grid}>
-              {items.map(p => (
-                <div key={p.id} className={styles.card}>
-                  <div className={styles.cardHeader}>
-                    <span className={styles.cardName}>{p.name}</span>
-                    <span className={`${styles.statusBadge} ${p.status === 'core' ? styles.statusCore : styles.statusCommunity}`}>
-                      {p.status}
-                    </span>
+              {items.map(p => {
+                const health = healthById.get(p.id)
+                return (
+                  <div key={p.id} className={styles.card}>
+                    <div className={styles.cardHeader}>
+                      <span className={styles.cardName}>{p.name}</span>
+                      <span className={`${styles.statusBadge} ${p.status === 'core' ? styles.statusCore : styles.statusCommunity}`}>
+                        {p.status}
+                      </span>
+                    </div>
+                    <p className={styles.cardDescription}>{p.description}</p>
+                    <div className={styles.cardMeta}>
+                      <span className={styles.kindTag}>{p.kind}</span>
+                      {p.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+                    </div>
+                    {health && (
+                      <div className={styles.cardMeta} title={health.detail ?? undefined}>
+                        <span className={`${styles.healthDot} ${styles[HEALTH_CLASS[health.health]]}`} />
+                        <span className={styles.healthLabel}>
+                          {health.health}
+                          {health.latencyMs != null && ` · ${health.latencyMs}ms`}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <p className={styles.cardDescription}>{p.description}</p>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.kindTag}>{p.kind}</span>
-                    {p.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </section>
         )

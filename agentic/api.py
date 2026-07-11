@@ -44,6 +44,15 @@ logger = logging.getLogger(__name__)
 orchestrator: Optional[AgentOrchestrator] = None
 ws_manager: Optional[WebSocketManager] = None
 
+_STARTUP_BANNER = r"""
+ _   _ _                       _   _             _             _    ___
+| \ | (_)___  __ _ _ __ __ _  | | | |_   _ _ __ | |_ ___ _ __  / \  |_ _|
+|  \| | / __|/ _` | '__/ _` | | |_| | | | | '_ \| __/ _ \ '__|/ _ \  | |
+| |\  | \__ \ (_| | | | (_| | |  _  | |_| | | | | ||  __/ |  / ___ \ | |
+|_| \_|_|___/\__,_|_|  \__,_| |_| |_|\__,_|_| |_|\__\___|_| /_/   \_\___|
+                                                            Agent API
+"""
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -53,6 +62,11 @@ async def lifespan(app: FastAPI):
     Initializes the orchestrator and WebSocket manager on startup and cleans up on shutdown.
     """
     global orchestrator, ws_manager
+
+    # Printed directly to stdout (not through logging) so it's visible even
+    # if log-to-console is disabled, and only fires once per real process
+    # start rather than on every module import (tests patch lifespan itself).
+    print(_STARTUP_BANNER, flush=True)
 
     # Refuse to start under multi-worker uvicorn/gunicorn. The fireteam
     # confirmation registry uses an in-process dict; multiple workers would
@@ -1998,6 +2012,18 @@ async def list_plugins():
     from orchestrator_helpers.plugin_catalog import list_plugins as _list_plugins
     plugins = _list_plugins()
     return {"plugins": plugins, "total": len(plugins)}
+
+
+@app.get("/plugins/health", tags=["System"])
+async def get_plugins_health():
+    """Probe every plugin's runtime reachability (Phase 16). mcp-server
+    plugins are TCP-checked against dockerService:mcpPort; builtin/
+    webapp-subsystem plugins are reported active since they run in-process.
+    Kept as a separate endpoint from GET /plugins so listing the catalog
+    stays instant while health is opt-in and slightly slower."""
+    from orchestrator_helpers.plugin_catalog import check_plugins_health
+    results = await check_plugins_health()
+    return {"health": results}
 
 
 # =============================================================================
