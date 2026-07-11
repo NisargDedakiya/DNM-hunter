@@ -414,3 +414,119 @@
   font-size: var(--text-xs);
   color: var(--text-tertiary);
 }
+
+/* ── Evidence Gallery (Phase 10) ─────────────────────── */
+
+.evidenceUploadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1-5, 6px) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+}
+
+.evidenceUploadBtn:hover { background: var(--bg-hover); }
+.evidenceUploadBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.evidenceNoteForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.evidenceNoteLabel {
+  padding: var(--space-1-5, 6px) var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+}
+
+.evidenceNoteText {
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono, monospace);
+  resize: vertical;
+}
+
+.evidenceEmpty {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.evidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.evidenceCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.evidenceThumb {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-tertiary);
+}
+
+.evidenceNotePreview {
+  width: 100%;
+  height: 100px;
+  margin: 0;
+  padding: var(--space-2);
+  font-size: 10px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.evidenceCardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  color: var(--text-tertiary);
+}
+
+.evidenceLabel {
+  flex: 1;
+  min-width: 0;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evidenceDeleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 2px;
+}
+
+.evidenceDeleteBtn:hover { color: var(--color-red-400, #f87171); }

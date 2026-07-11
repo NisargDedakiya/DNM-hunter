@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { FileText, Download, ExternalLink, Trash2, Loader2, AlertCircle, Sparkles, ChevronDown } from 'lucide-react'
-import { useAllReports, type ReportMeta } from '@/hooks/useReports'
+import { useAllReports, type ReportMeta, type ReportFormat } from '@/hooks/useReports'
 import { useProjects } from '@/hooks/useProjects'
 import { useProject } from '@/providers/ProjectProvider'
 import { useToast, WikiInfoButton } from '@/components/ui'
@@ -43,18 +43,19 @@ export default function ReportsPage() {
 
   const { data: projects } = useProjects(userId || undefined)
   const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [selectedFormat, setSelectedFormat] = useState<ReportFormat>('html')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
   const handleGenerate = useCallback(async () => {
     if (!selectedProjectId) return
     try {
-      await generate(selectedProjectId)
+      await generate({ projectId: selectedProjectId, format: selectedFormat })
       toast.info('Report generation started')
     } catch {
       toast.error('Failed to generate report')
       // error available via generateError
     }
-  }, [generate, selectedProjectId])
+  }, [generate, selectedProjectId, selectedFormat])
 
   const handleDelete = useCallback(async (projectId: string, reportId: string) => {
     try {
@@ -74,7 +75,7 @@ export default function ReportsPage() {
       const blob = await res.blob()
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `${report.title || 'report'}.html`
+      a.download = `${report.title || 'report'}.${report.format || 'html'}`
       a.click()
       URL.revokeObjectURL(a.href)
       toast.success('Report downloaded')
@@ -111,6 +112,19 @@ export default function ReportsPage() {
                   {p.name}{p.targetDomain ? ` (${p.targetDomain})` : ''}
                 </option>
               ))}
+            </select>
+            <ChevronDown size={12} className={styles.pickerChevron} />
+          </div>
+          <div className={styles.pickerWrapper}>
+            <select
+              className={styles.projectPicker}
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value as ReportFormat)}
+              disabled={isGenerating}
+            >
+              <option value="html">HTML</option>
+              <option value="pdf">PDF</option>
+              <option value="docx">DOCX</option>
             </select>
             <ChevronDown size={12} className={styles.pickerChevron} />
           </div>

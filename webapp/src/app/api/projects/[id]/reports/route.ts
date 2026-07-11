@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { gatherReportData } from '@/lib/report/reportData'
 import { generateReportHtml, type LLMNarratives } from '@/lib/report/reportTemplate'
+import { renderHtmlToPdf } from '@/lib/report/pdfRenderer'
+import { generateReportDocx } from '@/lib/report/reportDocx'
 import { writeFileSync, mkdirSync, existsSync } from 'fs'
 import path from 'path'
+
+const VALID_FORMATS = ['html', 'pdf', 'docx'] as const
+type ReportFormat = typeof VALID_FORMATS[number]
 
 const REPORT_OUTPUT_PATH = process.env.REPORT_OUTPUT_PATH || '/data/reports'
 const AGENT_API_URL = process.env.AGENT_API_URL || 'http://agent:8080'
@@ -41,9 +46,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 }
 
 /** POST /api/projects/{id}/reports — Generate a new report */
-export async function POST(_request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
+    let format: ReportFormat = 'html'
+    try {
+      const body = await request.json()
+      if (VALID_FORMATS.includes(body?.format)) format = body.format
+    } catch {
+      // No/empty body — default to html, matches pre-Phase-10 behavior.
+    }
 
     // 1. Gather all data from Neo4j + PostgreSQL
     const reportData = await gatherReportData(id)
@@ -67,8 +79,22 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       console.warn('Agent unavailable for report narratives, generating without:', err)
     }
 
-    // 3. Generate HTML
+    // 3. Generate the report file in the requested format. PDF/DOCX both
+    // build from the exact same ReportData/narratives as HTML — no
+    // parallel data-gathering path to keep in sync.
     const html = generateReportHtml(reportData, narratives)
+    let fileBuffer: Buffer
+    let extension: string
+    if (format === 'pdf') {
+      fileBuffer = await renderHtmlToPdf(html)
+      extension = 'pdf'
+    } else if (format === 'docx') {
+      fileBuffer = await generateReportDocx(reportData, narratives)
+      extension = 'docx'
+    } else {
+      fileBuffer = Buffer.from(html, 'utf-8')
+      extension = 'html'
+    }
 
     // 4. Write to disk
     if (!existsSync(REPORT_OUTPUT_PATH)) {
@@ -76,10 +102,9 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     }
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19)
     const safeName = reportData.project.name.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 40)
-    const filename = `report_${safeName}_${timestamp}.html`
+    const filename = `report_${safeName}_${timestamp}.${extension}`
     const filePath = path.join(REPORT_OUTPUT_PATH, filename)
-    const htmlBuffer = Buffer.from(html, 'utf-8')
-    writeFileSync(filePath, htmlBuffer)
+    writeFileSync(filePath, fileBuffer)
 
     // 5. Save metadata to DB
     const report = await prisma.report.create({
@@ -88,8 +113,8 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
         title: `Pentest Report — ${reportData.project.targetDomain || reportData.project.name}`,
         filename,
         filePath,
-        fileSize: htmlBuffer.length,
-        format: 'html',
+        fileSize: fileBuffer.length,
+        format,
         hasNarratives: narratives !== null,
         metrics: {
           riskScore: reportData.metrics.riskScore,

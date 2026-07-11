@@ -92,6 +92,7 @@ def execute_playwright(url: str = "", script: str = "", selector: str = "", form
     **Mode 1 — Content extraction** (provide `url`, optionally `selector` and `format`):
     Navigate to a URL with a real browser and extract the rendered content.
     Unlike curl, this fully renders JavaScript — perfect for SPAs and dynamic pages.
+    format="screenshot" captures a full-page PNG instead of text/HTML (see below).
 
     **Mode 2 — Custom script** (provide `script`):
     Run a Playwright Python script for complex multi-step interactions.
@@ -101,11 +102,16 @@ def execute_playwright(url: str = "", script: str = "", selector: str = "", form
     Args:
         url: URL to navigate to (Mode 1). Ignored if script is provided.
         script: Python code using Playwright sync API (Mode 2). If provided, url/selector/format are ignored.
-        selector: CSS selector to extract specific element (Mode 1, default: entire page body)
-        format: "text" for visible text, "html" for inner HTML (Mode 1, default: "text")
+        selector: CSS selector to extract specific element (Mode 1, text/html only, default: entire page body)
+        format: "text" for visible text, "html" for inner HTML, or "screenshot" for a
+            full-page PNG as base64 (Mode 1, default: "text")
 
     Returns:
-        Mode 1: Extracted page content (text or HTML)
+        Mode 1 (text/html): Extracted page content
+        Mode 1 (screenshot): "[SCREENSHOT_BASE64]<base64-png-data>" — decode the part
+            after the marker to get PNG bytes. To attach it as evidence on a finding,
+            POST it in a Mode 2 script (see the evidence-capture example below) —
+            `requests` is available in this container.
         Mode 2: Script stdout (whatever you print())
 
     Examples:
@@ -114,6 +120,14 @@ def execute_playwright(url: str = "", script: str = "", selector: str = "", form
 
         Get HTML of a login form:
         - url="http://10.0.0.5/login" selector="form" format="html"
+
+        Capture a screenshot of a vulnerable page (evidence for a finding):
+        - url="http://10.0.0.5/admin" format="screenshot"
+
+        Capture evidence AND attach it to a finding in one call (replace
+        REMEDIATION_ID with the finding's id — WEBAPP_API_URL/INTERNAL_API_KEY
+        are already set in this container's environment):
+        - script="import base64, os, requests\\npage.goto('http://10.0.0.5/admin')\\npage.wait_for_load_state('networkidle')\\npng = page.screenshot(full_page=True)\\nb64 = base64.b64encode(png).decode()\\nresp = requests.post(f\\"{os.environ['WEBAPP_API_URL']}/api/remediations/REMEDIATION_ID/evidence\\", json={'type': 'screenshot', 'imageBase64': b64, 'label': 'admin panel exposed', 'source': 'agent'}, headers={'X-Internal-Key': os.environ.get('INTERNAL_API_KEY', '')}, timeout=15)\\nprint(resp.status_code, resp.text[:200])"
 
         Login and capture authenticated page:
         - script="page.goto('http://10.0.0.5/login')\\npage.fill('#username', 'admin')\\npage.fill('#password', 'pass')\\npage.click('button[type=submit]')\\npage.wait_for_load_state('networkidle')\\nprint(page.inner_text('body')[:3000])"
@@ -124,6 +138,8 @@ def execute_playwright(url: str = "", script: str = "", selector: str = "", form
     if script.strip():
         return _execute_script_mode(script)
     elif url.strip():
+        if format.lower() == "screenshot":
+            return _execute_screenshot_mode(url)
         return _execute_content_mode(url, selector, format)
     else:
         return "[ERROR] Provide either 'url' (content extraction) or 'script' (custom automation)."
@@ -182,6 +198,48 @@ def _execute_content_mode(url: str, selector: str, format: str) -> str:
                     print(content)
                 else:
                     print("[INFO] Page rendered but no content extracted")
+            finally:
+                context.close()
+                browser.close()
+    """)
+
+    return _run_playwright_script(script, timeout=45)
+
+
+SCREENSHOT_MARKER = "[SCREENSHOT_BASE64]"
+
+
+def _execute_screenshot_mode(url: str) -> str:
+    """Mode 1 variant: navigate to URL and capture a full-page PNG screenshot,
+    returned as base64 text (this tool's contract is text in/text out — see
+    execute_playwright's docstring for how to decode and attach it)."""
+    script = textwrap.dedent(f"""\
+        import base64
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args={BROWSER_ARGS!r}
+            )
+            context = browser.new_context(
+                user_agent={CHROME_UA!r},
+                viewport={{"width": 1280, "height": 800}},
+            )
+            page = context.new_page()
+
+            try:
+                page.goto({url!r}, wait_until="networkidle", timeout=30000)
+            except Exception as e:
+                print(f"[ERROR] Navigation failed: {{e}}")
+                context.close()
+                browser.close()
+                raise SystemExit(1)
+
+            try:
+                png_bytes = page.screenshot(full_page=True)
+                b64 = base64.b64encode(png_bytes).decode("ascii")
+                print({SCREENSHOT_MARKER!r} + b64)
             finally:
                 context.close()
                 browser.close()

@@ -730,7 +730,7 @@ TOOL_REGISTRY = {
     "execute_playwright": {
         "purpose": "Browser automation -- rendered content extraction or custom scripting",
         "when_to_use": "Get JS-rendered page content (SPAs, dynamic pages), fill forms, test XSS inputs, login testing, multi-step browser flows",
-        "args_format": '"url": "http://target:port/path", "selector": "CSS selector", "format": "text|html", "script": "Playwright Python code"',
+        "args_format": '"url": "http://target:port/path", "selector": "CSS selector", "format": "text|html|screenshot", "script": "Playwright Python code"',
         "description": (
             '**execute_playwright** (Browser automation -- Playwright)\n'
             '   - **CRITICAL: Sync API only.** Your script runs inside `with sync_playwright() as p:`.\n'
@@ -739,6 +739,13 @@ TOOL_REGISTRY = {
             '   - **Content mode** (url): renders page with real browser, extracts text/HTML\n'
             '     Unlike curl, this executes JavaScript -- perfect for SPAs and dynamic pages\n'
             '     Optional: selector="form" to target elements, format="html" for innerHTML\n'
+            '   - **Screenshot mode** (url, format="screenshot"): captures a full-page PNG as\n'
+            '     "[SCREENSHOT_BASE64]<base64>" -- use this to capture evidence for a finding\n'
+            '     (a vulnerable page, an admin panel, an error message). To attach the capture\n'
+            '     directly to a finding, use script mode instead and POST it to\n'
+            '     $WEBAPP_API_URL/api/remediations/<remediation_id>/evidence with an\n'
+            '     X-Internal-Key header -- both env vars are already set in this container;\n'
+            '     `requests` is available.\n'
             '   - **Script mode** (script): run multi-step Playwright Python code\n'
             '     Pre-initialized `browser`, `context`, `page` variables. Use print() for output.\n'
             '     Example: page.goto("url"); page.fill("#user","admin"); page.click("button[type=submit]"); '

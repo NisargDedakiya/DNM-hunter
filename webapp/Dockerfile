@@ -52,8 +52,21 @@ RUN chown nextjs:nodejs .next
 
 # Pre-create data dirs so named volumes inherit correct ownership
 RUN mkdir -p /data/reports && chown nextjs:nodejs /data/reports
+RUN mkdir -p /data/evidence && chown nextjs:nodejs /data/evidence
 RUN mkdir -p /data/js-recon-uploads && chown nextjs:nodejs /data/js-recon-uploads
 RUN mkdir -p /data/js-recon-custom && chown nextjs:nodejs /data/js-recon-custom
+
+# Headless Chromium for server-side HTML->PDF report rendering (Phase 10,
+# webapp/src/lib/report/pdfRenderer.ts). Installed to a fixed, known path so
+# it survives independent of node_modules layout; --with-deps pulls the
+# Debian shared libraries Chromium needs (fonts, libnss3, etc). Same
+# version-pinning trick as the prisma CLI install above.
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+COPY --from=builder /app/node_modules/playwright/package.json /tmp/playwright-pkg.json
+RUN PW_VER=$(node -p "require('/tmp/playwright-pkg.json').version") && \
+    npm install --no-save "playwright@${PW_VER}" && \
+    npx playwright install --with-deps chromium && \
+    npm cache clean --force && rm /tmp/playwright-pkg.json
 
 # Leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing

@@ -6,9 +6,11 @@ import { StatusBadge } from '../RemediationDashboard/StatusBadge'
 import { ValidatorBadge } from '../RemediationDashboard/ValidatorBadge'
 import { RemediationTypeIcon } from '../RemediationDashboard/RemediationTypeIcon'
 import { EvidenceSection } from './EvidenceSection'
+import { EvidenceGallery } from './EvidenceGallery'
 import { SolutionSection } from './SolutionSection'
 import { ValidatorSection } from './ValidatorSection'
 import { CodeFixButton } from './CodeFixButton'
+import { PlatformSubmissionSection } from './PlatformSubmissionSection'
 import type { Remediation, ValidatorStatus } from '@/lib/cypherfix-types'
 import styles from './RemediationDetail.module.css'
 
@@ -89,9 +91,13 @@ export function RemediationDetail({
 
         {/* Evidence */}
         <EvidenceSection remediation={remediation} />
+        <EvidenceGallery remediationId={remediation.id} />
 
         {/* Solution */}
         <SolutionSection remediation={remediation} />
+
+        {/* Bug-bounty platform submission text */}
+        <PlatformSubmissionSection remediation={remediation} projectId={projectId} />
 
         {/* CodeFix */}
         <CodeFixButton remediation={remediation} onStartCodeFix={onStartCodeFix} missingSettings={missingSettings} projectId={projectId} />

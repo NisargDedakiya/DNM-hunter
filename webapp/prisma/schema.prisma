@@ -1273,12 +1273,35 @@ model Remediation {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
+  evidenceItems     Evidence[]
+
   @@index([projectId, status])
   @@index([projectId, severity])
   @@index([projectId, priority])
   @@index([programId, severity])
   @@index([programId, submissionStatus])
   @@map("remediations")
+}
+
+model Evidence {
+  id            String      @id @default(cuid())
+  remediationId String      @map("remediation_id")
+  remediation   Remediation @relation(fields: [remediationId], references: [id], onDelete: Cascade)
+  type          String      @default("screenshot") // screenshot | note
+  label         String      @default("")
+  // Screenshots are stored on disk (EVIDENCE_OUTPUT_PATH, mirrors reports'
+  // REPORT_OUTPUT_PATH convention); filePath is server-side only, never
+  // returned to the client — evidence is served via a dedicated route.
+  filePath      String      @default("") @map("file_path")
+  fileSize      Int         @default(0) @map("file_size")
+  // Free-text evidence (a captured request/response, terminal output) when
+  // type="note" — no file on disk.
+  textContent   String      @default("") @map("text_content") @db.Text
+  source        String      @default("manual") // manual | agent
+  capturedAt    DateTime    @default(now()) @map("captured_at")
+
+  @@index([remediationId])
+  @@map("evidence")
 }
 
 model Report {

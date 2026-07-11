@@ -54,8 +54,14 @@ async function fetchAllReports(): Promise<ReportMeta[]> {
   return res.json()
 }
 
-async function generateReport(projectId: string): Promise<ReportMeta> {
-  const res = await fetch(`/api/projects/${projectId}/reports`, { method: 'POST' })
+export type ReportFormat = 'html' | 'pdf' | 'docx'
+
+async function generateReport(projectId: string, format: ReportFormat = 'html'): Promise<ReportMeta> {
+  const res = await fetch(`/api/projects/${projectId}/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ format }),
+  })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error(body.error || 'Report generation failed')
@@ -80,7 +86,7 @@ export function useReports(projectId: string, enabled = true) {
   })
 
   const generateMutation = useMutation({
-    mutationFn: () => generateReport(projectId),
+    mutationFn: (format?: ReportFormat) => generateReport(projectId, format),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [REPORTS_KEY, projectId] })
       queryClient.invalidateQueries({ queryKey: [ALL_REPORTS_KEY] })
@@ -126,7 +132,8 @@ export function useAllReports() {
   })
 
   const generateMutation = useMutation({
-    mutationFn: (projectId: string) => generateReport(projectId),
+    mutationFn: ({ projectId, format }: { projectId: string; format?: ReportFormat }) =>
+      generateReport(projectId, format),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ALL_REPORTS_KEY] })
     },

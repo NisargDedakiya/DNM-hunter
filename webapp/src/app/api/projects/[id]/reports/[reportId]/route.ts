@@ -6,7 +6,13 @@ interface RouteParams {
   params: Promise<{ id: string; reportId: string }>
 }
 
-/** GET /api/projects/{id}/reports/{reportId} — Download report HTML */
+const CONTENT_TYPE_BY_FORMAT: Record<string, string> = {
+  html: 'text/html; charset=utf-8',
+  pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+}
+
+/** GET /api/projects/{id}/reports/{reportId} — Download report (HTML/PDF/DOCX) */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id, reportId } = await params
@@ -23,11 +29,15 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     const fileBuffer = readFileSync(report.filePath)
+    const contentType = CONTENT_TYPE_BY_FORMAT[report.format] || 'application/octet-stream'
+    // Binary formats (PDF/DOCX) download as attachments; HTML stays inline
+    // so the existing "open in new tab" behavior keeps working.
+    const disposition = report.format === 'html' ? 'inline' : 'attachment'
 
     return new Response(fileBuffer, {
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Content-Disposition': `inline; filename="${report.filename}"`,
+        'Content-Type': contentType,
+        'Content-Disposition': `${disposition}; filename="${report.filename}"`,
         'Content-Length': String(fileBuffer.length),
         'Cache-Control': 'no-cache',
       },
