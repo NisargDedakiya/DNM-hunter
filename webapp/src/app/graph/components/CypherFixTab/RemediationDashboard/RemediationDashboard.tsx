@@ -6,12 +6,14 @@ import { ExternalLink } from '@/components/ui'
 import { cveToUrl } from '@/lib/url-utils'
 import { SeverityBadge } from './SeverityBadge'
 import { StatusBadge } from './StatusBadge'
+import { ValidatorBadge } from './ValidatorBadge'
 import { RemediationTypeIcon } from './RemediationTypeIcon'
 import { RemediationFilters } from './RemediationFilters'
 import type {
   Remediation,
   RemediationSeverity,
   RemediationStatus,
+  ValidatorStatus,
 } from '@/lib/cypherfix-types'
 import { SEVERITY_ORDER } from '@/lib/cypherfix-types'
 import styles from './RemediationDashboard.module.css'
@@ -22,8 +24,10 @@ interface RemediationDashboardProps {
   error: Error | null
   severityFilter?: RemediationSeverity
   statusFilter?: RemediationStatus
+  validatorFilter?: ValidatorStatus
   onSeverityFilterChange: (severity: RemediationSeverity | undefined) => void
   onStatusFilterChange: (status: RemediationStatus | undefined) => void
+  onValidatorFilterChange: (status: ValidatorStatus | undefined) => void
   onSelectRemediation: (remediation: Remediation) => void
   onDismiss: (id: string) => void
   onDelete: (id: string) => void
@@ -39,8 +43,10 @@ export function RemediationDashboard({
   error,
   severityFilter,
   statusFilter,
+  validatorFilter,
   onSeverityFilterChange,
   onStatusFilterChange,
+  onValidatorFilterChange,
   onSelectRemediation,
   onDismiss,
   onDelete,
@@ -107,8 +113,10 @@ export function RemediationDashboard({
       <RemediationFilters
         severityFilter={severityFilter}
         statusFilter={statusFilter}
+        validatorFilter={validatorFilter}
         onSeverityChange={onSeverityFilterChange}
         onStatusChange={onStatusFilterChange}
+        onValidatorChange={onValidatorFilterChange}
       />
 
       {/* Table */}
@@ -124,6 +132,7 @@ export function RemediationDashboard({
                 <th className={styles.thTitle}>Title</th>
                 <th className={styles.thType}>Type</th>
                 <th className={styles.thStatus}>Status</th>
+                <th className={styles.thStatus}>Validator</th>
                 <th className={styles.thCve}>CVEs</th>
                 <th className={styles.thActions}></th>
               </tr>
@@ -153,6 +162,9 @@ export function RemediationDashboard({
                   </td>
                   <td className={styles.tdStatus}>
                     <StatusBadge status={rem.status} />
+                  </td>
+                  <td className={styles.tdStatus}>
+                    <ValidatorBadge status={rem.validatorStatus} confidenceScore={rem.confidenceScore} />
                   </td>
                   <td className={styles.tdCve}>
                     {rem.cveIds.length > 0 ? (

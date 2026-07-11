@@ -161,6 +161,14 @@ export type RemediationType =
 
 export type FixComplexity = 'low' | 'medium' | 'high' | 'critical'
 
+// ── AI validator (Phase 09) ──────────────────────────────────────────────────
+// Separate from RemediationStatus (fix workflow state) and priority (what to
+// fix first) — this is the AI's self-assessed confidence that a finding is a
+// genuine true positive, so operators can triage skeptically instead of
+// trusting every finding at face value.
+export type ValidatorStatus = 'confirmed' | 'likely' | 'needs_manual_review' | 'ignored'
+export type Likelihood = 'low' | 'medium' | 'high' | ''
+
 export interface Remediation {
   id: string
   projectId: string
@@ -190,6 +198,11 @@ export interface Remediation {
   status: RemediationStatus
   agentSessionId: string
   agentNotes: string
+  confidenceScore: number | null
+  falsePositiveScore: number | null
+  businessImpact: string
+  likelihood: Likelihood
+  validatorStatus: ValidatorStatus
   fileChanges: Array<{
     filePath: string
     language: string
@@ -230,6 +243,20 @@ export const STATUS_LABELS: Record<RemediationStatus, string> = {
   pr_created: 'PR Created',
   resolved: 'Resolved',
   dismissed: 'Dismissed',
+}
+
+export const VALIDATOR_STATUS_LABELS: Record<ValidatorStatus, string> = {
+  confirmed: 'Confirmed',
+  likely: 'Likely',
+  needs_manual_review: 'Needs Review',
+  ignored: 'Ignored',
+}
+
+export const VALIDATOR_STATUS_COLORS: Record<ValidatorStatus, string> = {
+  confirmed: 'var(--severity-critical, #dc2626)',
+  likely: 'var(--severity-medium, #ca8a04)',
+  needs_manual_review: 'var(--text-tertiary, #6b7280)',
+  ignored: 'var(--text-tertiary, #6b7280)',
 }
 
 // ── Activity Log Entry (CodeFix chronological event) ────────────────────────

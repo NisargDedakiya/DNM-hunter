@@ -26,6 +26,18 @@ class TriageFinding(BaseModel):
     target_repo: str = ""
     target_branch: str = "main"
 
+    # ── AI validator (Phase 09) — confidence/impact scoring on top of the
+    # weighted triage priority above. The triage LLM self-assesses how
+    # confident it is that this is a true positive vs. a false alarm, so
+    # operators can triage "needs_manual_review" findings first instead of
+    # reading every one at the same priority.
+    confidence_score: Optional[float] = None       # 0-100, likelihood true positive
+    false_positive_score: Optional[float] = None   # 0-100
+    business_impact: str = ""
+    likelihood: str = ""                            # "low" | "medium" | "high"
+    validator_status: str = "needs_manual_review"
+    # confirmed | likely | needs_manual_review | ignored
+
 
 class RemediationDraft(BaseModel):
     findings: list[TriageFinding] = []

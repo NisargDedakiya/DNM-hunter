@@ -2,11 +2,13 @@
 
 import { memo } from 'react'
 import { Filter, X } from 'lucide-react'
-import type { RemediationSeverity, RemediationStatus } from '@/lib/cypherfix-types'
+import type { RemediationSeverity, RemediationStatus, ValidatorStatus } from '@/lib/cypherfix-types'
+import { VALIDATOR_STATUS_LABELS } from '@/lib/cypherfix-types'
 import styles from './RemediationDashboard.module.css'
 
 const SEVERITIES: RemediationSeverity[] = ['critical', 'high', 'medium', 'low', 'info']
 const STATUSES: RemediationStatus[] = ['pending', 'in_progress', 'no_fix', 'code_review', 'pr_created', 'resolved', 'dismissed']
+const VALIDATOR_STATUSES: ValidatorStatus[] = ['confirmed', 'likely', 'needs_manual_review', 'ignored']
 
 const STATUS_LABELS: Record<RemediationStatus, string> = {
   pending: 'Pending',
@@ -21,17 +23,21 @@ const STATUS_LABELS: Record<RemediationStatus, string> = {
 interface RemediationFiltersProps {
   severityFilter?: RemediationSeverity
   statusFilter?: RemediationStatus
+  validatorFilter?: ValidatorStatus
   onSeverityChange: (severity: RemediationSeverity | undefined) => void
   onStatusChange: (status: RemediationStatus | undefined) => void
+  onValidatorChange: (status: ValidatorStatus | undefined) => void
 }
 
 export const RemediationFilters = memo(function RemediationFilters({
   severityFilter,
   statusFilter,
+  validatorFilter,
   onSeverityChange,
   onStatusChange,
+  onValidatorChange,
 }: RemediationFiltersProps) {
-  const hasFilters = !!severityFilter || !!statusFilter
+  const hasFilters = !!severityFilter || !!statusFilter || !!validatorFilter
 
   return (
     <div className={styles.filters}>
@@ -59,12 +65,24 @@ export const RemediationFilters = memo(function RemediationFilters({
         ))}
       </select>
 
+      <select
+        className={styles.filterSelect}
+        value={validatorFilter || ''}
+        onChange={e => onValidatorChange((e.target.value || undefined) as ValidatorStatus | undefined)}
+      >
+        <option value="">All Validator Statuses</option>
+        {VALIDATOR_STATUSES.map(s => (
+          <option key={s} value={s}>{VALIDATOR_STATUS_LABELS[s]}</option>
+        ))}
+      </select>
+
       {hasFilters && (
         <button
           className={styles.clearFilters}
           onClick={() => {
             onSeverityChange(undefined)
             onStatusChange(undefined)
+            onValidatorChange(undefined)
           }}
         >
           <X size={12} />

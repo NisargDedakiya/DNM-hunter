@@ -5,7 +5,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Remediation, RemediationSeverity, RemediationStatus } from '@/lib/cypherfix-types'
+import type { Remediation, RemediationSeverity, RemediationStatus, ValidatorStatus } from '@/lib/cypherfix-types'
 
 // =============================================================================
 // QUERY KEYS
@@ -22,6 +22,7 @@ async function fetchRemediations(
   filters?: {
     status?: RemediationStatus
     severity?: RemediationSeverity
+    validatorStatus?: ValidatorStatus
     sort?: string
     order?: 'asc' | 'desc'
   }
@@ -29,6 +30,7 @@ async function fetchRemediations(
   const params = new URLSearchParams({ projectId })
   if (filters?.status) params.set('status', filters.status)
   if (filters?.severity) params.set('severity', filters.severity)
+  if (filters?.validatorStatus) params.set('validatorStatus', filters.validatorStatus)
   if (filters?.sort) params.set('sort', filters.sort)
   if (filters?.order) params.set('order', filters.order)
 
@@ -76,6 +78,7 @@ export interface UseRemediationsOptions {
   projectId: string
   status?: RemediationStatus
   severity?: RemediationSeverity
+  validatorStatus?: ValidatorStatus
   sort?: string
   order?: 'asc' | 'desc'
   enabled?: boolean
@@ -85,6 +88,7 @@ export function useRemediations({
   projectId,
   status,
   severity,
+  validatorStatus,
   sort = 'priority',
   order = 'asc',
   enabled = true,
@@ -92,8 +96,8 @@ export function useRemediations({
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    queryKey: [REMEDIATIONS_KEY, projectId, { status, severity, sort, order }],
-    queryFn: () => fetchRemediations(projectId, { status, severity, sort, order }),
+    queryKey: [REMEDIATIONS_KEY, projectId, { status, severity, validatorStatus, sort, order }],
+    queryFn: () => fetchRemediations(projectId, { status, severity, validatorStatus, sort, order }),
     enabled: enabled && !!projectId,
     staleTime: 30_000,
   })

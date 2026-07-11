@@ -229,6 +229,11 @@ class TriageOrchestrator:
                 "estimatedFiles": rem["estimated_files"],
                 "targetRepo": rem["target_repo"],
                 "targetBranch": rem["target_branch"],
+                "confidenceScore": rem["confidence_score"],
+                "falsePositiveScore": rem["false_positive_score"],
+                "businessImpact": rem["business_impact"],
+                "likelihood": rem["likelihood"],
+                "validatorStatus": rem["validator_status"],
             })
 
         try:
@@ -359,6 +364,11 @@ class TriageOrchestrator:
                     estimated_files=item.get("estimated_files", 0),
                     target_repo=item.get("target_repo", ""),
                     target_branch=item.get("target_branch", "main"),
+                    confidence_score=item.get("confidence_score"),
+                    false_positive_score=item.get("false_positive_score"),
+                    business_impact=item.get("business_impact", ""),
+                    likelihood=item.get("likelihood", ""),
+                    validator_status=item.get("validator_status", "needs_manual_review"),
                 )
                 findings.append(finding)
 

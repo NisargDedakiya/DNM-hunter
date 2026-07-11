@@ -45,6 +45,11 @@ export async function POST(request: NextRequest) {
             estimatedFiles: (rem.estimatedFiles as number) || 0,
             targetRepo: (rem.targetRepo as string) || '',
             targetBranch: (rem.targetBranch as string) || 'main',
+            confidenceScore: rem.confidenceScore as number | undefined,
+            falsePositiveScore: rem.falsePositiveScore as number | undefined,
+            businessImpact: (rem.businessImpact as string) || '',
+            likelihood: (rem.likelihood as string) || '',
+            validatorStatus: (rem.validatorStatus as string) || 'needs_manual_review',
           },
         })
       )

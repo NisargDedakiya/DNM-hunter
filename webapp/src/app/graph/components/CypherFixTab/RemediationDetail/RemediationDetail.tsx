@@ -3,11 +3,13 @@
 import { ArrowLeft, Trash2, XCircle } from 'lucide-react'
 import { SeverityBadge } from '../RemediationDashboard/SeverityBadge'
 import { StatusBadge } from '../RemediationDashboard/StatusBadge'
+import { ValidatorBadge } from '../RemediationDashboard/ValidatorBadge'
 import { RemediationTypeIcon } from '../RemediationDashboard/RemediationTypeIcon'
 import { EvidenceSection } from './EvidenceSection'
 import { SolutionSection } from './SolutionSection'
+import { ValidatorSection } from './ValidatorSection'
 import { CodeFixButton } from './CodeFixButton'
-import type { Remediation } from '@/lib/cypherfix-types'
+import type { Remediation, ValidatorStatus } from '@/lib/cypherfix-types'
 import styles from './RemediationDetail.module.css'
 
 interface RemediationDetailProps {
@@ -19,6 +21,7 @@ interface RemediationDetailProps {
   onDelete: (id: string) => void
   onRefresh: () => void
   onStartCodeFix: (remediationId: string) => void
+  onOverrideValidatorStatus: (id: string, validatorStatus: ValidatorStatus) => void
   missingSettings?: string[]
 }
 
@@ -31,6 +34,7 @@ export function RemediationDetail({
   onDelete,
   onRefresh,
   onStartCodeFix,
+  onOverrideValidatorStatus,
   missingSettings = [],
 }: RemediationDetailProps) {
   return (
@@ -70,6 +74,7 @@ export function RemediationDetail({
           <div className={styles.badges}>
             <SeverityBadge severity={remediation.severity} />
             <StatusBadge status={remediation.status} />
+            <ValidatorBadge status={remediation.validatorStatus} confidenceScore={remediation.confidenceScore} />
             <RemediationTypeIcon type={remediation.remediationType} />
             {remediation.cvssScore !== null && (
               <span className={styles.cvss}>CVSS {remediation.cvssScore.toFixed(1)}</span>
@@ -78,6 +83,9 @@ export function RemediationDetail({
           <h2 className={styles.detailTitle}>{remediation.title}</h2>
           <p className={styles.description}>{remediation.description}</p>
         </div>
+
+        {/* AI Validator */}
+        <ValidatorSection remediation={remediation} onOverrideValidatorStatus={onOverrideValidatorStatus} />
 
         {/* Evidence */}
         <EvidenceSection remediation={remediation} />

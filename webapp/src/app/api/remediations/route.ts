@@ -16,12 +16,14 @@ export async function GET(request: NextRequest) {
 
     const status = searchParams.get('status')
     const severity = searchParams.get('severity')
+    const validatorStatus = searchParams.get('validatorStatus')
     const sort = searchParams.get('sort') || 'priority'
     const order = (searchParams.get('order') || 'asc') as 'asc' | 'desc'
 
     const where: Record<string, unknown> = { projectId }
     if (status) where.status = status
     if (severity) where.severity = severity
+    if (validatorStatus) where.validatorStatus = validatorStatus
 
     const remediations = await prisma.remediation.findMany({
       where,

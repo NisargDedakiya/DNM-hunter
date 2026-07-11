@@ -9,7 +9,7 @@ import { RemediationDashboard } from './RemediationDashboard/RemediationDashboar
 import { RemediationDetail } from './RemediationDetail/RemediationDetail'
 import { DiffViewer } from './DiffViewer/DiffViewer'
 import { TriageProgress } from './TriageProgress/TriageProgress'
-import type { Remediation, RemediationSeverity, RemediationStatus } from '@/lib/cypherfix-types'
+import type { Remediation, RemediationSeverity, RemediationStatus, ValidatorStatus } from '@/lib/cypherfix-types'
 import styles from './CypherFixTab.module.css'
 
 type SubView = 'dashboard' | 'detail' | 'diffviewer'
@@ -35,6 +35,7 @@ export function CypherFixTab({
   const [selectedRemediation, setSelectedRemediation] = useState<Remediation | null>(null)
   const [severityFilter, setSeverityFilter] = useState<RemediationSeverity | undefined>()
   const [statusFilter, setStatusFilter] = useState<RemediationStatus | undefined>()
+  const [validatorFilter, setValidatorFilter] = useState<ValidatorStatus | undefined>()
 
   const {
     remediations,
@@ -47,6 +48,7 @@ export function CypherFixTab({
     projectId,
     severity: severityFilter,
     status: statusFilter,
+    validatorStatus: validatorFilter,
   })
 
   const { data: project } = useProjectById(projectId || null)
@@ -87,6 +89,10 @@ export function CypherFixTab({
     updateRemediation({ id, data: { status: 'dismissed' } })
   }, [updateRemediation])
 
+  const handleOverrideValidatorStatus = useCallback((id: string, validatorStatus: ValidatorStatus) => {
+    updateRemediation({ id, data: { validatorStatus } })
+  }, [updateRemediation])
+
   const handleDelete = useCallback((id: string) => {
     deleteRemediation(id)
     if (selectedRemediation?.id === id) {
@@ -94,7 +100,7 @@ export function CypherFixTab({
     }
   }, [deleteRemediation, selectedRemediation, handleBackToDashboard])
 
-  const showEmpty = !isLoading && remediations.length === 0 && !severityFilter && !statusFilter
+  const showEmpty = !isLoading && remediations.length === 0 && !severityFilter && !statusFilter && !validatorFilter
 
   const renderContent = () => {
     if (showEmpty) {
@@ -122,6 +128,7 @@ export function CypherFixTab({
           onDelete={handleDelete}
           onRefresh={refetch}
           onStartCodeFix={handleStartCodeFix}
+          onOverrideValidatorStatus={handleOverrideValidatorStatus}
           missingSettings={missingSettings}
         />
       )
@@ -133,8 +140,10 @@ export function CypherFixTab({
         error={error}
         severityFilter={severityFilter}
         statusFilter={statusFilter}
+        validatorFilter={validatorFilter}
         onSeverityFilterChange={setSeverityFilter}
         onStatusFilterChange={setStatusFilter}
+        onValidatorFilterChange={setValidatorFilter}
         onSelectRemediation={handleSelectRemediation}
         onDismiss={handleDismiss}
         onDelete={handleDelete}

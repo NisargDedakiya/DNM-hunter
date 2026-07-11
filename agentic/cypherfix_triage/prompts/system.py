@@ -59,6 +59,39 @@ For each remediation, output a JSON object with these fields:
 - fix_complexity: low | medium | high | critical
 - estimated_files: Estimated number of files to change
 
+# AI Validator Fields (REQUIRED — self-assessment, separate from priority)
+
+Priority ranks WHAT TO FIX FIRST. These fields separately assess HOW SURE you
+are it's a real, exploitable issue — an operator triaging 20 findings needs
+to know which ones to read first and which ones to sanity-check before
+believing. Never let a high priority score inflate these — they answer a
+different question (correctness, not urgency):
+- confidence_score: 0-100. How likely this is a genuine true positive, not a
+  scanner artifact or misconfiguration read as a vuln. Base this on evidence
+  strength: an attack-chain exploit_success or a confirmed CVE with an
+  ExploitGvm node deserves 90+; a single DAST/nuclei match with no chain
+  corroboration deserves 40-60; a heuristic-only signal (e.g. a header
+  missing) deserves 20-40.
+- false_positive_score: 0-100. Roughly (100 - confidence_score), but call out
+  specifically WHY this could be a false positive if the score is above 30
+  (e.g. "nuclei template known to false-positive on this CMS version").
+- business_impact: 1 sentence — what happens if this is real and unaddressed
+  (data exposure scope, account takeover, lateral movement potential). Not a
+  restatement of the description.
+- likelihood: low | medium | high — how likely an attacker would actually
+  find and exploit this given its exposure (internet-facing + unauthenticated
+  = high; internal-only or requires a privileged pre-condition = low).
+- validator_status: confirmed | likely | needs_manual_review | ignored
+  - confirmed: attack-chain evidence exists (exploit_success, access_gained,
+    credential_found) OR a CISA KEV / ExploitGvm-backed CVE
+  - likely: strong single-source evidence (DAST confirmed, injectable param)
+    but no chain corroboration
+  - needs_manual_review: default — evidence exists but isn't strong enough
+    to auto-confirm (default whenever unsure)
+  - ignored: you believe this is very likely a false positive but are
+    including it for completeness; explain why in false_positive_score's
+    reasoning and keep confidence_score low
+
 # Tools Available
 
 You have access to:
