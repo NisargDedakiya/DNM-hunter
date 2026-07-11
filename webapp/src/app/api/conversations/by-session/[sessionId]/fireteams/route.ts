@@ -61,6 +61,10 @@ export async function POST(
             // accept `tools` from the agent, fall back to `skills` if some
             // legacy payload sneaks in.
             skills: m.tools ?? m.skills ?? [],
+            // Optional named agent role (agent_roles.py DISPATCHABLE_ROLE_IDS)
+            // the agent self-declared for this member — purely classificatory,
+            // rendered as a badge on the member card. "" when undeclared.
+            role: typeof m.role === 'string' ? m.role : '',
             status: 'running',
           })),
         },

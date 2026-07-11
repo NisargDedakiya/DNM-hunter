@@ -16,6 +16,7 @@ import styles from './FireteamMemberCard.module.css'
 import { ToolExecutionCard } from './ToolExecutionCard'
 import { PlanWaveCard } from './PlanWaveCard'
 import { formatTokenCount } from '@/lib/formatTokens'
+import { AGENT_ROLE_ICON_BY_ID, roleLabel } from '@/lib/agentRoles'
 import type { FireteamMemberPanel } from './types'
 
 interface FireteamMemberCardProps {
@@ -73,6 +74,8 @@ export function FireteamMemberCard({ member, missingApiKeys, onAddApiKey, onTool
 
   const toolCount = member.tools.length + member.planWaves.reduce((n, w) => n + w.tools.length, 0)
   const cls = [styles.card, styles[`status_${member.status}`] || ''].filter(Boolean).join(' ')
+  const RoleIcon = member.role ? AGENT_ROLE_ICON_BY_ID[member.role] : undefined
+  const roleName = roleLabel(member.role)
 
   // Sub-step: live counter while running, final count when finished.
   // `latest_iteration` streams in via FIRETEAM_THINKING; `iterations_used`
@@ -90,6 +93,11 @@ export function FireteamMemberCard({ member, missingApiKeys, onAddApiKey, onTool
       <button type="button" className={styles.header} onClick={() => setExpanded(v => !v)}>
         {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <span className={styles.name}>{member.name}</span>
+        {RoleIcon && roleName && (
+          <span className={styles.roleBadge} title={roleName}>
+            <RoleIcon size={11} /> {roleName}
+          </span>
+        )}
         {statusIcon(member.status)}
         <span className={styles.status}>{member.status}</span>
         <span className={styles.meta}>

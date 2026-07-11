@@ -34,6 +34,21 @@
   color: var(--text-primary, #e5e7eb);
 }
 
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bg-tertiary, #1f2937);
+  color: var(--text-secondary, #9ca3af);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .status {
   font-size: 0.75rem;
   color: var(--text-secondary, #9ca3af);

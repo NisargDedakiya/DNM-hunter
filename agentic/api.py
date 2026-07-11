@@ -1948,6 +1948,31 @@ async def get_community_skill_content(skill_id: str):
 
 
 # =============================================================================
+# NAMED AGENT ROLES & VULNERABILITY MODULES
+# =============================================================================
+
+@app.get("/agent-roles", tags=["System"])
+async def list_agent_roles():
+    """Return the canonical named-agent-role roster (Planner, Recon, JS, API,
+    Auth, Payload, Scanner, Validator, Report, Memory, Coordinator). Dispatched
+    fireteam members may optionally declare one of the `dispatchable` roles;
+    Planner/Coordinator/Memory are fulfilled by the root agent loop itself."""
+    from orchestrator_helpers.agent_roles import list_roles
+    return {"roles": list_roles()}
+
+
+@app.get("/vuln-modules", tags=["System"])
+async def list_vulnerability_modules():
+    """Return the unified vulnerability module catalog: the 9 fully-automated
+    built-in attack skills plus every markdown methodology guide under
+    agentic/skills/{vulnerabilities,api_security}/ and agentic/community-skills/,
+    each tagged with its suggested named agent role."""
+    from orchestrator_helpers.vuln_modules import list_vuln_modules
+    modules = list_vuln_modules()
+    return {"modules": modules, "total": len(modules)}
+
+
+# =============================================================================
 # LLM PROVIDER TEST — test a provider config with a simple message
 # =============================================================================
 

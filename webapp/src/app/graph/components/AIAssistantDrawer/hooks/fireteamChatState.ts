@@ -99,6 +99,7 @@ export function handleFireteamDeployed(
       // EXECUTED tool calls (different concept). Read the new agent key and
       // fall back to the legacy one for forward/back compat during rollout.
       skills: m.tools ?? m.skills ?? [],
+      role: m.role || undefined,
       status: 'running' as FireteamMemberStatus,
       started_at: now,
       tools: [],

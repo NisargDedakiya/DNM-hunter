@@ -603,6 +603,7 @@ export function useConversationRestoration(deps: ConversationRestorationDeps) {
                   name: m.name,
                   task: m.task ?? '',
                   skills: m.skills ?? [],
+                  role: m.role || undefined,
                   status: memberStatus,
                   started_at: m.startedAt ? new Date(m.startedAt) : startedAt,
                   completed_at: m.completedAt

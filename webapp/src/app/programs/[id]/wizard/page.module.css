@@ -135,6 +135,20 @@
   line-height: 1.4;
 }
 
+.cardRole {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
 .reader {
   border-radius: var(--radius-lg);
   background: var(--bg-secondary);

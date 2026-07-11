@@ -98,6 +98,8 @@ export interface FireteamMemberInfo {
   // is no longer emitted by the agent.
   tools?: string[]
   skills?: string[]
+  // Optional named agent role id (agent_roles.py DISPATCHABLE_ROLE_IDS).
+  role?: string
   max_iterations: number
 }
 

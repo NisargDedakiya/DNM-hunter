@@ -141,6 +141,10 @@ def _build_member_state(
         "fireteam_id": fireteam_id,
         "tools": list(spec.get("tools") or []),
         "task": spec.get("task") or "",
+        # Optional named agent role (agent_roles.py DISPATCHABLE_ROLE_IDS).
+        # Unknown/absent values are handled by agent_roles.get_role() returning
+        # None — the member prompt simply omits the persona prefix.
+        "role": spec.get("role") or "",
 
         # Member-local
         "execution_trace": [],
@@ -542,6 +546,7 @@ async def fireteam_deploy_node(
                         "name": m.get("name"),
                         "task": m.get("task"),
                         "tools": m.get("tools") or [],
+                        "role": m.get("role") or "",
                         "max_iterations": _member_max_iter,
                     }
                     for mid, m in zip(member_ids, members)
@@ -563,7 +568,7 @@ async def fireteam_deploy_node(
             "projectId": project_id,
             "members": [
                 {"memberIdKey": mid, "name": m.get("name") or mid, "task": m.get("task") or "",
-                 "tools": m.get("tools") or []}
+                 "tools": m.get("tools") or [], "role": m.get("role") or ""}
                 for mid, m in zip(member_ids, members)
             ],
         },

@@ -1190,6 +1190,7 @@ model FireteamMember {
   name             String
   task             String    @db.Text
   skills           String[]
+  role             String    @default("")
   status           String    @default("running")
   completionReason String?   @map("completion_reason")
   iterationsUsed   Int       @default(0) @map("iterations_used")

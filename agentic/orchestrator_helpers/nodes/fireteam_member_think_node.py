@@ -299,7 +299,7 @@ def _build_pending_confirmation(decision: LLMDecision, state: FireteamMemberStat
 # ---------- Prompt construction ----------
 
 _MEMBER_SYSTEM_PROMPT = """You are a Fireteam member agent specializing in a focused pentesting subtask.
-
+{role_persona}
 """ + UNTRUSTED_OUTPUT_GUIDANCE + """
 
 ## Your mission
@@ -781,9 +781,18 @@ def _build_member_prompt(state: FireteamMemberState) -> str:
             "orchestrator will recommend you complete and let the root re-deploy.\n\n"
         )
 
+    role_persona = ""
+    declared_role = state.get("role")
+    if declared_role:
+        from orchestrator_helpers.agent_roles import get_role
+        role_meta = get_role(declared_role)
+        if role_meta:
+            role_persona = f"\nYou are dispatched as this engagement's **{role_meta['label']}**. {role_meta['persona']}\n"
+
     rendered = _MEMBER_SYSTEM_PROMPT.format(
         task=state.get("task", "(no task specified)"),
         peer_block=peer_block,
+        role_persona=role_persona,
         phase=phase,
         max_iterations=state.get("max_iterations", 15),
         target_info=target_str,

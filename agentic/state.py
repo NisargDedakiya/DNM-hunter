@@ -446,6 +446,16 @@ class FireteamMemberSpec(BaseModel):
             "justification when the member calls it."
         ),
     )
+    role: Optional[str] = Field(
+        default=None,
+        description=(
+            "Optional named agent role this member fulfills, from the "
+            "dispatchable roster in orchestrator_helpers/agent_roles.py: "
+            "'recon', 'js', 'api', 'auth', 'payload', 'scanner', 'validator', "
+            "'report'. Purely classificatory — does not change what tools the "
+            "member may call. Unknown/absent values are ignored, not errors."
+        ),
+    )
 
 
 class FireteamPlan(BaseModel):
@@ -500,6 +510,7 @@ class FireteamMemberState(TypedDict):
     fireteam_id: str             # fireteam this member belongs to
     tools: List[str]             # primary tool allowlist (canonical TOOL_REGISTRY names)
     task: str                    # member's local objective
+    role: str                    # optional named agent role id (agent_roles.py); "" if undeclared
 
     # Member-local
     execution_trace: List[dict]

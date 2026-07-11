@@ -95,6 +95,9 @@ export interface FireteamMemberPanel {
   name: string
   task: string
   skills: string[]
+  // Optional named agent role id (agent_roles.py DISPATCHABLE_ROLE_IDS),
+  // rendered as a badge via @/lib/agentRoles. "" / undefined when undeclared.
+  role?: string
   status: FireteamMemberStatus
   started_at: Date
   completed_at?: Date
