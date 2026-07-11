@@ -74,6 +74,16 @@
   color: var(--accent-secondary);
 }
 
+.badgeOperator {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+.badgeViewer {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-tertiary);
+}
+
 .badgeYes {
   background: rgba(34, 197, 94, 0.15);
   color: var(--status-success);

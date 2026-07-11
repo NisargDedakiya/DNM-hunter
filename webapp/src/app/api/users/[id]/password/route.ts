@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { hashPassword, verifyPassword } from '@/lib/auth'
 import { getSession } from '@/lib/session'
+import { hasPermission } from '@/lib/rbac'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -26,16 +27,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const isAdmin = session.role === 'admin'
+    const canManageUsers = hasPermission(session.role, 'users.manage')
     const isSelf = session.userId === id
 
-    // Standard users can only change their own password
-    if (!isAdmin && !isSelf) {
+    // Users without users.manage can only change their own password
+    if (!canManageUsers && !isSelf) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Standard users must provide current password
-    if (!isAdmin && isSelf) {
+    // Users without users.manage must provide their current password
+    if (!canManageUsers && isSelf) {
       if (!currentPassword) {
         return NextResponse.json(
           { error: 'Current password is required' },

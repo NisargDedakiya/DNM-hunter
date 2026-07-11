@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify } from 'jose'
+import { consumeRateLimit, tierForPath } from '@/lib/rateLimit'
+import { hasPermission, requiredPermissionForPath } from '@/lib/rbac'
 
 const AUTH_COOKIE_NAME = 'nisarghunter-auth'
 
@@ -46,15 +48,45 @@ async function verifyApiToken(origin: string, rawToken: string): Promise<{ sub: 
   }
 }
 
+function clientIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) return forwardedFor.split(',')[0].trim()
+  const realIp = request.headers.get('x-real-ip')
+  if (realIp) return realIp.trim()
+  return 'unknown'
+}
+
+function rateLimitedResponse(resetAt: number): NextResponse {
+  const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000))
+  const response = NextResponse.json({ error: 'Too many requests. Please slow down.' }, { status: 429 })
+  response.headers.set('Retry-After', String(retryAfterSeconds))
+  return response
+}
+
+/**
+ * Central RBAC gate (see lib/rbac.ts ROUTE_PERMISSIONS) for routes whose
+ * access rule is a plain role/permission check with no per-resource
+ * ownership nuance. Returns a 403/redirect response if denied, or null to
+ * let the request proceed. Routes needing "admin OR the record's owner"
+ * logic aren't listed there and keep handling that in the route handler,
+ * since middleware has no access to which resource is being requested.
+ */
+function enforceRoutePermission(request: NextRequest, role: string): NextResponse | null {
+  const { pathname } = request.nextUrl
+  const required = requiredPermissionForPath(pathname)
+  if (!required) return null
+  if (hasPermission(role, required)) return null
+
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  return NextResponse.redirect(new URL('/graph', request.url))
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public paths
-  if (PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
-    return NextResponse.next()
-  }
-
-  // Allow static assets and Next.js internals
+  // Allow static assets and Next.js internals — never rate limited or authed
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -64,10 +96,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Internal service-to-service calls (Docker network)
+  // Internal service-to-service calls (Docker network) — trusted infra, not
+  // an attacker-controlled surface, so exempt from rate limiting too.
   const internalKey = request.headers.get('x-internal-key')
   const expectedKey = process.env.INTERNAL_API_KEY
   if (internalKey && expectedKey && expectedKey !== 'changeme' && internalKey === expectedKey) {
+    return NextResponse.next()
+  }
+
+  // Rate limit everything else by client IP, before auth resolution — this
+  // is what actually protects /api/auth/login from credential brute-forcing
+  // (it's a public path and would otherwise skip every other check below).
+  const rateLimit = consumeRateLimit(`ip:${clientIp(request)}`, tierForPath(pathname))
+  if (!rateLimit.allowed) {
+    return rateLimitedResponse(rateLimit.resetAt)
+  }
+
+  // Allow public paths
+  if (PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next()
   }
 
@@ -78,6 +124,8 @@ export async function middleware(request: NextRequest) {
     const rawToken = authHeader.slice('Bearer '.length).trim()
     const apiPayload = rawToken ? await verifyApiToken(request.nextUrl.origin, rawToken) : null
     if (apiPayload) {
+      const denied = enforceRoutePermission(request, apiPayload.role)
+      if (denied) return denied
       const requestHeaders = new Headers(request.headers)
       requestHeaders.set('x-user-id', apiPayload.sub)
       requestHeaders.set('x-user-role', apiPayload.role)
@@ -105,6 +153,9 @@ export async function middleware(request: NextRequest) {
     response.cookies.delete(AUTH_COOKIE_NAME)
     return response
   }
+
+  const denied = enforceRoutePermission(request, payload.role)
+  if (denied) return denied
 
   // Inject user info into request headers for downstream API routes
   const requestHeaders = new Headers(request.headers)

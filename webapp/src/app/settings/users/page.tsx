@@ -5,7 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/providers/AuthProvider'
 import { useUsers, useCreateUser, useDeleteUser, useChangePassword } from '@/hooks/useUsers'
 import { Modal } from '@/components/ui'
+import { ROLE_IDS, ROLE_LABELS, ROLE_DESCRIPTIONS, type RoleId } from '@/lib/rbac'
 import styles from './page.module.css'
+
+const ROLE_BADGE_CLASS: Record<RoleId, string> = {
+  admin: 'badgeAdmin',
+  operator: 'badgeOperator',
+  standard: 'badgeStandard',
+  viewer: 'badgeViewer',
+}
 
 type ModalState =
   | { type: 'none' }
@@ -17,7 +25,8 @@ type ModalState =
 export default function UsersPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user: authUser, isAdmin, isLoading: authLoading } = useAuth()
+  const { user: authUser, can, isLoading: authLoading } = useAuth()
+  const canManageUsers = can('users.manage')
   const { data: users, isLoading } = useUsers()
   const createUser = useCreateUser()
   const deleteUser = useDeleteUser()
@@ -47,10 +56,10 @@ export default function UsersPage() {
 
   // Redirect non-admin to graph (unless they came for password change)
   useEffect(() => {
-    if (!authLoading && !isAdmin && !wantsPasswordChange && modal.type !== 'changeOwn') {
+    if (!authLoading && !canManageUsers && !wantsPasswordChange && modal.type !== 'changeOwn') {
       router.push('/graph')
     }
-  }, [authLoading, isAdmin, wantsPasswordChange, modal, router])
+  }, [authLoading, canManageUsers, wantsPasswordChange, modal, router])
 
   function resetForm() {
     setName('')
@@ -168,7 +177,7 @@ export default function UsersPage() {
   }
 
   // Show change password modal for standard users
-  if (!isAdmin && modal.type === 'changeOwn') {
+  if (!canManageUsers && modal.type === 'changeOwn') {
     return (
       <div className={styles.page}>
         <Modal isOpen onClose={closeModal} title="Change Password" size="small">
@@ -219,7 +228,7 @@ export default function UsersPage() {
     )
   }
 
-  if (!isAdmin) return null
+  if (!canManageUsers) return null
 
   return (
     <div className={styles.page}>
@@ -257,8 +266,8 @@ export default function UsersPage() {
                   <span className={styles.email}>{user.email}</span>
                 </td>
                 <td className={styles.td}>
-                  <span className={`${styles.badge} ${user.role === 'admin' ? styles.badgeAdmin : styles.badgeStandard}`}>
-                    {user.role}
+                  <span className={`${styles.badge} ${styles[ROLE_BADGE_CLASS[user.role as RoleId]] || styles.badgeStandard}`}>
+                    {ROLE_LABELS[user.role as RoleId] || user.role}
                   </span>
                 </td>
                 <td className={styles.td}>
@@ -342,9 +351,11 @@ export default function UsersPage() {
           <div className={styles.field}>
             <label className={styles.label}>Role</label>
             <select className={styles.select} value={role} onChange={e => setRole(e.target.value)}>
-              <option value="standard">Standard</option>
-              <option value="admin">Admin</option>
+              {ROLE_IDS.map(r => (
+                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
+              ))}
             </select>
+            <span className={styles.hint}>{ROLE_DESCRIPTIONS[role as RoleId] || ROLE_DESCRIPTIONS.standard}</span>
           </div>
           <div className={styles.modalActions}>
             <button className={styles.actionButton} onClick={closeModal}>Cancel</button>

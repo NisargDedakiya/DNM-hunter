@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, AUTH_COOKIE_NAME } from './auth'
+import { hasPermission, type Permission } from './rbac'
 
 export interface Session {
   userId: string
@@ -36,6 +37,20 @@ export async function requireAdmin(): Promise<Session | NextResponse> {
   const result = await requireSession()
   if (result instanceof NextResponse) return result
   if (result.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  return result
+}
+
+/**
+ * Returns session or a 401/403 NextResponse, gated on a named RBAC
+ * permission (lib/rbac.ts) rather than a hardcoded role string.
+ * Usage: const result = await requirePermission('audit_log.view'); if (result instanceof NextResponse) return result;
+ */
+export async function requirePermission(permission: Permission): Promise<Session | NextResponse> {
+  const result = await requireSession()
+  if (result instanceof NextResponse) return result
+  if (!hasPermission(result.role, permission)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   return result

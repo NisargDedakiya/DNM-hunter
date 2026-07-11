@@ -39,7 +39,7 @@ import { GET, PUT } from './route'
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeSession(userId = 'user-1', role: 'admin' | 'standard' = 'standard') {
+function makeSession(userId = 'user-1', role: 'admin' | 'operator' | 'standard' | 'viewer' = 'standard') {
   return { userId, role }
 }
 
@@ -231,5 +231,47 @@ describe('PUT /api/users/[id]', () => {
     const res = await PUT(putReq({ defaultAgentModel: 'x' }), makeParams('user-1'))
     expect(res.status).toBe(500)
     errSpy.mockRestore()
+  })
+
+  // -------------------------------------------------------------------
+  // RBAC (Phase 16): role writes are gated on users.manage, and accept
+  // the full role vocabulary (admin/operator/standard/viewer), not just
+  // the original binary admin/standard.
+  // -------------------------------------------------------------------
+
+  test('a user without users.manage cannot change a role, even their own', async () => {
+    mockGetSession.mockResolvedValue(makeSession('user-1', 'standard'))
+    const res = await PUT(putReq({ role: 'operator' }), makeParams('user-1'))
+    expect(res.status).toBe(403)
+  })
+
+  test('an operator (no users.manage) cannot change roles either', async () => {
+    mockGetSession.mockResolvedValue(makeSession('user-1', 'operator'))
+    const res = await PUT(putReq({ role: 'admin' }), makeParams('user-1'))
+    expect(res.status).toBe(403)
+  })
+
+  test('admin can set a target user to the new "operator" role', async () => {
+    mockGetSession.mockResolvedValue(makeSession('admin-1', 'admin'))
+    mockUpdate.mockImplementation(({ data }: { data: Record<string, unknown> }) => ({ id: 'user-2', ...data }))
+    const res = await PUT(putReq({ role: 'operator' }), makeParams('user-2'))
+    expect(res.status).toBe(200)
+    expect(mockUpdate.mock.calls[0][0].data.role).toBe('operator')
+  })
+
+  test('admin can set a target user to the new "viewer" role', async () => {
+    mockGetSession.mockResolvedValue(makeSession('admin-1', 'admin'))
+    mockUpdate.mockImplementation(({ data }: { data: Record<string, unknown> }) => ({ id: 'user-2', ...data }))
+    const res = await PUT(putReq({ role: 'viewer' }), makeParams('user-2'))
+    expect(res.status).toBe(200)
+    expect(mockUpdate.mock.calls[0][0].data.role).toBe('viewer')
+  })
+
+  test('an unrecognized role string is silently dropped, not written to the DB', async () => {
+    mockGetSession.mockResolvedValue(makeSession('admin-1', 'admin'))
+    mockUpdate.mockImplementation(({ data }: { data: Record<string, unknown> }) => ({ id: 'user-2', ...data }))
+    await PUT(putReq({ role: 'superuser' }), makeParams('user-2'))
+    const data = mockUpdate.mock.calls[0][0].data
+    expect('role' in data).toBe(false)
   })
 })

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getSession, isInternalRequest } from '@/lib/session'
+import { hasPermission, isKnownRole } from '@/lib/rbac'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
-      if (session.role !== 'admin' && session.userId !== id) {
+      if (!hasPermission(session.role, 'users.manage') && session.userId !== id) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
     }
@@ -78,13 +79,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
 
-      // Standard users can only update their own name/email
-      if (session.role !== 'admin' && session.userId !== id) {
+      // Users without users.manage can only update their own name/email
+      if (!hasPermission(session.role, 'users.manage') && session.userId !== id) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
 
-      // Only admin can change roles
-      if (role && session.role !== 'admin') {
+      // Only users.manage can change roles
+      if (role && !hasPermission(session.role, 'users.manage')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
     }
@@ -92,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const data: Record<string, string> = {}
     if (name) data.name = name
     if (email) data.email = email
-    if (role === 'admin' || role === 'standard') data.role = role
+    if (role && isKnownRole(role)) data.role = role
     // Remembered model choices, used to pre-fill the next new project.
     if (typeof defaultAgentModel === 'string') data.defaultAgentModel = defaultAgentModel
     if (typeof defaultAiPipelineModel === 'string') data.defaultAiPipelineModel = defaultAiPipelineModel
@@ -137,7 +138,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!isInternalRequest(request)) {
       const session = await getSession()
-      if (!session || session.role !== 'admin') {
+      if (!session || !hasPermission(session.role, 'users.manage')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
 

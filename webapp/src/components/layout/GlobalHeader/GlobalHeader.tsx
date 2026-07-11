@@ -13,7 +13,7 @@ import styles from './GlobalHeader.module.css'
 
 export function GlobalHeader() {
   const pathname = usePathname()
-  const { isAdmin } = useAuth()
+  const { can } = useAuth()
   const { projectId } = useProject()
 
   const coreNav = [
@@ -69,7 +69,7 @@ export function GlobalHeader() {
           <span>Projects</span>
         </Link>
 
-        {isAdmin && (
+        {can('users.manage') && (
           <Link
             href="/settings/users"
             className={`${styles.navItem} ${pathname === '/settings/users' ? styles.navItemActive : ''}`}

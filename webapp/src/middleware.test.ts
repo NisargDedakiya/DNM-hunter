@@ -6,7 +6,7 @@
  * @vitest-environment node
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Mock environment
@@ -15,6 +15,17 @@ vi.stubEnv('INTERNAL_API_KEY', 'internal-secret-abc')
 
 import { middleware } from './middleware'
 import { SignJWT } from 'jose'
+import { _resetRateLimitState } from './lib/rateLimit'
+
+const originalFetch = global.fetch
+
+beforeEach(() => {
+  _resetRateLimitState()
+})
+
+afterEach(() => {
+  global.fetch = originalFetch
+})
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -272,5 +283,142 @@ describe('middleware - authenticated', () => {
     const req = makeRequest('/api/projects', { cookie: token })
     const res = await middleware(req)
     expect(res.status).toBe(401)
+  })
+})
+
+/* ------------------------------------------------------------------ */
+/*  Rate limiting                                                      */
+/* ------------------------------------------------------------------ */
+
+describe('middleware - rate limiting', () => {
+  test('allows requests under the auth-tier limit, then 429s with Retry-After', async () => {
+    const ip = '203.0.113.10'
+    // RATE_LIMIT_AUTH_MAX defaults to 10 when unset
+    for (let i = 0; i < 10; i++) {
+      const req = makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ip } })
+      const res = await middleware(req)
+      expect(res.status).not.toBe(429)
+    }
+    const blockedReq = makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ip } })
+    const blockedRes = await middleware(blockedReq)
+    expect(blockedRes.status).toBe(429)
+    expect(blockedRes.headers.get('Retry-After')).toBeTruthy()
+    const body = await blockedRes.json()
+    expect(body.error).toMatch(/too many requests/i)
+  })
+
+  test('different IPs get independent auth-tier budgets', async () => {
+    const ipA = '203.0.113.20'
+    const ipB = '203.0.113.21'
+    for (let i = 0; i < 10; i++) {
+      await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ipA } }))
+    }
+    // ipA is now exhausted
+    const exhaustedRes = await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ipA } }))
+    expect(exhaustedRes.status).toBe(429)
+
+    // ipB is untouched
+    const freshRes = await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ipB } }))
+    expect(freshRes.status).not.toBe(429)
+  })
+
+  test('the default tier has a much higher budget than the auth tier', async () => {
+    const ip = '203.0.113.30'
+    // 10 requests to a non-auth path should never trip the default (300/60s) limit
+    for (let i = 0; i < 10; i++) {
+      const req = makeRequest('/api/projects', { headers: { 'x-forwarded-for': ip } })
+      const res = await middleware(req)
+      expect(res.status).not.toBe(429)
+    }
+  })
+
+  test('rate limiting is bypassed for internal service-to-service calls', async () => {
+    const ip = '203.0.113.40'
+    // Exhaust the auth-tier budget for this IP first
+    for (let i = 0; i < 10; i++) {
+      await middleware(makeRequest('/api/auth/login', { headers: { 'x-forwarded-for': ip } }))
+    }
+    // A request presenting the valid internal key from the same IP still gets through
+    const req = makeRequest('/api/auth/login', {
+      headers: { 'x-forwarded-for': ip, 'x-internal-key': 'internal-secret-abc' },
+    })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(429)
+  })
+
+  test('static assets are never rate limited', async () => {
+    const ip = '203.0.113.50'
+    for (let i = 0; i < 15; i++) {
+      const res = await middleware(makeRequest('/_next/static/chunk.js', { headers: { 'x-forwarded-for': ip } }))
+      expect(res.status).not.toBe(429)
+    }
+  })
+})
+
+/* ------------------------------------------------------------------ */
+/*  RBAC — central route-permission enforcement (Phase 16)             */
+/* ------------------------------------------------------------------ */
+
+describe('middleware - RBAC route permissions', () => {
+  test('blocks a standard-role cookie session from /api/audit-log with 403', async () => {
+    const token = await createTestToken('user-standard', 'standard')
+    const req = makeRequest('/api/audit-log', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).toBe(403)
+  })
+
+  test('allows an admin-role cookie session through /api/audit-log', async () => {
+    const token = await createTestToken('user-admin', 'admin')
+    const req = makeRequest('/api/audit-log', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(403)
+    expect(res.status).not.toBe(401)
+  })
+
+  test('blocks an operator-role session from /api/audit-log (users.manage/audit_log.view are admin-only)', async () => {
+    const token = await createTestToken('user-operator', 'operator')
+    const req = makeRequest('/api/audit-log', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).toBe(403)
+  })
+
+  test('redirects a non-admin page request to /settings/users away, instead of a 403 JSON body', async () => {
+    const token = await createTestToken('user-standard', 'standard')
+    const req = makeRequest('/settings/users', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(403) // page routes redirect, not JSON 403
+    expect(res.headers.get('location')).toContain('/graph')
+  })
+
+  test('allows an admin page request to /settings/users through', async () => {
+    const token = await createTestToken('user-admin', 'admin')
+    const req = makeRequest('/settings/users', { cookie: token })
+    const res = await middleware(req)
+    expect(res.headers.get('location')).toBeNull()
+  })
+
+  test('a Bearer API token for a standard-role user is also blocked from /api/audit-log', async () => {
+    global.fetch = vi.fn(async () => new Response(
+      JSON.stringify({ userId: 'user-42', role: 'standard' }),
+      { status: 200 }
+    )) as unknown as typeof fetch
+
+    const req = makeRequest('/api/audit-log', { headers: { authorization: 'Bearer nh_validtoken' } })
+    const res = await middleware(req)
+    expect(res.status).toBe(403)
+  })
+
+  test('an unrecognized role string is denied a permission-gated route (fail closed)', async () => {
+    const token = await createTestToken('user-weird', 'superuser')
+    const req = makeRequest('/api/audit-log', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).toBe(403)
+  })
+
+  test('routes with no listed permission requirement are unaffected by RBAC', async () => {
+    const token = await createTestToken('user-standard', 'standard')
+    const req = makeRequest('/api/projects', { cookie: token })
+    const res = await middleware(req)
+    expect(res.status).not.toBe(403)
   })
 })

@@ -12,6 +12,10 @@ model User {
   name          String
   email         String            @unique
   password      String            @default("")
+  // RBAC role id (Phase 16, see webapp/src/lib/rbac.ts): 'admin' | 'operator'
+  // | 'standard' | 'viewer'. Kept as free text (not a Prisma enum) so new
+  // roles never require a migration — rbac.ts is the single source of truth
+  // for the valid set and the permissions each one grants.
   role          String            @default("standard")
   projects      Project[]
   programs      Program[]

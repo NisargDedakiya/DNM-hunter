@@ -49,6 +49,7 @@ vi.mock('@/providers/AuthProvider', () => ({
     user: { id: 'test-user', name: 'Test Admin', email: 'admin@test.com', role: 'admin' },
     isLoading: false,
     isAdmin: true,
+    can: () => true,
     login: vi.fn(),
     logout: vi.fn(),
   }),

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
 import { getSession, isInternalRequest } from '@/lib/session'
+import { hasPermission, isKnownRole } from '@/lib/rbac'
 
 // GET /api/users - List users (admin: all, standard: self only, internal: all)
 export async function GET(request: NextRequest) {
@@ -14,8 +15,8 @@ export async function GET(request: NextRequest) {
       if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
-      // Standard users only see themselves
-      if (session.role !== 'admin') {
+      // Only roles with users.view_all see everyone; others see themselves only
+      if (!hasPermission(session.role, 'users.view_all')) {
         where = { id: session.userId }
       }
     }
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Allow internal service calls
     if (!isInternalRequest(request)) {
       const session = await getSession()
-      if (!session || session.role !== 'admin') {
+      if (!session || !hasPermission(session.role, 'users.manage')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
     }
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         ...(password ? { password: await hashPassword(password) } : {}),
-        ...((role === 'admin' || role === 'standard') ? { role } : {}),
+        ...(role && isKnownRole(role) ? { role } : {}),
       }
     })
 

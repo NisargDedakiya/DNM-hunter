@@ -1,18 +1,21 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
+import { hasPermission, type Permission, type RoleId } from '@/lib/rbac'
 
 export interface AuthUser {
   id: string
   name: string
   email: string
-  role: 'admin' | 'standard'
+  role: RoleId
 }
 
 interface AuthContextValue {
   user: AuthUser | null
   isLoading: boolean
+  /** @deprecated Prefer can(permission) for anything more specific than "is this the admin role". */
   isAdmin: boolean
+  can: (permission: Permission) => boolean
   login: (email: string, password: string) => Promise<{ error?: string }>
   logout: () => Promise<void>
 }
@@ -61,12 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/login'
   }, [])
 
+  const can = useCallback(
+    (permission: Permission) => (user ? hasPermission(user.role, permission) : false),
+    [user]
+  )
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isLoading,
         isAdmin: user?.role === 'admin',
+        can,
         login,
         logout,
       }}

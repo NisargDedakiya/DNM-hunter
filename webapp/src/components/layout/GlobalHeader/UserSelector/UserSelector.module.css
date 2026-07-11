@@ -226,3 +226,13 @@
   background: rgba(59, 130, 246, 0.15);
   color: var(--accent-secondary);
 }
+
+.roleBadgeOperator {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+.roleBadgeViewer {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--text-tertiary);
+}

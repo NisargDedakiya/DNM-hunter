@@ -6,15 +6,24 @@ import { ChevronDown, Users, LogOut, KeyRound } from 'lucide-react'
 import { useProject } from '@/providers/ProjectProvider'
 import { useAuth } from '@/providers/AuthProvider'
 import { useUsers } from '@/hooks/useUsers'
+import { ROLE_LABELS, type RoleId } from '@/lib/rbac'
 import styles from './UserSelector.module.css'
+
+const ROLE_BADGE_CLASS: Record<RoleId, string> = {
+  admin: 'roleBadgeAdmin',
+  operator: 'roleBadgeOperator',
+  standard: 'roleBadgeStandard',
+  viewer: 'roleBadgeViewer',
+}
 
 export function UserSelector() {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const { userId, setUserId, setCurrentProject } = useProject()
-  const { user: authUser, isAdmin, logout } = useAuth()
+  const { user: authUser, can, logout } = useAuth()
   const { data: users } = useUsers()
+  const canBrowseUsers = can('users.view_all')
 
   const currentUser = users?.find(u => u.id === userId)
 
@@ -74,7 +83,7 @@ export function UserSelector() {
 
       {isOpen && (
         <div className={styles.dropdown}>
-          {isAdmin ? (
+          {canBrowseUsers ? (
             <>
               <div className={styles.header}>
                 <span className={styles.headerTitle}>Users</span>
@@ -95,8 +104,8 @@ export function UserSelector() {
                         <span className={styles.itemName}>
                           {user.name}
                           {' '}
-                          <span className={`${styles.roleBadge} ${user.role === 'admin' ? styles.roleBadgeAdmin : styles.roleBadgeStandard}`}>
-                            {user.role}
+                          <span className={`${styles.roleBadge} ${styles[ROLE_BADGE_CLASS[user.role as RoleId]] || styles.roleBadgeStandard}`}>
+                            {ROLE_LABELS[user.role as RoleId] || user.role}
                           </span>
                         </span>
                         <span className={styles.itemEmail}>{user.email}</span>
