@@ -353,6 +353,20 @@ model Project {
   trufflehogIncludeDetectors   String   @default("") @map("trufflehog_include_detectors")
   trufflehogExcludeDetectors   String   @default("") @map("trufflehog_exclude_detectors")
 
+  // ========== IAC/DEVOPS CONFIG SCANNER ==========
+  iacScanEnabled               Boolean  @default(false) @map("iac_scan_enabled")
+  iacScanGithubOrg             String   @default("") @map("iac_scan_github_org")
+  iacScanGithubRepos           String   @default("") @map("iac_scan_github_repos")
+
+  // ========== CLOUD STORAGE BUCKET ENUMERATION ==========
+  cloudReconEnabled             Boolean  @default(false) @map("cloud_recon_enabled")
+  cloudReconSeeds                String   @default("") @map("cloud_recon_seeds")
+  cloudReconProviders            String   @default("aws_s3,gcs,azure_blob") @map("cloud_recon_providers")
+
+  // ========== MOBILE APK STATIC ANALYSIS ==========
+  mobileScanEnabled             Boolean  @default(false) @map("mobile_scan_enabled")
+  mobileScanUploadedFiles       String[] @default([])    @map("mobile_scan_uploaded_files")
+
   // ========== NAABU PORT SCANNER ==========
   naabuEnabled                Boolean  @default(true) @map("naabu_enabled")
   naabuDockerImage            String   @default("projectdiscovery/naabu:latest") @map("naabu_docker_image")

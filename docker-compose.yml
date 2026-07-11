@@ -277,6 +277,32 @@ services:
     image: nisarghunter-trufflehog:latest
     profiles: ["tools"]
 
+  # Phase 14: offline static analysis of Dockerfiles/compose/K8s/GitHub
+  # Actions/Terraform in cloned target repositories.
+  iac-scanner:
+    build:
+      context: .
+      dockerfile: iac_scan/Dockerfile
+    image: nisarghunter-iac-scan:latest
+    profiles: ["tools"]
+
+  # Phase 14: unauthenticated, read-only AWS S3/GCS/Azure Blob public bucket
+  # enumeration via name permutation.
+  cloud-recon-scanner:
+    build:
+      context: .
+      dockerfile: cloud_recon/Dockerfile
+    image: nisarghunter-cloud-recon:latest
+    profiles: ["tools"]
+
+  # Phase 14: androguard-based static analysis of uploaded Android APKs.
+  mobile-scanner:
+    build:
+      context: .
+      dockerfile: mobile_scan/Dockerfile
+    image: nisarghunter-mobile-scan:latest
+    profiles: ["tools"]
+
   # WCVS (Web Cache Vulnerability Scanner) — breadth engine for the cache
   # poisoning module. Build-only: the recon container runs it docker-in-docker.
   # See recon/cache_scan/ and wcvs/Dockerfile.
@@ -779,6 +805,7 @@ services:
       - evidence_data:/data/evidence
       - js_recon_uploads:/data/js-recon-uploads
       - js_recon_custom:/data/js-recon-custom
+      - mobile_scan_uploads:/data/mobile-scan-uploads
       - ./VERSION:/app/VERSION:ro
     depends_on:
       postgres:
@@ -845,6 +872,7 @@ volumes:
   evidence_data:
   js_recon_uploads:
   js_recon_custom:
+  mobile_scan_uploads:
   neo4j_logs:
   neo4j_import:
   neo4j_plugins:

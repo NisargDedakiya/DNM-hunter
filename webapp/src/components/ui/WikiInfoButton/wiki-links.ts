@@ -98,6 +98,9 @@ export const SECTION_WIKI: Record<string, { page: string; anchor?: string }> = {
   Github:           { page: 'GitHub-Secret-Hunting' },
   Trufflehog:       { page: 'TruffleHog-Secret-Scanning' },
   GvmScan:          { page: 'GVM-Vulnerability-Scanning' },
+  IacScan:          { page: 'IaC-DevOps-Config-Scanning' },
+  CloudRecon:       { page: 'Cloud-Storage-Bucket-Enumeration' },
+  MobileScan:       { page: 'Mobile-APK-Static-Analysis' },
   Fireteam:         { page: 'Fireteam-Parallel-Specialists' },
   // Tool sections that have a TOOL_WIKI entry are also exposed here for convenience.
   ...({} as Record<string, { page: string; anchor?: string }>),

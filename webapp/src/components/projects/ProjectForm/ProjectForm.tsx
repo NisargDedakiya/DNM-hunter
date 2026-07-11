@@ -44,6 +44,9 @@ import { MitreSection } from './sections/MitreSection'
 import { SecurityChecksSection } from './sections/SecurityChecksSection'
 import { GithubSection } from './sections/GithubSection'
 import { TrufflehogSection } from './sections/TrufflehogSection'
+import { IacScanSection } from './sections/IacScanSection'
+import { CloudReconSection } from './sections/CloudReconSection'
+import { MobileScanSection } from './sections/MobileScanSection'
 import { AgentBehaviourSection } from './sections/AgentBehaviourSection'
 import { AttackSkillsSection } from './sections/AttackSkillsSection'
 import { ShodanSection } from './sections/ShodanSection'
@@ -943,6 +946,9 @@ export function ProjectForm({
             <GvmScanSection data={formData} updateField={updateField} />
             <GithubSection data={formData} updateField={updateField} hasGithubToken={hasGithubToken} />
             <TrufflehogSection data={formData} updateField={updateField} hasGithubToken={hasGithubToken} />
+            <IacScanSection data={formData} updateField={updateField} hasGithubToken={hasGithubToken} />
+            <CloudReconSection data={formData} updateField={updateField} />
+            <MobileScanSection data={formData} updateField={updateField} projectId={projectId} />
           </>
         )}
 
