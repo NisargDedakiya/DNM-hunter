@@ -1,0 +1,11 @@
+{
+  "id": "nmap",
+  "name": "Nmap",
+  "category": "recon",
+  "kind": "mcp-server",
+  "description": "Service/version fingerprinting and detailed port scanning.",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8004,
+  "status": "core",
+  "tags": ["port-scan", "fingerprinting"]
+}

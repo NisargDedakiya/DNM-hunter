@@ -51,6 +51,11 @@ DEFAULT_AGENT_SETTINGS: dict[str, Any] = {
     # Has no effect on non-Anthropic providers (gated by isinstance check).
     'ANTHROPIC_PROMPT_CACHING_ENABLED': True,
 
+    # Cross-scan Program memory (Phase 11) — pre-formatted context block from
+    # prior scans against the same bug-bounty Program, injected into the
+    # system prompt. Empty for standalone projects; see fetch_agent_settings().
+    'PROGRAM_MEMORY_CONTEXT': '',
+
     # Stealth Mode
     'STEALTH_MODE': False,
 
@@ -566,6 +571,40 @@ def fetch_agent_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     else:
         settings['USER_LLM_PROVIDERS'] = []
         settings['USER_SETTINGS'] = {}
+
+    # --- Program memory (Phase 11): if this project belongs to a bug-bounty
+    # Program, pull the cross-scan memory rollup other scans against the same
+    # program have already built up. Pre-formatted into one string here so
+    # prompts/base.py can drop it straight into the system prompt with no
+    # further shaping. Absent for standalone (non-Program) projects or on any
+    # fetch failure — never blocks session start. ---
+    settings['PROGRAM_MEMORY_CONTEXT'] = ''
+    program_id = project.get('programId')
+    if program_id and webapp_url:
+        try:
+            memory_resp = requests.get(
+                f"{webapp_url.rstrip('/')}/api/programs/{program_id}/memory",
+                headers=INTERNAL_HEADERS,
+                timeout=10,
+            )
+            memory_resp.raise_for_status()
+            memory = memory_resp.json()
+            if memory and memory.get('priorFindingsSummary'):
+                lines = [memory['priorFindingsSummary']]
+                known_paths = memory.get('knownPaths') or []
+                if known_paths:
+                    path_list = ', '.join(p.get('path', '') for p in known_paths[:15] if p.get('path'))
+                    lines.append(f"Previously-seen paths/endpoints: {path_list}")
+                working_payloads = memory.get('workingPayloads') or []
+                if working_payloads:
+                    payload_lines = [
+                        f"- [{p.get('category', '?')}] {p.get('workedOn', '')}: {p.get('summary', '')[:200]}"
+                        for p in working_payloads[:10]
+                    ]
+                    lines.append("Confirmed/likely findings from prior scans (do not re-derive from scratch):\n" + "\n".join(payload_lines))
+                settings['PROGRAM_MEMORY_CONTEXT'] = "\n\n".join(lines)
+        except Exception as e:
+            logger.warning(f"Failed to fetch program memory for program {program_id}: {e}")
 
     logger.info(f"Loaded {len(settings)} agent settings for project {project_id}")
     return settings

@@ -1,0 +1,11 @@
+{
+  "id": "nuclei",
+  "name": "Nuclei",
+  "category": "scanner",
+  "kind": "mcp-server",
+  "description": "Templated vulnerability scanning against known CVEs and misconfigurations.",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8002,
+  "status": "core",
+  "tags": ["cve", "templates", "misconfiguration"]
+}

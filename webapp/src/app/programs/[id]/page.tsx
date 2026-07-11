@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, Target as TargetIcon, KeyRound, Compass } from 'lucide-react'
 import { useProgram, useUpdateProgram, useCreateAsset, useDeleteAsset, PLATFORMS, ASSET_TYPES } from '@/hooks/usePrograms'
 import { useAlertModal, useToast } from '@/components/ui'
+import { ProgramMemoryPanel } from './ProgramMemoryPanel'
 import styles from './page.module.css'
 
 function assetTypeLabel(value: string): string {
@@ -221,6 +222,8 @@ export default function ProgramDetailPage() {
               ))}
             </ul>
           </section>
+
+          <ProgramMemoryPanel programId={programId} />
         </div>
       </div>
     </div>

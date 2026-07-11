@@ -1,0 +1,10 @@
+{
+  "id": "community-skills",
+  "name": "Community Skill Packs",
+  "category": "recon",
+  "kind": "builtin",
+  "description": "Opt-in methodology guides (IDOR/BOLA, SSTI, XXE, mass assignment, and more) imported per-user from agentic/community-skills/.",
+  "dockerService": null,
+  "status": "community",
+  "tags": ["methodology", "skills", "opt-in"]
+}

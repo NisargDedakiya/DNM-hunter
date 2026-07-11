@@ -814,6 +814,9 @@ Create minimal TODOs — follow the attack skill workflow for step-by-step guida
 ### Known Target Information
 {target_info}
 
+### Program Memory (prior scans of this same bug-bounty program)
+{program_memory}
+
 ### Previous Questions & Answers
 {qa_history}
 

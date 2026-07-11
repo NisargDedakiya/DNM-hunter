@@ -1,0 +1,11 @@
+{
+  "id": "network-recon",
+  "name": "Network Recon (curl, naabu, hydra)",
+  "category": "recon",
+  "kind": "mcp-server",
+  "description": "HTTP requests, fast port scanning, and credential brute-forcing against in-scope targets.",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8000,
+  "status": "core",
+  "tags": ["http", "port-scan", "brute-force"]
+}

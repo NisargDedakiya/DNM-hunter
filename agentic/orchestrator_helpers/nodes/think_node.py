@@ -403,6 +403,7 @@ async def think_node(state: AgentState, config, *, llm, guidance_queues, neo4j_c
         chain_context=chain_context_formatted,
         todo_list=todo_list_formatted,
         target_info=target_info_formatted,
+        program_memory=get_setting("PROGRAM_MEMORY_CONTEXT", "") or "No memory from prior scans of this program.",
         qa_history=qa_history_formatted,
         fireteam_action_enum=ft_action_enum,
         fireteam_plan_field=ft_plan_field,

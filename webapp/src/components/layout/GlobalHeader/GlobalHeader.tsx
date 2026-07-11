@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch, LayoutDashboard, Radar, Sparkles } from 'lucide-react'
+import { Crosshair, FolderOpen, Shield, BookOpen, TrendingUp, FileText, Settings, Users, GitBranch, LayoutDashboard, Radar, Sparkles, Store } from 'lucide-react'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { ProjectSelector } from './ProjectSelector'
 import { UserSelector } from './UserSelector'
@@ -29,6 +29,7 @@ export function GlobalHeader() {
     { label: 'CypherFix', href: '/cypherfix', icon: <Shield size={14} /> },
     { label: 'Insights', href: '/insights', icon: <TrendingUp size={14} /> },
     { label: 'Reports', href: '/reports', icon: <FileText size={14} /> },
+    { label: 'Marketplace', href: '/marketplace', icon: <Store size={14} /> },
   ]
 
   return (

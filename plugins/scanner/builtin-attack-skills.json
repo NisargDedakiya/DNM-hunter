@@ -1,0 +1,10 @@
+{
+  "id": "builtin-attack-skills",
+  "name": "Built-in Attack Skills (SQLi, XSS, SSRF, RCE, Path Traversal + 4 more)",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "The 9 vulnerability classes fully wired into the main agent loop's classification and workflow injection (see /vuln-modules).",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["sqli", "xss", "ssrf", "rce", "path-traversal", "classification"]
+}

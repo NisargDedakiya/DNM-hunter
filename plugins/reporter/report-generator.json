@@ -1,0 +1,10 @@
+{
+  "id": "report-generator",
+  "name": "Report Generator (HTML / PDF / DOCX)",
+  "category": "reporter",
+  "kind": "webapp-subsystem",
+  "description": "Full pentest reports with AI-written narratives, exportable as HTML, PDF, or DOCX (Phase 10).",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["report", "pdf", "docx", "narrative"]
+}

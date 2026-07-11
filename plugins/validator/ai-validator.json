@@ -1,0 +1,10 @@
+{
+  "id": "ai-validator",
+  "name": "AI Validator (Confidence / False-Positive Scoring)",
+  "category": "validator",
+  "kind": "webapp-subsystem",
+  "description": "The triage agent's confidence/false-positive/business-impact/likelihood scoring on every finding (Phase 09), overridable by an operator.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["triage", "confidence", "false-positive"]
+}

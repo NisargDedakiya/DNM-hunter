@@ -1,0 +1,11 @@
+{
+  "id": "metasploit",
+  "name": "Metasploit",
+  "category": "scanner",
+  "kind": "mcp-server",
+  "description": "Exploitation of known CVEs against network services via Metasploit Framework modules.",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8003,
+  "status": "core",
+  "tags": ["exploitation", "cve", "msf"]
+}

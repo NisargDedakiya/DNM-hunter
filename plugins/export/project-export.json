@@ -1,0 +1,10 @@
+{
+  "id": "project-export",
+  "name": "Project Export (ZIP bundle)",
+  "category": "export",
+  "kind": "webapp-subsystem",
+  "description": "Bundles a project's Neo4j graph, Postgres findings, and generated reports into a downloadable ZIP.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["zip", "backup", "export"]
+}

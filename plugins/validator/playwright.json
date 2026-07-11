@@ -1,0 +1,11 @@
+{
+  "id": "playwright",
+  "name": "Playwright Browser Automation",
+  "category": "validator",
+  "kind": "mcp-server",
+  "description": "Real-browser content extraction, scripting, and full-page screenshot capture — used to confirm findings and capture evidence (Phase 10).",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8005,
+  "status": "core",
+  "tags": ["browser", "screenshot", "evidence", "js-rendering"]
+}

@@ -1972,6 +1972,17 @@ async def list_vulnerability_modules():
     return {"modules": modules, "total": len(modules)}
 
 
+@app.get("/plugins", tags=["System"])
+async def list_plugins():
+    """Return the plugin catalog (Phase 11): metadata about every recon/
+    scanner/validator/reporter/export capability the platform already ships,
+    loaded from plugins/*/manifest-style JSON files. Backs the webapp
+    Marketplace browser."""
+    from orchestrator_helpers.plugin_catalog import list_plugins as _list_plugins
+    plugins = _list_plugins()
+    return {"plugins": plugins, "total": len(plugins)}
+
+
 # =============================================================================
 # LLM PROVIDER TEST — test a provider config with a simple message
 # =============================================================================

@@ -1044,10 +1044,43 @@ model Program {
   projects        Project[]
   remediations    Remediation[]
   authCredentials AuthCredential[]
+  memory          ProgramMemory?
 
   @@index([userId])
   @@index([userId, status])
   @@map("programs")
+}
+
+// Cross-scan memory (Phase 11): a Program is hunted across many Projects
+// (scans) over time, but each scan's ReAct session starts with zero
+// knowledge of what earlier scans against the SAME program already learned.
+// This is a single rolling record per Program, recomputed deterministically
+// from that program's Remediation history (see /api/programs/{id}/memory),
+// and read by the orchestrator at session start (project_settings.py) so a
+// new engagement doesn't re-discover the tech stack or re-try dead payloads.
+model ProgramMemory {
+  id                        String   @id @default(cuid())
+  programId                 String   @unique @map("program_id")
+  program                   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  // [{ name, category, confidence, source }] — inferred from Remediation.category
+  // and affectedAssets across all findings for this program.
+  techStack                 Json     @default("[]") @map("tech_stack")
+  // [{ path, method, note }] — endpoints/paths seen recurring across findings.
+  knownPaths                Json     @default("[]") @map("known_paths")
+  // [{ category, summary, workedOn }] — solution/evidence text from
+  // confirmed findings, so future scans don't re-derive the same exploit.
+  workingPayloads           Json     @default("[]") @map("working_payloads")
+  // Human/LLM-readable rollup of what's been found so far (counts by
+  // severity, top categories, confirmed vs needs-review) — the block
+  // actually injected into the system prompt.
+  priorFindingsSummary      String   @default("") @map("prior_findings_summary") @db.Text
+  lastComputedFromProjectId String?  @map("last_computed_from_project_id")
+
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  @@map("program_memories")
 }
 
 // A stored identity for cross-account/IDOR testing against one Program's

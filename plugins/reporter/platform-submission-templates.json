@@ -1,0 +1,10 @@
+{
+  "id": "platform-submission-templates",
+  "name": "Bug-Bounty Platform Submission Templates",
+  "category": "reporter",
+  "kind": "webapp-subsystem",
+  "description": "Ready-to-paste finding writeups formatted for HackerOne, Bugcrowd, Intigriti, and YesWeHack (Phase 10).",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["hackerone", "bugcrowd", "intigriti", "yeswehack"]
+}
