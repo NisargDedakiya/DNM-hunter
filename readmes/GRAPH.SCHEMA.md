@@ -2998,7 +2998,7 @@ Documented here so the prefix convention stays coherent as later laps land. Empt
 |---|---|---|
 | `Vulnerability` | `ai_asr`, `ai_trials`, `ai_oracle_kind`, `ai_transcript_ref`, `ai_payload_class`, `ai_probe_pack_version`, `ai_target_url` | ✅ **SHIPPED** — AI Attack Surface (garak/pyrit/giskard/promptfoo, see section above) |
 | `CVE` | `is_ai_library` | vuln_scan AI library lookup lap |
-| `Secret` / `TrufflehogFinding` / `GithubSecret` | `ai_provider` | trufflehog / github-secret-hunt AI detector lap |
+| `Secret` / `TrufflehogFinding` / `GithubSecret` | `ai_provider` | ✅ **SHIPPED** (Phase 15) — resolved from the detector's own name via `graph_db/ai_provider_map.py`; set on GithubSecret (github_secret_hunt), TrufflehogFinding (trufflehog_scan), and jsluice-sourced Secret nodes (resource_mixin.py). js_recon's SDK-usage-correlated enrichment (above) is unaffected. |
 | `JsReconFinding` | `finding_type` values `ai-sdk-client`, `ai-sdk-key-literal`, `ai-sdk-browser-allowed`, `ai-frontend-detected` | js_recon AI SDK lap |
 | `MitreData` | `id` starting with `AML.T` | add_mitre ATLAS lap |
 

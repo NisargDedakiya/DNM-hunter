@@ -44,6 +44,7 @@ import { VulnSourcePie } from './components/VulnSourcePie'
 import { CweBreakdownBar } from './components/CweBreakdownBar'
 import { VulnTargetsBar } from './components/VulnTargetsBar'
 import { GvmRemediationPie } from './components/GvmRemediationPie'
+import { SecurityModulesBar } from './components/SecurityModulesBar'
 import { CisaKevGauge } from './components/CisaKevGauge'
 import { ChainSuccessRatePie } from './components/ChainSuccessRatePie'
 import { FindingTypesBar } from './components/FindingTypesBar'
@@ -274,6 +275,11 @@ export default function InsightsPage() {
             {(vulns.data?.exploits?.length ?? 0) > 0 && (
               <CisaKevGauge data={vulns.data?.exploits} isLoading={vulns.isLoading} />
             )}
+          </div>
+        )}
+        {(vulns.data?.securityModules?.length ?? 0) > 0 && (
+          <div className={styles.gridFull}>
+            <SecurityModulesBar data={vulns.data?.securityModules} isLoading={vulns.isLoading} />
           </div>
         )}
       </div>

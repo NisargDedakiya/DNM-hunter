@@ -8,6 +8,7 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
 from graph_db.cpe_resolver import _is_ip_address
+from graph_db.ai_provider_map import resolve_ai_provider
 
 class ResourceMixin:
     def update_graph_from_resource_enum(self, recon_data: dict, user_id: str, project_id: str) -> dict:
@@ -388,6 +389,8 @@ class ResourceMixin:
 
                     scan_ts = resource_enum_data.get("scan_metadata", {}).get("scan_timestamp", "")
 
+                    ai_provider = resolve_ai_provider(secret_type)
+
                     session.run(
                         """
                         MERGE (s:Secret {id: $id})
@@ -402,13 +405,17 @@ class ResourceMixin:
                             s.discovered_at = $discovered_at,
                             s.updated_at = datetime()
                         WITH s
+                        FOREACH (_ IN CASE WHEN $ai_provider IS NOT NULL THEN [1] ELSE [] END |
+                            SET s.ai_provider = $ai_provider
+                        )
+                        WITH s
                         MATCH (bu:BaseURL {url: $base_url, user_id: $user_id, project_id: $project_id})
                         MERGE (bu)-[:HAS_SECRET]->(s)
                         """,
                         id=node_id, user_id=user_id, project_id=project_id,
                         secret_type=secret_type, severity=severity,
                         source_url=source_url, base_url=base_url,
-                        sample=sample, discovered_at=scan_ts
+                        sample=sample, discovered_at=scan_ts, ai_provider=ai_provider
                     )
                     created_secrets.add(node_id)
                     stats["secrets_created"] += 1

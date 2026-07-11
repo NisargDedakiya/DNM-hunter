@@ -30,6 +30,7 @@ export function GlobalHeader() {
     { label: 'Insights', href: '/insights', icon: <TrendingUp size={14} /> },
     { label: 'Reports', href: '/reports', icon: <FileText size={14} /> },
     { label: 'Marketplace', href: '/marketplace', icon: <Store size={14} /> },
+    { label: 'Academy', href: '/academy', icon: <BookOpen size={14} /> },
   ]
 
   return (

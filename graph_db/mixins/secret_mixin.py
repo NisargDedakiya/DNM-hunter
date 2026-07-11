@@ -10,6 +10,8 @@ Provides methods to ingest secret detection results:
 
 from datetime import datetime
 
+from graph_db.ai_provider_map import resolve_ai_provider
+
 
 class SecretMixin:
     def clear_github_hunt_data(self, user_id: str, project_id: str) -> dict:
@@ -336,6 +338,9 @@ class SecretMixin:
                         "path": clean_path,
                         "timestamp": finding.get("timestamp", ""),
                     }
+                    ai_provider = resolve_ai_provider(secret_type)
+                    if ai_provider:
+                        node_props["ai_provider"] = ai_provider
                     if details.get("matches"):
                         node_props["matches"] = details["matches"]
                     if details.get("sample"):
@@ -652,6 +657,9 @@ class SecretMixin:
                     "timestamp": finding.get("timestamp", ""),
                     "extra_data": finding.get("extra_data", "{}"),
                 }
+                ai_provider = resolve_ai_provider(detector_name)
+                if ai_provider:
+                    finding_props["ai_provider"] = ai_provider
 
                 try:
                     session.run(

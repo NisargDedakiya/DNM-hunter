@@ -64,6 +64,7 @@ export interface VulnerabilityData {
   exploits: Exploit[]
   githubSecrets: { repos: number; secrets: number; sensitiveFiles: number }
   gvmRemediation: { status: string; count: number }[]
+  securityModules: { module: 'IaC / DevOps' | 'Cloud Storage' | 'Mobile APK'; severity: string; count: number }[]
 }
 
 export interface AttackSurfaceData {

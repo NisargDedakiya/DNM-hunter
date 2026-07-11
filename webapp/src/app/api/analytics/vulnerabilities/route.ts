@@ -186,6 +186,27 @@ export async function GET(request: NextRequest) {
       count: toNum(r.get('count')),
     }))
 
+    // Q10: Phase 14 security modules (IaC/DevOps, Cloud Storage, Mobile APK) severity breakdown
+    const secModulesResult = await session.run(
+      `CALL {
+         MATCH (:IacScan {project_id: $pid})-[:HAS_REPOSITORY]->()-[:HAS_FINDING]->(f:IacFinding)
+         RETURN 'IaC / DevOps' AS module, f.severity AS severity
+         UNION ALL
+         MATCH (:CloudReconScan {project_id: $pid})-[:HAS_BUCKET_FINDING]->(f:CloudBucketFinding)
+         RETURN 'Cloud Storage' AS module, f.severity AS severity
+         UNION ALL
+         MATCH (:MobileScan {project_id: $pid})-[:HAS_APP]->()-[:HAS_FINDING]->(f:MobileFinding)
+         RETURN 'Mobile APK' AS module, f.severity AS severity
+       }
+       RETURN module, severity, count(*) AS count`,
+      { pid: projectId }
+    )
+    const securityModules = secModulesResult.records.map(r => ({
+      module: r.get('module') as 'IaC / DevOps' | 'Cloud Storage' | 'Mobile APK',
+      severity: (r.get('severity') as string) || 'unknown',
+      count: toNum(r.get('count')),
+    }))
+
     return NextResponse.json({
       severityDistribution,
       vulnTypes,
@@ -196,6 +217,7 @@ export async function GET(request: NextRequest) {
       exploits,
       githubSecrets,
       gvmRemediation,
+      securityModules,
     })
   } catch (error) {
     console.error('Analytics vulnerabilities error:', error)
