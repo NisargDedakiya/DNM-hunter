@@ -1404,6 +1404,14 @@ model Remediation {
   validatorStatus    String  @default("needs_manual_review") @map("validator_status")
   // confirmed | likely | needs_manual_review | ignored
 
+  // ── AI Reasoning (Phase 16) — Neo4j ChainFinding.finding_id(s) this
+  // remediation was synthesized from, if any. Lets the webapp look up the
+  // originating ChainStep's tool_name/reasoning/thought/tool_args_summary
+  // to answer "why this tool / why this payload / why this endpoint" for
+  // the AI Reasoning panel. Empty for remediations not derived from a
+  // specific attack-chain finding (the common case) — not an error state.
+  sourceFindingIds   String[] @default([]) @map("source_finding_ids")
+
   // ── Bug-bounty submission tracking ──
   submissionStatus   String   @default("not_submitted") @map("submission_status")
   // not_submitted | draft | submitted | triaged | accepted | duplicate | informative | rejected | paid

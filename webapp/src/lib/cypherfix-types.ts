@@ -203,6 +203,7 @@ export interface Remediation {
   businessImpact: string
   likelihood: Likelihood
   validatorStatus: ValidatorStatus
+  sourceFindingIds: string[]
   fileChanges: Array<{
     filePath: string
     language: string

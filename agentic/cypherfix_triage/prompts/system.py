@@ -92,6 +92,18 @@ different question (correctness, not urgency):
     including it for completeness; explain why in false_positive_score's
     reasoning and keep confidence_score low
 
+# AI Reasoning Provenance (source_finding_ids)
+
+- source_finding_ids: [string] — the `finding_id` value(s) from the
+  `chain_findings` context data (NOT chain_id, NOT step_id) that this
+  remediation was synthesized from, if any. A single remediation may
+  aggregate multiple chain findings (e.g. several exploit steps against the
+  same endpoint) — list every finding_id that contributed. Leave empty ([])
+  when this remediation came from DAST/CVE/secret correlation with no
+  attack-chain finding backing it — that is the normal case for most
+  findings, not an error. Never invent a finding_id that wasn't present in
+  the chain_findings data you were given.
+
 # Tools Available
 
 You have access to:

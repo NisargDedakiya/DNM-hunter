@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
             businessImpact: (rem.businessImpact as string) || '',
             likelihood: (rem.likelihood as string) || '',
             validatorStatus: (rem.validatorStatus as string) || 'needs_manual_review',
+            sourceFindingIds: (rem.sourceFindingIds as string[]) || [],
           },
         })
       )

@@ -12,7 +12,7 @@ function makeRemediation(overrides: Partial<Remediation> = {}): Remediation {
     targetRepo: '', targetBranch: 'main', fixBranch: '', prUrl: '', prStatus: 'none',
     status: 'pending', agentSessionId: '', agentNotes: '', fileChanges: [],
     confidenceScore: 90, falsePositiveScore: 10, businessImpact: 'Full DB access.', likelihood: 'high',
-    validatorStatus: 'confirmed',
+    validatorStatus: 'confirmed', sourceFindingIds: [],
     createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
     ...overrides,
   }

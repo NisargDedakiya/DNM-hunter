@@ -234,6 +234,7 @@ class TriageOrchestrator:
                 "businessImpact": rem["business_impact"],
                 "likelihood": rem["likelihood"],
                 "validatorStatus": rem["validator_status"],
+                "sourceFindingIds": rem["source_finding_ids"],
             })
 
         try:

@@ -9,6 +9,7 @@ import { EvidenceSection } from './EvidenceSection'
 import { EvidenceGallery } from './EvidenceGallery'
 import { SolutionSection } from './SolutionSection'
 import { ValidatorSection } from './ValidatorSection'
+import { ReasoningPanel } from './ReasoningPanel'
 import { CodeFixButton } from './CodeFixButton'
 import { PlatformSubmissionSection } from './PlatformSubmissionSection'
 import { CommentsSection } from './CommentsSection'
@@ -89,6 +90,9 @@ export function RemediationDetail({
 
         {/* AI Validator */}
         <ValidatorSection remediation={remediation} onOverrideValidatorStatus={onOverrideValidatorStatus} />
+
+        {/* AI Reasoning: why this tool/payload/endpoint/finding/severity */}
+        <ReasoningPanel remediation={remediation} />
 
         {/* Evidence */}
         <EvidenceSection remediation={remediation} />

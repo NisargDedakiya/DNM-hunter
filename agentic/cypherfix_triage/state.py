@@ -38,6 +38,16 @@ class TriageFinding(BaseModel):
     validator_status: str = "needs_manual_review"
     # confirmed | likely | needs_manual_review | ignored
 
+    # ── AI Reasoning (Phase 16) — links this remediation back to the
+    # ChainFinding(s) (chain_findings context, cypher_queries.py) it was
+    # synthesized from, so the webapp can look up the originating
+    # ChainStep's tool_name/reasoning/thought and answer "why this tool,
+    # why this payload, why this endpoint" — not just the validator's
+    # confidence assessment on top of it. Empty when this remediation
+    # wasn't derived from a specific attack-chain finding (e.g. a DAST/CVE
+    # correlation with no chain involved) — that's expected, not an error.
+    source_finding_ids: list[str] = []
+
 
 class RemediationDraft(BaseModel):
     findings: list[TriageFinding] = []
