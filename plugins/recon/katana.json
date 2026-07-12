@@ -1,0 +1,27 @@
+{
+  "id": "katana",
+  "name": "Katana",
+  "category": "recon",
+  "kind": "mcp-server",
+  "description": "Fast crawling and endpoint discovery to expand a target's attack surface.",
+  "dockerService": "kali-sandbox",
+  "mcpPort": 8000,
+  "status": "core",
+  "tags": ["crawl", "endpoints", "attack-surface"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "common.adapters.builtin_adapters:ReconAdapter",
+  "requiredTools": ["katana"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "depth": { "type": "integer", "minimum": 1, "maximum": 10 },
+      "jsCrawl": { "type": "boolean" }
+    }
+  },
+  "permissions": [
+    { "scope": "network:target", "reason": "Crawls in-scope target web applications to enumerate endpoints." },
+    { "scope": "scope:in-scope-only", "reason": "Crawl targets are restricted to in-scope assets by the RoE hard-guardrail." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}

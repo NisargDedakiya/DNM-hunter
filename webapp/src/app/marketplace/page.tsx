@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Store, Radar, ScanSearch, ShieldCheck, FileText, PackageOpen, Loader2 } from 'lucide-react'
 import styles from './page.module.css'
 
+interface PluginPermission { scope: string; reason: string }
+
 interface Plugin {
   id: string
   name: string
@@ -14,6 +16,11 @@ interface Plugin {
   dockerService: string | null
   status: 'core' | 'community'
   tags: string[]
+  // Master-plan Phase 6 installable-module fields (optional on legacy manifests).
+  version?: string
+  author?: string
+  requiredTools?: string[]
+  permissions?: PluginPermission[]
 }
 
 const CATEGORY_META: Record<Plugin['category'], { label: string; icon: React.ReactNode }> = {
@@ -119,6 +126,19 @@ export default function MarketplacePage() {
                       <span className={styles.kindTag}>{p.kind}</span>
                       {p.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
                     </div>
+                    {p.permissions && p.permissions.length > 0 && (
+                      <div className={styles.permBlock}>
+                        <span className={styles.permTitle}>Permissions this plugin requests</span>
+                        <ul className={styles.permList}>
+                          {p.permissions.map(perm => (
+                            <li key={perm.scope} className={styles.permItem} title={perm.reason}>
+                              <code className={styles.permScope}>{perm.scope}</code>
+                              {perm.reason && <span className={styles.permReason}>{perm.reason}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     {health && (
                       <div className={styles.cardMeta} title={health.detail ?? undefined}>
                         <span className={`${styles.healthDot} ${styles[HEALTH_CLASS[health.health]]}`} />

@@ -7,5 +7,21 @@
   "dockerService": "kali-sandbox",
   "mcpPort": 8002,
   "status": "core",
-  "tags": ["cve", "templates", "misconfiguration"]
+  "tags": ["cve", "templates", "misconfiguration"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "common.adapters.builtin_adapters:ReconAdapter",
+  "requiredTools": ["nuclei"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "severity": { "type": "array", "items": { "type": "string", "enum": ["info", "low", "medium", "high", "critical"] } },
+      "templates": { "type": "array", "items": { "type": "string" } }
+    }
+  },
+  "permissions": [
+    { "scope": "network:target", "reason": "Sends templated HTTP/network probes to in-scope target hosts." },
+    { "scope": "scope:in-scope-only", "reason": "Only targets assets marked in-scope; the RoE hard-guardrail blocks the rest." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
 }

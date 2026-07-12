@@ -173,3 +173,28 @@
   color: var(--text-tertiary);
   font-size: 10px;
 }
+
+/* ── Plugin permissions (master-plan Phase 6, security-first) ── */
+.permBlock {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--border-default);
+}
+.permTitle {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  font-weight: var(--font-semibold);
+}
+.permList { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.permItem { display: flex; align-items: baseline; gap: 6px; font-size: var(--text-xs); }
+.permScope {
+  flex-shrink: 0;
+  color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  padding: 0 5px;
+  border-radius: var(--radius-default);
+  font-size: 11px;
+}
+.permReason { color: var(--text-tertiary); overflow: hidden; text-overflow: ellipsis; }
