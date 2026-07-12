@@ -12,6 +12,7 @@ import { useWorkspaces, useCreateWorkspace } from '@/hooks/useWorkspaces'
 import { usePrograms, useProgram, useUpdateProgram } from '@/hooks/usePrograms'
 import { useToast } from '@/components/ui'
 import { SubmissionsSection } from './SubmissionsSection'
+import { ReconPlanPanel } from './ReconPlanPanel'
 import styles from './workspace.module.css'
 
 type SubSection = 'scope' | 'assets' | 'recon' | 'findings' | 'evidence' | 'reports' | 'notes' | 'submissions'
@@ -212,18 +213,21 @@ function ProgramSpine({
         )}
 
         {subSection === 'recon' && (
-          <ContextCards
-            title="Recon targets"
-            empty="No recon targets linked to this program yet."
-            items={program.projects.map(p => ({
-              key: p.id,
-              label: p.name,
-              sub: p.targetDomain,
-              href: `/projects/${p.id}/settings`,
-              icon: <Radar size={14} />,
-            }))}
-            cta={{ label: 'New recon target', href: '/projects/new' }}
-          />
+          <div className={styles.reconStack}>
+            <ReconPlanPanel programId={program.id} />
+            <ContextCards
+              title="Recon targets"
+              empty="No recon targets linked to this program yet."
+              items={program.projects.map(p => ({
+                key: p.id,
+                label: p.name,
+                sub: p.targetDomain,
+                href: `/projects/${p.id}/settings`,
+                icon: <Radar size={14} />,
+              }))}
+              cta={{ label: 'New recon target', href: '/projects/new' }}
+            />
+          </div>
         )}
 
         {subSection === 'findings' && (
