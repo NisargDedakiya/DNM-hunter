@@ -1187,6 +1187,31 @@ model Workspace {
   @@map("workspaces")
 }
 
+// A scan/recon job tracked through the unified lifecycle state machine
+// (master-plan Phase 2, Priority 7 — see common/job_lifecycle.py). The
+// orchestrator owns execution; this table is the persisted projection the
+// webapp queue/cockpit UI reads. Additive — no existing run flow depends on it.
+model Job {
+  id          String   @id @default(cuid())
+  moduleName  String   @map("module_name")
+  programId   String?  @map("program_id")
+  userId      String?  @map("user_id")
+  // queued | running | paused | retrying | completed | cancelled | failed
+  status      String   @default("queued")
+  progress    Float    @default(0)
+  config      Json     @default("{}")
+  error       String?  @db.Text
+  retries     Int      @default(0)
+  startedAt   DateTime? @map("started_at")
+  finishedAt  DateTime? @map("finished_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([programId])
+  @@index([status])
+  @@map("jobs")
+}
+
 // A bug-bounty submission tracked against a Program (master-plan Phase 1,
 // Priority 10). First-class submission history with status pills + bounty
 // totals, optionally linked to a generated Report.
