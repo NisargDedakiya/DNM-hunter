@@ -18,7 +18,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
           orderBy: { updatedAt: 'desc' },
           select: { id: true, name: true, targetDomain: true, updatedAt: true },
         },
-        _count: { select: { remediations: true } },
+        workspace: { select: { id: true, name: true } },
+        _count: { select: { remediations: true, submissions: true } },
       },
     })
 
@@ -40,7 +41,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json()
 
     const {
-      name, platform, platformHandle, platformUrl, status,
+      name, platform, platformHandle, platformUrl, status, workspaceId,
       scopeSummary, outOfScope, rateLimits, credentialNotes, notes,
       rewardMin, rewardMax, rewardCurrency, startDate, deadline,
     } = body
@@ -53,6 +54,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         ...(platformHandle !== undefined && { platformHandle }),
         ...(platformUrl !== undefined && { platformUrl }),
         ...(status !== undefined && { status }),
+        ...(workspaceId !== undefined && { workspaceId }),
         ...(scopeSummary !== undefined && { scopeSummary }),
         ...(outOfScope !== undefined && { outOfScope }),
         ...(rateLimits !== undefined && { rateLimits }),

@@ -8,12 +8,13 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
+    const workspaceId = searchParams.get('workspaceId')
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
     }
 
     const programs = await prisma.program.findMany({
-      where: { userId },
+      where: { userId, ...(workspaceId ? { workspaceId } : {}) },
       orderBy: { updatedAt: 'desc' },
       include: {
         _count: { select: { assets: true, projects: true, remediations: true } },
@@ -40,9 +41,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `platform must be one of: ${PLATFORMS.join(', ')}` }, { status: 400 })
     }
 
+    // Attach to a Workspace (master-plan Phase 1). Honor an explicit workspaceId
+    // when the caller belongs to it; otherwise fall back to the user's oldest
+    // workspace, creating a default one the first time a user has none.
+    let workspaceId: string | null = null
+    if (typeof body.workspaceId === 'string' && body.workspaceId) {
+      const ws = await prisma.workspace.findFirst({ where: { id: body.workspaceId, userId }, select: { id: true } })
+      workspaceId = ws?.id ?? null
+    }
+    if (!workspaceId) {
+      const existing = await prisma.workspace.findFirst({ where: { userId }, orderBy: { createdAt: 'asc' }, select: { id: true } })
+      workspaceId = existing
+        ? existing.id
+        : (await prisma.workspace.create({ data: { userId, name: 'Default Workspace' }, select: { id: true } })).id
+    }
+
     const program = await prisma.program.create({
       data: {
         userId,
+        workspaceId,
         name,
         platform: platform || 'manual',
         platformHandle: body.platformHandle || '',

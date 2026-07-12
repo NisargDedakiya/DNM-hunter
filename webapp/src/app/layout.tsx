@@ -4,6 +4,7 @@ import '@/styles/index.css'
 import { QueryProvider } from '@/providers/QueryProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { ProjectProvider } from '@/providers/ProjectProvider'
+import { WorkspaceProvider } from '@/providers/WorkspaceProvider'
 import { ToastProvider, AlertProvider } from '@/components/ui'
 import { AppLayout } from '@/components/layout'
 import { ThemeDbBridge } from '@/components/ThemeDbBridge'
@@ -53,11 +54,13 @@ export default function RootLayout({
             <AuthProvider>
               <ThemeDbBridge />
               <ProjectProvider>
-                <ToastProvider>
-                  <AlertProvider>
-                    <AppLayout>{children}</AppLayout>
-                  </AlertProvider>
-                </ToastProvider>
+                <WorkspaceProvider>
+                  <ToastProvider>
+                    <AlertProvider>
+                      <AppLayout>{children}</AppLayout>
+                    </AlertProvider>
+                  </ToastProvider>
+                </WorkspaceProvider>
               </ProjectProvider>
             </AuthProvider>
           </Suspense>

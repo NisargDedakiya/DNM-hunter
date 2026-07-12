@@ -19,6 +19,7 @@ model User {
   role          String            @default("standard")
   projects      Project[]
   programs      Program[]
+  workspaces    Workspace[]
   conversations Conversation[]
   llmProviders  UserLlmProvider[]
   attackSkills  UserAttackSkill[]
@@ -1127,6 +1128,12 @@ model Program {
   userId          String    @map("user_id")
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Top-level container (master-plan Phase 1). Nullable so the additive
+  // migration can backfill one default Workspace per user before any UI
+  // relies on it; every program created after the migration gets one.
+  workspaceId     String?   @map("workspace_id")
+  workspace       Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+
   name            String
   platform        String    @default("manual") @map("platform") // hackerone | bugcrowd | intigriti | yeswehack | manual
   platformHandle  String    @default("") @map("platform_handle") // program slug/handle on the platform, if any
@@ -1153,11 +1160,55 @@ model Program {
   projects        Project[]
   remediations    Remediation[]
   authCredentials AuthCredential[]
+  submissions     Submission[]
   memory          ProgramMemory?
 
   @@index([userId])
   @@index([userId, status])
+  @@index([workspaceId])
   @@map("programs")
+}
+
+// Top-level container that groups a user's Programs into one coherent
+// engagement surface (master-plan Phase 1 — the "Workspace spine"). A user
+// always works inside Workspace -> Program -> Scope -> Assets -> Recon ->
+// Findings -> Evidence -> Reports rather than launching tools loose.
+model Workspace {
+  id          String    @id @default(cuid())
+  name        String
+  description String    @default("")
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programs    Program[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("workspaces")
+}
+
+// A bug-bounty submission tracked against a Program (master-plan Phase 1,
+// Priority 10). First-class submission history with status pills + bounty
+// totals, optionally linked to a generated Report.
+model Submission {
+  id          String    @id @default(cuid())
+  programId   String    @map("program_id")
+  program     Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  severity    String    @default("medium") // info | low | medium | high | critical
+  // draft | submitted | triaged | accepted | duplicate | rejected | paid
+  status      String    @default("draft")
+  platform    String?   // hackerone | bugcrowd | intigriti | other
+  bounty      Float?
+  notes       String    @default("") @db.Text
+  reportId    String?   @map("report_id")
+  submittedAt DateTime? @map("submitted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([programId])
+  @@index([programId, status])
+  @@map("submissions")
 }
 
 // Cross-scan memory (Phase 11): a Program is hunted across many Projects
