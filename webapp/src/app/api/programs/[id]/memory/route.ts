@@ -27,6 +27,41 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 }
 
 /**
+ * PATCH /api/programs/{id}/memory — user-authoritative memory edits
+ * (master-plan Phase 4). The operator can pin interesting endpoints, edit the
+ * freeform note, and record report references. These fields are deliberately
+ * NOT touched by the deterministic recompute (POST) below, so a user edit
+ * always wins over auto-derived memory. Creates the record if absent.
+ */
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params
+    const program = await prisma.program.findUnique({ where: { id }, select: { id: true } })
+    if (!program) return NextResponse.json({ error: 'Program not found' }, { status: 404 })
+
+    const body = await request.json()
+    const data: Record<string, unknown> = {}
+    if (Array.isArray(body.interestingEndpoints)) data.interestingEndpoints = body.interestingEndpoints
+    if (Array.isArray(body.reconSummaries)) data.reconSummaries = body.reconSummaries
+    if (Array.isArray(body.reportRefs)) data.reportRefs = body.reportRefs.map(String)
+    if (typeof body.userNotes === 'string') data.userNotes = body.userNotes
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: 'No editable memory fields provided' }, { status: 400 })
+    }
+
+    const memory = await prisma.programMemory.upsert({
+      where: { programId: id },
+      create: { programId: id, ...data },
+      update: data,
+    })
+    return NextResponse.json(memory)
+  } catch (error) {
+    console.error('Update program memory failed:', error)
+    return NextResponse.json({ error: 'Failed to update program memory' }, { status: 500 })
+  }
+}
+
+/**
  * POST /api/programs/{id}/memory — deterministically recompute the memory
  * record from this program's full Remediation history (across every
  * Project/scan ever run against it) and upsert.

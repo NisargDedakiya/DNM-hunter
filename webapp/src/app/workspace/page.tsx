@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Layers, Plus, Radar, ShieldAlert, ShieldCheck, Target as TargetIcon, Search,
-  FileText, Camera, StickyNote, Send, ChevronRight, FolderOpen,
+  FileText, Camera, StickyNote, Send, ChevronRight, FolderOpen, Brain,
 } from 'lucide-react'
 import { useProject } from '@/providers/ProjectProvider'
 import { useWorkspace } from '@/providers/WorkspaceProvider'
@@ -13,9 +13,10 @@ import { usePrograms, useProgram, useUpdateProgram } from '@/hooks/usePrograms'
 import { useToast } from '@/components/ui'
 import { SubmissionsSection } from './SubmissionsSection'
 import { ReconPlanPanel } from './ReconPlanPanel'
+import { MemorySection } from './MemorySection'
 import styles from './workspace.module.css'
 
-type SubSection = 'scope' | 'assets' | 'recon' | 'findings' | 'evidence' | 'reports' | 'notes' | 'submissions'
+type SubSection = 'scope' | 'assets' | 'recon' | 'findings' | 'evidence' | 'reports' | 'memory' | 'notes' | 'submissions'
 
 const SUB_SECTIONS: { id: SubSection; label: string; icon: React.ReactNode }[] = [
   { id: 'scope', label: 'Scope', icon: <ShieldCheck size={14} /> },
@@ -24,6 +25,7 @@ const SUB_SECTIONS: { id: SubSection; label: string; icon: React.ReactNode }[] =
   { id: 'findings', label: 'Findings', icon: <Search size={14} /> },
   { id: 'evidence', label: 'Evidence', icon: <Camera size={14} /> },
   { id: 'reports', label: 'Reports', icon: <FileText size={14} /> },
+  { id: 'memory', label: 'Memory', icon: <Brain size={14} /> },
   { id: 'notes', label: 'Notes', icon: <StickyNote size={14} /> },
   { id: 'submissions', label: 'Submissions', icon: <Send size={14} /> },
 ]
@@ -261,6 +263,8 @@ function ProgramSpine({
             cta={{ label: 'Report Center', href: '/reports' }}
           />
         )}
+
+        {subSection === 'memory' && <MemorySection programId={program.id} />}
 
         {subSection === 'notes' && (
           <div>

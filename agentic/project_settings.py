@@ -589,8 +589,16 @@ def fetch_agent_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
             )
             memory_resp.raise_for_status()
             memory = memory_resp.json()
-            if memory and memory.get('priorFindingsSummary'):
-                lines = [memory['priorFindingsSummary']]
+            # Fire when there's ANY memory worth injecting — auto-derived prior
+            # findings OR user-authoritative pins/notes (master-plan Phase 4).
+            if memory and (
+                memory.get('priorFindingsSummary')
+                or memory.get('interestingEndpoints')
+                or (memory.get('userNotes') or '').strip()
+            ):
+                lines = []
+                if memory.get('priorFindingsSummary'):
+                    lines.append(memory['priorFindingsSummary'])
                 known_paths = memory.get('knownPaths') or []
                 if known_paths:
                     path_list = ', '.join(p.get('path', '') for p in known_paths[:15] if p.get('path'))
@@ -602,6 +610,20 @@ def fetch_agent_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
                         for p in working_payloads[:10]
                     ]
                     lines.append("Confirmed/likely findings from prior scans (do not re-derive from scratch):\n" + "\n".join(payload_lines))
+                # User-authoritative memory (master-plan Phase 4): operator-pinned
+                # endpoints and notes take precedence — surface them prominently
+                # so the Planner re-checks them first.
+                interesting = memory.get('interestingEndpoints') or []
+                if interesting:
+                    pin_lines = [
+                        f"- {e.get('endpoint', '')}: {e.get('note', '')[:200]}"
+                        for e in interesting[:10] if e.get('endpoint')
+                    ]
+                    if pin_lines:
+                        lines.append("Operator-pinned endpoints to prioritize re-checking:\n" + "\n".join(pin_lines))
+                user_notes = (memory.get('userNotes') or '').strip()
+                if user_notes:
+                    lines.append(f"Operator notes for this program:\n{user_notes[:1000]}")
                 settings['PROGRAM_MEMORY_CONTEXT'] = "\n\n".join(lines)
         except Exception as e:
             logger.warning(f"Failed to fetch program memory for program {program_id}: {e}")

@@ -1262,6 +1262,17 @@ model ProgramMemory {
   priorFindingsSummary      String   @default("") @map("prior_findings_summary") @db.Text
   lastComputedFromProjectId String?  @map("last_computed_from_project_id")
 
+  // ── User-authoritative memory (master-plan Phase 4) ──
+  // These fields are edited by the operator and are NOT overwritten by the
+  // deterministic recompute, so a pinned endpoint or a hand-written note
+  // always wins over auto-derived memory.
+  // [{ endpoint, note, pinnedAt }] — endpoints the user marked interesting.
+  interestingEndpoints      Json     @default("[]") @map("interesting_endpoints")
+  // [{ projectId, summary, at }] — compressed summary per past recon run.
+  reconSummaries            Json     @default("[]") @map("recon_summaries")
+  reportRefs                String[] @default([]) @map("report_refs")
+  userNotes                 String   @default("") @map("user_notes") @db.Text
+
   createdAt                 DateTime @default(now()) @map("created_at")
   updatedAt                 DateTime @updatedAt @map("updated_at")
 

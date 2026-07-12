@@ -373,3 +373,14 @@
 .planBtnOn { background: var(--success); color: #fff; border-color: transparent; }
 .planBtnSkip { background: var(--bg-tertiary); color: var(--text-tertiary); }
 .planFooter { font-size: var(--text-xs); color: var(--text-tertiary); margin: 0; }
+
+/* ── Memory sub-section (Phase 4) ── */
+.memSubhead {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  margin: var(--space-4) 0 var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

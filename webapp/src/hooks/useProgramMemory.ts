@@ -9,6 +9,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
+export interface InterestingEndpoint { endpoint: string; note: string; pinnedAt?: string }
+
 export interface ProgramMemory {
   id: string
   programId: string
@@ -17,8 +19,29 @@ export interface ProgramMemory {
   workingPayloads: Array<{ category: string; summary: string; workedOn: string }>
   priorFindingsSummary: string
   lastComputedFromProjectId: string | null
+  // User-authoritative fields (master-plan Phase 4) — never clobbered by recompute.
+  interestingEndpoints: InterestingEndpoint[]
+  reconSummaries: Array<{ projectId: string; summary: string; at: string }>
+  reportRefs: string[]
+  userNotes: string
   createdAt: string
   updatedAt: string
+}
+
+export interface MemoryEdit {
+  interestingEndpoints?: InterestingEndpoint[]
+  reportRefs?: string[]
+  userNotes?: string
+}
+
+async function patchMemory(programId: string, edit: MemoryEdit): Promise<ProgramMemory> {
+  const res = await fetch(`/api/programs/${programId}/memory`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(edit),
+  })
+  if (!res.ok) throw new Error((await res.json()).error || 'Failed to update program memory')
+  return res.json()
 }
 
 const MEMORY_KEY = 'program-memory'
@@ -51,10 +74,19 @@ export function useProgramMemory(programId: string | null) {
     },
   })
 
+  const editMutation = useMutation({
+    mutationFn: (edit: MemoryEdit) => patchMemory(programId as string, edit),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MEMORY_KEY, programId] })
+    },
+  })
+
   return {
     memory: query.data ?? null,
     isLoading: query.isLoading,
     recompute: recomputeMutation.mutate,
     isRecomputing: recomputeMutation.isPending,
+    editMemory: editMutation.mutateAsync,
+    isEditing: editMutation.isPending,
   }
 }
