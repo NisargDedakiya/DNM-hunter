@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useProject } from '@/providers/ProjectProvider'
 import { useDashboardSummary } from '@/hooks/useDashboardSummary'
+import { OperationsPanel } from './OperationsPanel'
 import styles from './page.module.css'
 
 function formatDate(iso: string): string {
@@ -108,6 +109,8 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <OperationsPanel />
 
       <div className={styles.columns}>
         <section className={styles.panel}>

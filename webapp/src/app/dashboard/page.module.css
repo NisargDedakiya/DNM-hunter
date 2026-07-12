@@ -281,3 +281,40 @@ a.activityLink:hover {
   text-align: center;
   margin: 0;
 }
+
+/* ── Operations cockpit (master-plan Phase 5) ── */
+.opsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.opsCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+.opsTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
+}
+.opsMuted { color: var(--text-tertiary); font-size: var(--text-sm); margin: 0; }
+.opsList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.opsItem { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-secondary); }
+.opsIcon { color: var(--accent-primary); display: inline-flex; }
+.opsModule { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
+.opsProgress { font-size: var(--text-xs); color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+.opsPos { font-size: var(--text-xs); color: var(--text-tertiary); font-weight: var(--font-semibold); width: 22px; }
+.opsHealthSummary { font-size: var(--text-xs); color: var(--text-tertiary); margin: 0 0 var(--space-2); }
+.opsDot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.opsDotOk { background: var(--success, #16a34a); }
+.opsDotBad { background: var(--danger, #dc2626); }
+.spin { animation: opsspin 1s linear infinite; }
+@keyframes opsspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
