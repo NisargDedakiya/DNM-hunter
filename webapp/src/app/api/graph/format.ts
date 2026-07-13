@@ -113,7 +113,14 @@ export function formatGraphRecords(records: any[]): FormattedGraphData {
     }
   })
 
-  return { nodes: Array.from(nodesMap.values()), links }
+  // Drop dangling links whose endpoints were never registered as nodes — e.g.
+  // a relationship returned alongside an OPTIONAL MATCH node that was null.
+  // Left in, react-force-graph would auto-materialize a phantom node for the
+  // missing endpoint.
+  const presentIds = new Set(nodesMap.keys())
+  const cleanLinks = links.filter(l => presentIds.has(l.source) && presentIds.has(l.target))
+
+  return { nodes: Array.from(nodesMap.values()), links: cleanLinks }
 }
 
 export function getNodeName(node: Neo4jNode): string {

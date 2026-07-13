@@ -17,6 +17,21 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { FileSystemDrawer } from './FileSystemDrawer'
 
+// FileSystemDrawer consumes useAlertModal() from the @/components/ui barrel,
+// which needs an AlertProvider at runtime. Stub it with stable spies so tests
+// can assert the drawer surfaced a validation warning via the alert modal
+// (the component uses alertWarning/alertError, not window.alert).
+const alertSpies = vi.hoisted(() => ({
+  alertError: vi.fn(),
+  alertWarning: vi.fn(),
+  alertInfo: vi.fn(),
+  dangerConfirm: vi.fn().mockResolvedValue(true),
+}))
+vi.mock('@/components/ui', () => ({
+  useAlertModal: () => alertSpies,
+  WikiInfoButton: () => null,
+}))
+
 vi.mock('@/components/ui/Drawer', () => ({
   Drawer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="drawer">{children}</div>
@@ -225,7 +240,8 @@ describe('FileSystemDrawer: modal UX', () => {
 
 describe('FileSystemDrawer: mkdir input validation', () => {
   test('slash in new folder name is rejected client-side', async () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    const alertSpy = alertSpies.alertWarning
+    alertSpy.mockClear()
     fetchHandler = async (url) => {
       if (url.includes('/api/agent/workspace/list')) {
         return new Response(JSON.stringify({ entries: sampleWithProtected }), { status: 200 })
@@ -247,7 +263,8 @@ describe('FileSystemDrawer: mkdir input validation', () => {
   })
 
   test('dot/dotdot names are rejected client-side', async () => {
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    const alertSpy = alertSpies.alertWarning
+    alertSpy.mockClear()
     render(<FileSystemDrawer isOpen={true} onClose={() => {}} projectId="p1" />)
     await waitFor(() => expect(screen.getByText('notes')).toBeInTheDocument())
     fireEvent.click(screen.getByTitle('New folder in current directory'))

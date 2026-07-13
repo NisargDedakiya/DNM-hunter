@@ -68,8 +68,11 @@ describe('Workflow graph edges stay consistent', () => {
   test('every tool in WORKFLOW_TOOLS has an output-map entry (SECTION_NODE_MAP)', () => {
     for (const tool of WORKFLOW_TOOLS) {
       const outputs = SECTION_NODE_MAP[tool.id]
+      // A defined entry must be an array. It may legitimately be empty for a
+      // pure-enrichment tool that produces no new graph nodes (e.g.
+      // EndpointAiClassifier annotates existing nodes rather than creating them).
       if (outputs !== undefined) {
-        expect(outputs.length).toBeGreaterThan(0)
+        expect(Array.isArray(outputs)).toBe(true)
       }
     }
   })

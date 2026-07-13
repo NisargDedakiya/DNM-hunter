@@ -124,6 +124,9 @@ describe('Wave status computation', () => {
 // ---------------------------------------------------------------------------
 
 function derivePlanStatus(failed: number, total: number): PlanWaveItem['status'] {
+  // An empty plan (nothing to run) is a success, not an error — guard the
+  // total===0 case before the "all failed" check (0 failed === 0 total).
+  if (total === 0) return 'success'
   if (failed === total) return 'error'
   if (failed > 0) return 'partial'
   return 'success'

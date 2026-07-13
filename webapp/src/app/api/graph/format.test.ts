@@ -194,6 +194,9 @@ describe('formatGraphRecords', () => {
     relId = 100,
   ) {
     return {
+      // Real neo4j-driver Records expose `keys` as an array; formatGraphRecords
+      // iterates it, so the mock must provide it too.
+      keys: ['n', 'r', 'm'],
       get(key: string) {
         if (key === 'n') return source
         if (key === 'm') return target
@@ -250,6 +253,7 @@ describe('formatGraphRecords', () => {
 
   test('skips records with null nodes', () => {
     const nullRecord = {
+      keys: ['n', 'r', 'm'],
       get(key: string) {
         if (key === 'n') return null
         if (key === 'm') return makeNode('Sub', { name: 'test' }, 5)
@@ -258,7 +262,10 @@ describe('formatGraphRecords', () => {
       },
     }
     const result = formatGraphRecords([nullRecord])
-    expect(result.nodes).toEqual([])
+    // The non-null matched node (m) is still registered, but the relationship
+    // pointing at the null node is dropped rather than left dangling.
+    expect(result.nodes).toHaveLength(1)
+    expect(result.nodes[0].id).toBe('5')
     expect(result.links).toEqual([])
   })
 

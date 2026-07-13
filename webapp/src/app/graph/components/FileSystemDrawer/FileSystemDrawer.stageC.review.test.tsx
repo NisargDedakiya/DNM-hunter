@@ -16,6 +16,20 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react'
 import { FileSystemDrawer } from './FileSystemDrawer'
 
+// FileSystemDrawer consumes useAlertModal() from the @/components/ui barrel,
+// which needs an AlertProvider at runtime. Stub it so the drawer renders
+// without wrapping every test in providers (these tests assert filesystem
+// behavior, not alert UI).
+vi.mock('@/components/ui', () => ({
+  useAlertModal: () => ({
+    alertError: vi.fn(),
+    alertWarning: vi.fn(),
+    alertInfo: vi.fn(),
+    dangerConfirm: vi.fn().mockResolvedValue(true),
+  }),
+  WikiInfoButton: () => null,
+}))
+
 vi.mock('@/components/ui/Drawer', () => ({
   Drawer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="drawer">{children}</div>
