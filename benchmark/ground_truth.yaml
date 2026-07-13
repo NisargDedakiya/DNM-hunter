@@ -1,0 +1,99 @@
+# =============================================================================
+# NisargHunter AI — vulnerability-detection benchmark ground truth
+# =============================================================================
+# The documented, deliberately-planted vulnerabilities in the bundled
+# guinea_pigs/ targets. This is the CONTRACT a real end-to-end scan is scored
+# against: for each item, the scorer (score.py) checks whether the tool's
+# findings contain a match, and reports recall overall / per P-tier / per target.
+#
+# Severity is mapped to the Bugcrowd VRT priority tiers so the scorecard answers
+# "can it find P3+?" directly:
+#   P1 = critical, P2 = high, P3 = medium, P4 = low, P5 = informational
+#
+# `match` lists the signals a finding must carry to count as a hit. A finding
+# matches an item if its category equals `category` OR any `keywords` token
+# appears (case-insensitively) in the finding's title/name, AND — when
+# `endpoint` is given and the finding carries one — the endpoint substring
+# matches. Keep keywords specific enough to avoid cross-matching.
+#
+# Source: guinea_pigs/*/README.md (documented vuln catalogs). Do NOT invent
+# entries — every item here traces to a target's own README.
+# =============================================================================
+
+targets:
+  dvws-node:
+    description: "Modern Node.js vulnerable app (Express/Apollo/SOAP/XML-RPC) + CVE containers"
+    up_check: "http://localhost:80/"
+    items:
+      # ---- Injection ----
+      - {id: dvws-sqli-rest,   name: "SQL Injection (REST)",        category: sqli,    p_tier: P1, endpoint: "/api/v2/passphrase", keywords: ["sql injection", "sqli"]}
+      - {id: dvws-sqli-gql,    name: "SQL Injection (GraphQL)",     category: sqli,    p_tier: P1, endpoint: ":4000",                keywords: ["sql injection", "sqli"]}
+      - {id: dvws-nosqli,      name: "NoSQL Injection",             category: nosqli,  p_tier: P2, endpoint: "/api/v2/notesearch",   keywords: ["nosql"]}
+      - {id: dvws-cmdi,        name: "OS Command Injection",        category: rce,     p_tier: P1, endpoint: "/api/v2/sysinfo",      keywords: ["command injection", "os command", "rce"]}
+      - {id: dvws-xxe-export,  name: "XXE (XML export)",            category: xxe,     p_tier: P2, endpoint: "/profile/export/xml",  keywords: ["xxe", "xml external entity"]}
+      - {id: dvws-xxe-soap,    name: "XXE (SOAP)",                  category: xxe,     p_tier: P2, endpoint: "/dvwsuserservice",     keywords: ["xxe", "soap"]}
+      - {id: dvws-ldapi,       name: "LDAP Injection",              category: ldapi,   p_tier: P3, endpoint: "/ldap-search",          keywords: ["ldap injection"]}
+      # ---- Broken Access Control ----
+      - {id: dvws-idor-notes,  name: "BOLA/IDOR (notes)",           category: idor,    p_tier: P2, endpoint: "/api/v2/notes/",       keywords: ["idor", "bola", "broken object"]}
+      - {id: dvws-idor-gql,    name: "BOLA/IDOR (GraphQL)",         category: idor,    p_tier: P2, endpoint: ":4000",                keywords: ["idor", "bola"]}
+      - {id: dvws-admin,       name: "Broken Admin Access",         category: bac,     p_tier: P2, endpoint: "/api/v2/admin/logs",   keywords: ["broken access", "admin", "authorization"]}
+      - {id: dvws-massassign,  name: "Mass Assignment",             category: massassign, p_tier: P3, endpoint: "/api/v2/admin/create-user", keywords: ["mass assignment"]}
+      # ---- Auth & Session ----
+      - {id: dvws-jwt-none,    name: "JWT alg:none bypass",         category: jwt,     p_tier: P2, endpoint: "/api/v2/login",        keywords: ["jwt", "alg:none", "alg none"]}
+      - {id: dvws-jwt-weak,    name: "JWT weak secret",             category: jwt,     p_tier: P2, endpoint: "/api/v2/login",        keywords: ["jwt", "weak secret"]}
+      - {id: dvws-bruteforce,  name: "Brute force (weak rate limit)", category: bruteforce, p_tier: P4, endpoint: "/api/v2/login",   keywords: ["brute force", "rate limit"]}
+      # ---- SSRF ----
+      - {id: dvws-ssrf-dl,     name: "SSRF (file download)",        category: ssrf,    p_tier: P2, endpoint: "/api/download",        keywords: ["ssrf", "server-side request"]}
+      - {id: dvws-ssrf-xmlrpc, name: "SSRF (XML-RPC)",              category: ssrf,    p_tier: P2, endpoint: ":9090",                keywords: ["ssrf"]}
+      # ---- File & Data ----
+      - {id: dvws-upload,      name: "Unrestricted File Upload",    category: upload,  p_tier: P2, endpoint: "/api/upload",           keywords: ["unrestricted file upload", "file upload"]}
+      - {id: dvws-filewrite,   name: "Arbitrary File Write (GraphQL)", category: filewrite, p_tier: P1, endpoint: ":4000",           keywords: ["file write", "arbitrary file"]}
+      - {id: dvws-pathtrav,    name: "Path Traversal",              category: pathtraversal, p_tier: P2, endpoint: "/api/upload",     keywords: ["path traversal", "directory traversal"]}
+      - {id: dvws-datexp,      name: "Sensitive Data Exposure",     category: infodisclosure, p_tier: P3, endpoint: "/api/v2/export", keywords: ["sensitive data", "data exposure"]}
+      # ---- Misconfig & Other ----
+      - {id: dvws-gql-introspect, name: "GraphQL Introspection",    category: graphql, p_tier: P4, endpoint: ":4000",                keywords: ["introspection"]}
+      - {id: dvws-openredirect, name: "Open Redirect",              category: openredirect, p_tier: P4, endpoint: "/logout/",         keywords: ["open redirect"]}
+      - {id: dvws-cors,        name: "CORS Misconfiguration",       category: cors,    p_tier: P3, endpoint: "",                      keywords: ["cors"]}
+      - {id: dvws-infodisc,    name: "Information Disclosure (API spec)", category: infodisclosure, p_tier: P4, endpoint: "/api-docs", keywords: ["information disclosure", "api spec", "swagger", "openapi"]}
+      # ---- VHost / SNI fixture (documented expected severities) ----
+      - {id: dvws-vhost-k8s,   name: "Host-header/SNI routing bypass (k8s)", category: vhost, p_tier: P2, endpoint: "k8s.", keywords: ["host header", "host_header_bypass", "routing"]}
+      - {id: dvws-vhost-admin, name: "Hidden vhost (admin)",        category: vhost,   p_tier: P3, endpoint: "admin.",              keywords: ["hidden vhost", "virtual host", "vhost"]}
+      # ---- CVE containers (real, Metasploit-exploitable) ----
+      - {id: dvws-cve-tomcat,  name: "Tomcat PUT RCE (CVE-2017-12617)", category: cve, p_tier: P1, endpoint: ":8080", keywords: ["cve-2017-12617", "tomcat"]}
+      - {id: dvws-cve-log4shell, name: "Log4Shell (CVE-2021-44228)", category: cve,  p_tier: P1, endpoint: ":8888", keywords: ["cve-2021-44228", "log4shell", "log4j"]}
+      - {id: dvws-cve-vsftpd,  name: "vsftpd backdoor (CVE-2011-2523)", category: cve, p_tier: P1, endpoint: ":21", keywords: ["cve-2011-2523", "vsftpd", "backdoor"]}
+      - {id: dvws-mongo-noauth, name: "MongoDB no auth exposed",    category: misconfig, p_tier: P2, endpoint: ":27017", keywords: ["mongodb", "no auth", "unauthenticated"]}
+
+  node_serialize:
+    description: "Node.js node-serialize 0.0.4 deserialization RCE"
+    up_check: "http://localhost:8080/"
+    items:
+      - {id: nser-cve-2017-5941, name: "node-serialize unserialize() RCE (CVE-2017-5941)", category: cve, p_tier: P1, endpoint: "/profile", keywords: ["cve-2017-5941", "deserialization", "node-serialize", "rce"]}
+
+  apache_2_4_49:
+    description: "Apache 2.4.49 path traversal / RCE"
+    up_check: "http://localhost:8080/"
+    items:
+      - {id: apache41773, name: "Apache path traversal (CVE-2021-41773)", category: cve, p_tier: P1, endpoint: "/cgi-bin", keywords: ["cve-2021-41773", "path traversal"]}
+      - {id: apache42013, name: "Apache double-encode bypass RCE (CVE-2021-42013)", category: cve, p_tier: P1, endpoint: "/cgi-bin", keywords: ["cve-2021-42013"]}
+
+  apache_2_4_25:
+    description: "Apache 2.4.25 auth bypass / DoS"
+    up_check: "http://localhost:8080/"
+    items:
+      - {id: apache3167, name: "Apache auth bypass (CVE-2017-3167)", category: cve, p_tier: P1, endpoint: "", keywords: ["cve-2017-3167", "authentication bypass"]}
+      - {id: apache3169, name: "Apache mod_ssl NULL deref DoS (CVE-2017-3169)", category: cve, p_tier: P3, endpoint: "", keywords: ["cve-2017-3169"]}
+
+  web_cache_poisoning:
+    description: "Real nginx shared cache in front of a vulnerable Flask origin"
+    up_check: "http://localhost:9090/"
+    items:
+      - {id: wcp-reflected, name: "Web cache poisoning (reflected unkeyed header)", category: webcachepoison, p_tier: P2, endpoint: "/", keywords: ["cache poison", "web cache", "unkeyed"]}
+
+# P-tier -> human label, for the scorecard.
+p_tier_labels:
+  P1: "Critical"
+  P2: "High"
+  P3: "Medium"
+  P4: "Low"
+  P5: "Informational"
