@@ -11,8 +11,12 @@ SEVERITY_HIGH = "high"
 SEVERITY_MEDIUM = "medium"
 SEVERITY_LOW = "low"
 
+# Letter-boundary (not \b): \b treats '_' as a word char, so \bPASSWORD\b misses
+# the ubiquitous DB_PASSWORD / MYSQL_ROOT_PASSWORD / SECRET_KEY / ACCESS_TOKEN
+# naming. Lookarounds count only letters as "inside a word" so underscores,
+# digits, and edges separate, while PASSWORDLESS / TOKENIZED still don't match.
 _SECRET_ENV_NAME = re.compile(
-    r"\b(PASSWORD|SECRET|TOKEN|API_KEY|APIKEY|ACCESS_KEY|PRIVATE_KEY|AWS_SECRET)\b",
+    r"(?<![A-Za-z])(PASSWORD|PASSWD|SECRET|TOKEN|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY|AWS_SECRET)(?![A-Za-z])",
     re.IGNORECASE,
 )
 _SECRET_VALUE_LOOKS_LITERAL = re.compile(r"^[\"']?[A-Za-z0-9+/_\-=]{8,}[\"']?$")

@@ -5,7 +5,12 @@ SEVERITY_CRITICAL = "critical"
 SEVERITY_HIGH = "high"
 SEVERITY_MEDIUM = "medium"
 
-_SECRET_KEY = re.compile(r"\b(PASSWORD|SECRET|TOKEN|API_KEY|APIKEY|ACCESS_KEY|PRIVATE_KEY)\b", re.IGNORECASE)
+# Letter-boundary (not \b) so underscore-joined names — the near-universal env
+# var convention: DB_PASSWORD, MYSQL_ROOT_PASSWORD, SECRET_KEY, ACCESS_TOKEN —
+# still match. \b treats '_' as a word char, so \bPASSWORD\b misses FOO_PASSWORD.
+# The lookarounds count only letters as "inside a word", so '_', digits, and
+# string edges act as separators while PASSWORDLESS / TOKENIZED do not match.
+_SECRET_KEY = re.compile(r"(?<![A-Za-z])(PASSWORD|PASSWD|SECRET|TOKEN|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY)(?![A-Za-z])", re.IGNORECASE)
 _LITERAL = re.compile(r"^[A-Za-z0-9+/_\-=]{8,}$")
 
 
