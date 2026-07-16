@@ -88,7 +88,25 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
     except Exception as exc:
         result.error = f"iac_scan failed: {type(exc).__name__}: {exc}"
 
-    # 2) Value-pattern secret detection
+    # 2) OS host-hardening config + low-level native-code (C/C++) bugs
+    try:
+        from os_audit import audit_tree as os_audit_tree
+        for o in os_audit_tree(path).findings:
+            findings.append(Finding(
+                kind=o.kind,               # "host-config" | "native-code"
+                rule_id=o.rule_id,
+                title=o.title,
+                severity=o.severity,
+                file=o.file,
+                line=o.line,
+                detail=o.detail,
+                category="os",
+            ))
+    except Exception as exc:
+        prev = f"{result.error}; " if result.error else ""
+        result.error = f"{prev}os_audit failed: {type(exc).__name__}: {exc}"
+
+    # 3) Value-pattern secret detection
     try:
         from .secret_scanner import scan_secrets
         for s in scan_secrets(path):

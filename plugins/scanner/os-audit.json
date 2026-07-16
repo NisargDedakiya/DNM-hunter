@@ -1,0 +1,23 @@
+{
+  "id": "os-audit",
+  "name": "OS & Low-Level Auditor",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "Audits OS host-hardening configuration (sshd, sudoers, sysctl, passwd/shadow, fstab) and scans C/C++ source for low-level memory-safety and command-injection bugs.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["os", "hardening", "cis", "native", "memory-safety", "buffer-overflow"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "os_audit.runner:audit_tree",
+  "requiredTools": [],
+  "configSchema": {
+    "type": "object",
+    "properties": { "path": { "type": "string", "description": "directory or repo checkout to audit" } },
+    "required": ["path"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Reads system config files and source code from the provided path only." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
