@@ -1,0 +1,23 @@
+{
+  "id": "code-audit",
+  "name": "Web Application Source SAST",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "VRT-mapped static analysis of web-application source (Python, JS/TS) for the server-side and web vulnerability classes: SQL injection, command injection/RCE, XXE, local file inclusion, SSTI, SSRF, path traversal, open redirect, XSS sinks, LDAP injection, CRLF/response splitting, cryptographic weakness, insecure deserialization, and insecure randomness. Uses light intra-file taint so injection sinks fire on user-controlled data, not constants.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["sast", "vrt", "sql-injection", "rce", "xss", "ssrf", "xxe", "crypto", "web"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "code_audit.scanner:scan_tree",
+  "requiredTools": [],
+  "configSchema": {
+    "type": "object",
+    "properties": { "path": { "type": "string", "description": "source tree or repo checkout" } },
+    "required": ["path"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Reads application source files to analyze; does not execute them." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}

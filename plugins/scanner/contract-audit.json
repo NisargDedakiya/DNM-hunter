@@ -1,0 +1,23 @@
+{
+  "id": "contract-audit",
+  "name": "Solidity Smart-Contract Scanner",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "VRT-mapped static analysis of Solidity smart contracts for the Smart Contract Misconfiguration classes: reentrancy (state after external call), tx.origin authorization, unchecked low-level call returns, arbitrary delegatecall, unguarded selfdestruct, unprotected ownership/critical setters (owner takeover), integer overflow exposure on pre-0.8 pragmas, uninitialized storage pointers, and block-value randomness. Each finding carries its VRT id and SWC registry id.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["smart-contract", "solidity", "web3", "vrt", "swc", "reentrancy", "defi"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "contract_audit.scanner:scan_tree",
+  "requiredTools": [],
+  "configSchema": {
+    "type": "object",
+    "properties": { "path": { "type": "string", "description": "directory of .sol contracts or a single .sol file" } },
+    "required": ["path"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Reads Solidity source files to analyze; does not compile or execute them." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}

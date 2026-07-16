@@ -28,7 +28,7 @@ _SEV_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 
 @dataclass
 class Finding:
-    kind: str            # "misconfig" | "secret"
+    kind: str            # misconfig | host-config | native-code | llm-owasp | sast | smart-contract | secret
     rule_id: str
     title: str
     severity: str
@@ -124,7 +124,43 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
         prev = f"{result.error}; " if result.error else ""
         result.error = f"{prev}llm_audit failed: {type(exc).__name__}: {exc}"
 
-    # 4) Value-pattern secret detection
+    # 4) Web-application source SAST (server-side injection, crypto, XSS/SSRF…)
+    try:
+        from code_audit import scan_tree as code_scan_tree
+        for c in code_scan_tree(path):
+            findings.append(Finding(
+                kind="sast",
+                rule_id=c.rule_id,
+                title=c.title,
+                severity=c.severity,
+                file=c.file,
+                line=c.line,
+                detail=f"{c.detail} [VRT {c.vrt}{'; ' + c.cwe if c.cwe else ''}]",
+                category="webapp",
+            ))
+    except Exception as exc:
+        prev = f"{result.error}; " if result.error else ""
+        result.error = f"{prev}code_audit failed: {type(exc).__name__}: {exc}"
+
+    # 5) Solidity smart-contract static analysis
+    try:
+        from contract_audit import scan_tree as contract_scan_tree
+        for sc in contract_scan_tree(path):
+            findings.append(Finding(
+                kind="smart-contract",
+                rule_id=sc.rule_id,
+                title=sc.title,
+                severity=sc.severity,
+                file=sc.file,
+                line=sc.line,
+                detail=f"{sc.detail} [VRT {sc.vrt}{'; ' + sc.swc if sc.swc else ''}]",
+                category="web3",
+            ))
+    except Exception as exc:
+        prev = f"{result.error}; " if result.error else ""
+        result.error = f"{prev}contract_audit failed: {type(exc).__name__}: {exc}"
+
+    # 6) Value-pattern secret detection
     try:
         from .secret_scanner import scan_secrets
         for s in scan_secrets(path):

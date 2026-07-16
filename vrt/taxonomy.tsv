@@ -1,0 +1,403 @@
+Technical severity ▼	VRT category	Specific vulnerability name	Variant / Affected function	Actions
+P1	AI Application Security	Model Extraction	API Query-Based Model Reconstruction	
+P1	AI Application Security	Remote Code Execution	Full System Compromise	
+P1	AI Application Security	Sensitive Information Disclosure	Cross-Tenant PII Leakage/Exposure	
+P1	AI Application Security	Sensitive Information Disclosure	Key Leak	
+P1	AI Application Security	Training Data Poisoning	Backdoor Injection / Bias Manipulation	
+P1	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Sensitive data Leakage/Exposure	
+P1	Automotive Security Misconfiguration	RF Hub	Key Fob Cloning	
+P1	Broken Access Control (BAC)	Insecure Direct Object References (IDOR)	Modify/View Sensitive Information(Iterable Object Identifiers)	
+P1	Broken Authentication and Session Management	Authentication Bypass		
+P1	Cloud Security	Identity and Access Management (IAM) Misconfigurations	Publicly Accessible IAM Credentials	
+P1	Decentralized Application Misconfiguration	Insecure Data Storage	Plaintext Private Key	
+P1	Decentralized Application Misconfiguration	Marketplace Security	Orderbook Manipulation	
+P1	Decentralized Application Misconfiguration	Marketplace Security	Signer Account Takeover	
+P1	Decentralized Application Misconfiguration	Marketplace Security	Unauthorized Asset Transfer	
+P1	Decentralized Application Misconfiguration	Protocol Security Misconfiguration	Node-level Denial of Service	
+P1	Insecure OS/Firmware	Command Injection		
+P1	Insecure OS/Firmware	Hardcoded Password	Privileged User	
+P1	Sensitive Data Exposure	Disclosure of Secrets	For Publicly Accessible Asset	
+P1	Server Security Misconfiguration	Exposed Portal	Admin Portal	
+P1	Server Security Misconfiguration	Using Default Credentials		
+P1	Server-Side Injection	File Inclusion	Local	
+P1	Server-Side Injection	Remote Code Execution (RCE)		
+P1	Server-Side Injection	SQL Injection		
+P1	Server-Side Injection	XML External Entity Injection (XXE)		
+P1	Smart Contract Misconfiguration	Reentrancy Attack		
+P1	Smart Contract Misconfiguration	Smart Contract Owner Takeover		
+P1	Smart Contract Misconfiguration	Unauthorized Transfer of Funds		
+P1	Smart Contract Misconfiguration	Uninitialized Variables		
+P1	Zero Knowledge Security Misconfiguration	Deanonymization of Data		
+P1	Zero Knowledge Security Misconfiguration	Improper Proof Validation and Finalization Logic		
+P2	AI Application Security	Denial-of-Service (DoS)	Application-Wide	
+P2	AI Application Security	Prompt Injection	System Prompt Leakage	
+P2	AI Application Security	Remote Code Execution	Sandboxed Container Code Execution	
+P2	AI Application Security	Vector and Embedding Weaknesses	Embedding Exfiltration / Model Extraction	
+P2	Application-Level Denial-of-Service (DoS)	Critical Impact and/or Easy Difficulty		
+P2	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Code Execution (CAN Bus Pivot)	
+P2	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	OTA Firmware Manipulation	
+P2	Automotive Security Misconfiguration	RF Hub	CAN Injection / Interaction	
+P2	Broken Access Control (BAC)	Insecure Direct Object References (IDOR)	Modify Sensitive Information(Iterable Object Identifiers)	
+P2	Cloud Security	Identity and Access Management (IAM) Misconfigurations	Overly Permissive IAM Roles	
+P2	Cloud Security	Storage Misconfigurations	Unencrypted Sensitive Data at Rest	
+P2	Cross-Site Request Forgery (CSRF)	Application-Wide		
+P2	Cross-Site Scripting (XSS)	Stored	Non-Privileged User to Anyone	
+P2	Cryptographic Weakness	Key Reuse	Inter-Environment	
+P2	Decentralized Application Misconfiguration	Marketplace Security	Malicious Order Offer	
+P2	Decentralized Application Misconfiguration	Marketplace Security	Price or Fee Manipulation	
+P2	Insecure OS/Firmware	Hardcoded Password	Non-Privileged User	
+P2	Insecure OS/Firmware	Local Administrator on default environment		
+P2	Insecure OS/Firmware	Over-Permissioned Credentials on Storage		
+P2	Physical Security Issues	Weakness in physical access control	Commonly Keyed System	
+P2	Protocol Specific Misconfiguration	Frontrunning-Enabled Attack		
+P2	Protocol Specific Misconfiguration	Sandwich-Enabled Attack		
+P2	Sensitive Data Exposure	Weak Password Reset Implementation	Token Leakage via Host Header Poisoning	
+P2	Server Security Misconfiguration	OAuth Misconfiguration	Account Takeover	
+P2	Server Security Misconfiguration	Server-Side Request Forgery (SSRF)	Internal High Impact	
+P2	Smart Contract Misconfiguration	Integer Overflow / Underflow		
+P2	Smart Contract Misconfiguration	Unauthorized Smart Contract Approval		
+P3	AI Application Security	Improper Output Handling	Cross-Site Scripting (XSS)	
+P3	AI Application Security	Vector and Embedding Weaknesses	Semantic Indexing	
+P3	Application-Level Denial-of-Service (DoS)	High Impact and/or Medium Difficulty		
+P3	Automotive Security Misconfiguration	Automatic Braking System (ABS)	Unintended Acceleration / Brake	
+P3	Automotive Security Misconfiguration	Battery Management System	Firmware Dump	
+P3	Automotive Security Misconfiguration	CAN	Injection (Basic Safety Message)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Battery Management System)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Headlights)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Powertrain)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Pyrotechnical Device Deployment Tool)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Sensors)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Steering Control)	
+P3	Automotive Security Misconfiguration	CAN	Injection (Vehicle Anti-theft Systems)	
+P3	Automotive Security Misconfiguration	Immobilizer	Engine Start	
+P3	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Code Execution (No CAN Bus Pivot)	
+P3	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Unauthorized Access to Services (API / Endpoints)	
+P3	Automotive Security Misconfiguration	RF Hub	Data Leakage / Pull Encryption Mechanism	
+P3	Broken Access Control (BAC)	Insecure Direct Object References (IDOR)	View Sensitive Information(Iterable Object Identifiers)	
+P3	Broken Authentication and Session Management	Session Fixation	Remote Attack Vector	
+P3	Broken Authentication and Session Management	Second Factor Authentication (2FA) Bypass		
+P3	Client-Side Injection	Binary Planting	Default Folder Privilege Escalation	
+P3	Cloud Security	Network Configuration Issues	Lack of Network Segmentation	
+P3	Cloud Security	Network Configuration Issues	Open Management Ports to the Internet	
+P3	Cross-Site Scripting (XSS)	Reflected	Non-Self	
+P3	Cross-Site Scripting (XSS)	Stored	Privileged User to Privilege Elevation	
+P3	Cross-Site Scripting (XSS)	Stored	CSRF/URL-Based	
+P3	Cryptographic Weakness	Broken Cryptography	Use of Broken Cryptographic Primitive	
+P3	Cryptographic Weakness	Insecure Key Generation	Insufficient Key Space	
+P3	Decentralized Application Misconfiguration	Marketplace Security	OFAC Bypass	
+P3	Insecure OS/Firmware	Shared Credentials on Storage		
+P3	Insecure OS/Firmware	Weakness in Firmware Updates	Firmware does not validate update integrity	
+P3	Sensitive Data Exposure	Disclosure of Secrets	For Internal Asset	
+P3	Sensitive Data Exposure	EXIF Geolocation Data Not Stripped From Uploaded Images	Automatic User Enumeration	
+P3	Server Security Misconfiguration	Exposed Portal	Non-Admin Portal	
+P3	Server Security Misconfiguration	Mail Server Misconfiguration	No Spoofing Protection on Email Domain	
+P3	Server Security Misconfiguration	Misconfigured DNS	Subdomain Takeover	
+P3	Server Security Misconfiguration	Server-Side Request Forgery (SSRF)	Internal Scan and/or Medium Impact	
+P3	Server-Side Injection	Content Spoofing	iframe Injection	
+P3	Server-Side Injection	HTTP Response Manipulation	Response Splitting (CRLF)	
+P3	Smart Contract Misconfiguration	Function-level Denial of Service		
+P3	Smart Contract Misconfiguration	Improper Fee Implementation		
+P3	Smart Contract Misconfiguration	Irreversible Function Call		
+P3	Smart Contract Misconfiguration	Malicious Superuser Risk		
+P4	AI Application Security	Adversarial Example Injection	AI Misclassification Attacks	
+P4	AI Application Security	AI Safety	Misinformation / Wrong Factual Data	
+P4	AI Application Security	Denial-of-Service (DoS)	Tenant-Scoped	
+P4	AI Application Security	Improper Output Handling	Markdown/HTML Injection	
+P4	AI Application Security	Insufficient Rate Limiting	Query Flooding / API Token Abuse	
+P4	Automotive Security Misconfiguration	Battery Management System	Fraudulent Interface	
+P4	Automotive Security Misconfiguration	CAN	Injection (Disallowed Messages)	
+P4	Automotive Security Misconfiguration	CAN	Injection (DoS)	
+P4	Automotive Security Misconfiguration	GNSS / GPS	Spoofing	
+P4	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Default Credentials	
+P4	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Denial of Service (DoS / Brick)	
+P4	Automotive Security Misconfiguration	Infotainment, Radio Head Unit	Source Code Dump	
+P4	Automotive Security Misconfiguration	RF Hub	Unauthorized Access / Turn On	
+P4	Automotive Security Misconfiguration	Roadside Unit (RSU)	Sybil Attack	
+P4	Broken Access Control (BAC)	Bypass of Password Confirmation	Change Password	
+P4	Broken Access Control (BAC)	Insecure Direct Object References (IDOR)	Modify/View Sensitive Information(Complex Object Identifiers GUID/UUID)	
+P4	Broken Access Control (BAC)	Username/Email Enumeration	Non-Brute Force	
+P4	Broken Authentication and Session Management	Cleartext Transmission of Session Token		
+P4	Broken Authentication and Session Management	Failure to Invalidate Session	On Logout (Client and Server-Side)	
+P4	Broken Authentication and Session Management	Failure to Invalidate Session	On Password Reset and/or Change	
+P4	Broken Authentication and Session Management	Weak Login Function	Other Plaintext Protocol with no Secure Alternative	
+P4	Broken Authentication and Session Management	Weak Login Function	Over HTTP	
+P4	Broken Authentication and Session Management	Weak Registration Implementation	Over HTTP	
+P4	Cloud Security	Misconfigured Services and APIs	Insecure API Endpoints	
+P4	Cross-Site Scripting (XSS)	Off-Domain	Data URI	
+P4	Cross-Site Scripting (XSS)	Referer		
+P4	Cross-Site Scripting (XSS)	Stored	Privileged User to No Privilege Elevation	
+P4	Cross-Site Scripting (XSS)	Universal (UXSS)		
+P4	Cryptographic Weakness	Broken Cryptography	Use of Vulnerable Cryptographic Library	
+P4	Cryptographic Weakness	Insecure Key Generation	Key Exchage Without Entity Authentication	
+P4	Cryptographic Weakness	Insufficient Entropy	Limited Random Number Generator (RNG) Entropy Source	
+P4	Cryptographic Weakness	Insufficient Entropy	Predictable Initialization Vector (IV)	
+P4	Cryptographic Weakness	Insufficient Entropy	Predictable Pseudo-Random Number Generator (PRNG) Seed	
+P4	Cryptographic Weakness	Insufficient Entropy	Small Seed Space in Pseudo-Random Number Generator (PRNG)	
+P4	Cryptographic Weakness	Insufficient Verification of Data Authenticity	Integrity Check Value (ICV)	
+P4	Cryptographic Weakness	Key Reuse	Lack of Perfect Forward Secrecy	
+P4	Cryptographic Weakness	Side-Channel Attack	Padding Oracle Attack	
+P4	Cryptographic Weakness	Side-Channel Attack	Timing Attack	
+P4	Cryptographic Weakness	Use of Expired Cryptographic Key (or Certificate)		
+P4	Insecure Data Storage	Sensitive Application Data Stored Unencrypted	On External Storage	
+P4	Insecure Data Storage	Server-Side Credentials Storage	Plaintext	
+P4	Insecure Data Transport	Executable Download	No Secure Integrity Check	
+P4	Insufficient Security Configurability	No Password Policy		
+P4	Insufficient Security Configurability	Weak Password Reset Implementation	Token is Not Invalidated After Use	
+P4	Insufficient Security Configurability	Weak 2FA Implementation	2FA Secret Cannot be Rotated	
+P4	Insufficient Security Configurability	Weak 2FA Implementation	2FA Secret Remains Obtainable After 2FA is Enabled	
+P4	Privacy Concerns	Unnecessary Data Collection	WiFi SSID+Password	
+P4	Sensitive Data Exposure	Disclosure of Secrets	Pay-Per-Use Abuse	
+P4	Sensitive Data Exposure	EXIF Geolocation Data Not Stripped From Uploaded Images	Manual User Enumeration	
+P4	Sensitive Data Exposure	Sensitive Token in URL	User Facing	
+P4	Sensitive Data Exposure	Token Leakage via Referer	Over HTTP	
+P4	Sensitive Data Exposure	Token Leakage via Referer	Untrusted 3rd Party	
+P4	Sensitive Data Exposure	Via localStorage/sessionStorage	Sensitive Token	
+P4	Sensitive Data Exposure	Visible Detailed Error/Debug Page	Detailed Server Configuration	
+P4	Sensitive Data Exposure	Weak Password Reset Implementation	Password Reset Token Sent Over HTTP	
+P4	Server Security Misconfiguration	CAPTCHA	Implementation Vulnerability	
+P4	Server Security Misconfiguration	Clickjacking	Sensitive Click-Based Action	
+P4	Server Security Misconfiguration	Database Management System (DBMS) Misconfiguration	Excessively Privileged User / DBA	
+P4	Server Security Misconfiguration	Lack of Password Confirmation	Delete Account	
+P4	Server Security Misconfiguration	Lack of Security Headers	Cache-Control for a Sensitive Page	
+P4	Server Security Misconfiguration	Mail Server Misconfiguration	Email Spoofing to Inbox due to Missing or Misconfigured DMARC on Email Domain	
+P4	Server Security Misconfiguration	Misconfigured DNS	Zone Transfer	
+P4	Server Security Misconfiguration	Missing Secure or HTTPOnly Cookie Flag	Session Token	
+P4	Server Security Misconfiguration	No Rate Limiting on Form	Email-Triggering	
+P4	Server Security Misconfiguration	No Rate Limiting on Form	Login	
+P4	Server Security Misconfiguration	No Rate Limiting on Form	Registration	
+P4	Server Security Misconfiguration	No Rate Limiting on Form	SMS-Triggering	
+P4	Server Security Misconfiguration	OAuth Misconfiguration	Account Squatting	
+P4	Server Security Misconfiguration	Web Application Firewall (WAF) Bypass	Direct Server Access	
+P4	Server-Side Injection	Content Spoofing	Email HTML Injection	
+P4	Server-Side Injection	Content Spoofing	External Authentication Injection	
+P4	Server-Side Injection	Content Spoofing	Impersonation via Broken Link Hijacking	
+P4	Server-Side Injection	Server-Side Template Injection (SSTI)	Basic	
+P4	Smart Contract Misconfiguration	Improper Decimals Implementation		
+P4	Smart Contract Misconfiguration	Improper Use of Modifier		
+P4	Unvalidated Redirects and Forwards	Open Redirect	GET-Based	
+P5	AI Application Security	Improper Input Handling	ANSI Escape Codes	
+P5	AI Application Security	Improper Input Handling	RTL Overrides	
+P5	AI Application Security	Improper Input Handling	Unicode Confusables	
+P5	Application-Level Denial-of-Service (DoS)	App Crash	Malformed Android Intents	
+P5	Application-Level Denial-of-Service (DoS)	App Crash	Malformed iOS URL Schemes	
+P5	Automotive Security Misconfiguration	RF Hub	Relay	
+P5	Automotive Security Misconfiguration	RF Hub	Replay	
+P5	Automotive Security Misconfiguration	RF Hub	Roll Jam	
+P5	Broken Access Control (BAC)	Insecure Direct Object References (IDOR)	View Non-Sensitive Information	
+P5	Broken Authentication and Session Management	Concurrent Logins		
+P5	Broken Authentication and Session Management	Failure to Invalidate Session	Concurrent Sessions On Logout	
+P5	Broken Authentication and Session Management	Failure to Invalidate Session	Long Timeout	
+P5	Broken Authentication and Session Management	Failure to Invalidate Session	On Email Change	
+P5	Broken Authentication and Session Management	Failure to Invalidate Session	On Logout (Server-Side Only)	
+P5	Broken Authentication and Session Management	Failure to Invalidate Session	On 2FA Activation/Change	
+P5	Broken Authentication and Session Management	SAML Replay		
+P5	Broken Authentication and Session Management	Session Fixation	Local Attack Vector	
+P5	Broken Authentication and Session Management	Weak Login Function	Not Operational or Intended Public Access	
+P5	Client-Side Injection	Binary Planting	No Privilege Escalation	
+P5	Client-Side Injection	Binary Planting	Non-Default Folder Privilege Escalation	
+P5	Cloud Security	Logging and Monitoring Issues	Disabled or Insufficient Logging	
+P5	Cross-Site Request Forgery (CSRF)	Action-Specific	Logout	
+P5	Cross-Site Request Forgery (CSRF)	CSRF Token Not Unique Per Request		
+P5	Cross-Site Request Forgery (CSRF)	Flash-Based		
+P5	Cross-Site Scripting (XSS)	Cookie-Based		
+P5	Cross-Site Scripting (XSS)	Flash-Based		
+P5	Cross-Site Scripting (XSS)	IE-Only		
+P5	Cross-Site Scripting (XSS)	Reflected	Self	
+P5	Cross-Site Scripting (XSS)	Stored	Self	
+P5	Cross-Site Scripting (XSS)	TRACE Method		
+P5	Cryptographic Weakness	Incomplete Cleanup of Keying Material		
+P5	Cryptographic Weakness	Insufficient Entropy	Initialization Vector (IV) Reuse	
+P5	Cryptographic Weakness	Insufficient Entropy	Pseudo-Random Number Generator (PRNG) Seed Reuse	
+P5	Cryptographic Weakness	Insufficient Entropy	Use of True Random Number Generator (TRNG) for Non-Security Purpose	
+P5	Cryptographic Weakness	Key Reuse	Intra-Environment	
+P5	Cryptographic Weakness	Side-Channel Attack	Emanations Attack	
+P5	Cryptographic Weakness	Side-Channel Attack	Power Analysis Attack	
+P5	Cryptographic Weakness	Weak Hash	Use of Predictable Salt	
+P5	External Behavior	Browser Feature	Aggressive Offline Caching	
+P5	External Behavior	Browser Feature	Autocomplete Enabled	
+P5	External Behavior	Browser Feature	Autocorrect Enabled	
+P5	External Behavior	Browser Feature	Plaintext Password Field	
+P5	External Behavior	Browser Feature	Save Password	
+P5	External Behavior	Captcha Bypass	Crowdsourcing	
+P5	External Behavior	CSV Injection		
+P5	External Behavior	System Clipboard Leak	Shared Links	
+P5	External Behavior	User Password Persisted in Memory		
+P5	Insecure Data Storage	Non-Sensitive Application Data Stored Unencrypted		
+P5	Insecure Data Storage	Screen Caching Enabled		
+P5	Insecure Data Storage	Sensitive Application Data Stored Unencrypted	On Internal Storage	
+P5	Insecure Data Transport	Executable Download	Secure Integrity Check	
+P5	Insecure OS/Firmware	Data not encrypted at rest	Non sensitive	
+P5	Insecure OS/Firmware	Weakness in Firmware Updates	Firmware is not encrypted	
+P5	Insufficient Security Configurability	Lack of Notification Email		
+P5	Insufficient Security Configurability	Password Policy Bypass		
+P5	Insufficient Security Configurability	Verification of Contact Method not Required		
+P5	Insufficient Security Configurability	Weak Password Policy		
+P5	Insufficient Security Configurability	Weak Password Reset Implementation	Token Has Long Timed Expiry	
+P5	Insufficient Security Configurability	Weak Password Reset Implementation	Token is Not Invalidated After Email Change	
+P5	Insufficient Security Configurability	Weak Password Reset Implementation	Token is Not Invalidated After Login	
+P5	Insufficient Security Configurability	Weak Password Reset Implementation	Token is Not Invalidated After New Token is Requested	
+P5	Insufficient Security Configurability	Weak Password Reset Implementation	Token is Not Invalidated After Password Change	
+P5	Insufficient Security Configurability	Weak Registration Implementation	Allows Disposable Email Addresses	
+P5	Insufficient Security Configurability	Weak 2FA Implementation	Missing Failsafe	
+P5	Insufficient Security Configurability	Weak 2FA Implementation	Old 2FA Code is Not Invalidated After New Code is Generated	
+P5	Insufficient Security Configurability	Weak 2FA Implementation	2FA Code is Not Updated After New Code is Requested	
+P5	Lack of Binary Hardening	Lack of Exploit Mitigations		
+P5	Lack of Binary Hardening	Lack of Jailbreak Detection		
+P5	Lack of Binary Hardening	Lack of Obfuscation		
+P5	Lack of Binary Hardening	Runtime Instrumentation-Based		
+P5	Mobile Security Misconfiguration	Auto Backup Allowed by Default		
+P5	Mobile Security Misconfiguration	Clipboard Enabled		
+P5	Mobile Security Misconfiguration	SSL Certificate Pinning	Absent	
+P5	Mobile Security Misconfiguration	SSL Certificate Pinning	Defeatable	
+P5	Mobile Security Misconfiguration	Tapjacking		
+P5	Network Security Misconfiguration	Telnet Enabled		
+P5	Sensitive Data Exposure	Disclosure of Known Public Information		
+P5	Sensitive Data Exposure	Disclosure of Secrets	Data/Traffic Spam	
+P5	Sensitive Data Exposure	Disclosure of Secrets	Intentionally Public, Sample or Invalid	
+P5	Sensitive Data Exposure	Disclosure of Secrets	Non-Corporate User	
+P5	Sensitive Data Exposure	GraphQL Introspection Enabled		
+P5	Sensitive Data Exposure	Internal IP Disclosure		
+P5	Sensitive Data Exposure	JSON Hijacking		
+P5	Sensitive Data Exposure	Mixed Content (HTTPS Sourcing HTTP)		
+P5	Sensitive Data Exposure	Non-Sensitive Token in URL		
+P5	Sensitive Data Exposure	Sensitive Data Hardcoded	File Paths	
+P5	Sensitive Data Exposure	Sensitive Data Hardcoded	OAuth Secret	
+P5	Sensitive Data Exposure	Sensitive Token in URL	In the Background	
+P5	Sensitive Data Exposure	Sensitive Token in URL	On Password Reset	
+P5	Sensitive Data Exposure	Token Leakage via Referer	Password Reset Token	
+P5	Sensitive Data Exposure	Token Leakage via Referer	Trusted 3rd Party	
+P5	Sensitive Data Exposure	Via localStorage/sessionStorage	Non-Sensitive Token	
+P5	Sensitive Data Exposure	Visible Detailed Error/Debug Page	Descriptive Stack Trace	
+P5	Sensitive Data Exposure	Visible Detailed Error/Debug Page	Full Path Disclosure	
+P5	Server Security Misconfiguration	Bitsquatting		
+P5	Server Security Misconfiguration	CAPTCHA	Brute Force	
+P5	Server Security Misconfiguration	CAPTCHA	Missing	
+P5	Server Security Misconfiguration	Clickjacking	Form Input	
+P5	Server Security Misconfiguration	Clickjacking	Non-Sensitive Action	
+P5	Server Security Misconfiguration	Cookie Scoped to Parent Domain		
+P5	Server Security Misconfiguration	Directory Listing Enabled	Non-Sensitive Data Exposure	
+P5	Server Security Misconfiguration	Email Verification Bypass		
+P5	Server Security Misconfiguration	Exposed Portal	Protected	
+P5	Server Security Misconfiguration	Fingerprinting/Banner Disclosure		
+P5	Server Security Misconfiguration	Insecure SSL	Certificate Error	
+P5	Server Security Misconfiguration	Insecure SSL	Insecure Cipher Suite	
+P5	Server Security Misconfiguration	Insecure SSL	Lack of Forward Secrecy	
+P5	Server Security Misconfiguration	Lack of Password Confirmation	Change Email Address	
+P5	Server Security Misconfiguration	Lack of Password Confirmation	Change Password	
+P5	Server Security Misconfiguration	Lack of Password Confirmation	Manage 2FA	
+P5	Server Security Misconfiguration	Lack of Security Headers	Cache-Control for a Non-Sensitive Page	
+P5	Server Security Misconfiguration	Lack of Security Headers	Content-Security-Policy	
+P5	Server Security Misconfiguration	Lack of Security Headers	Content-Security-Policy-Report-Only	
+P5	Server Security Misconfiguration	Lack of Security Headers	Public-Key-Pins	
+P5	Server Security Misconfiguration	Lack of Security Headers	Strict-Transport-Security	
+P5	Server Security Misconfiguration	Lack of Security Headers	X-Content-Security-Policy	
+P5	Server Security Misconfiguration	Lack of Security Headers	X-Content-Type-Options	
+P5	Server Security Misconfiguration	Lack of Security Headers	X-Frame-Options	
+P5	Server Security Misconfiguration	Lack of Security Headers	X-Webkit-CSP	
+P5	Server Security Misconfiguration	Lack of Security Headers	X-XSS-Protection	
+P5	Server Security Misconfiguration	Mail Server Misconfiguration	Email Spoofing on Non-Email Domain	
+P5	Server Security Misconfiguration	Mail Server Misconfiguration	Email Spoofing to Spam Folder	
+P5	Server Security Misconfiguration	Mail Server Misconfiguration	Missing or Misconfigured SPF and/or DKIM	
+P5	Server Security Misconfiguration	Misconfigured DNS	Missing Certification Authority Authorization (CAA) Record	
+P5	Server Security Misconfiguration	Missing DNSSEC		
+P5	Server Security Misconfiguration	Missing Secure or HTTPOnly Cookie Flag	Non-Session Cookie	
+P5	Server Security Misconfiguration	Missing Subresource Integrity		
+P5	Server Security Misconfiguration	No Rate Limiting on Form	Change Password	
+P5	Server Security Misconfiguration	Potentially Unsafe HTTP Method Enabled	OPTIONS	
+P5	Server Security Misconfiguration	Potentially Unsafe HTTP Method Enabled	TRACE	
+P5	Server Security Misconfiguration	Reflected File Download (RFD)		
+P5	Server Security Misconfiguration	Same-Site Scripting		
+P5	Server Security Misconfiguration	Server-Side Request Forgery (SSRF)	External - DNS Query Only	
+P5	Server Security Misconfiguration	Server-Side Request Forgery (SSRF)	External - Low impact	
+P5	Server Security Misconfiguration	Unsafe File Upload	File Extension Filter Bypass	
+P5	Server Security Misconfiguration	Unsafe File Upload	No Antivirus	
+P5	Server Security Misconfiguration	Unsafe File Upload	No Size Limit	
+P5	Server Security Misconfiguration	Username/Email Enumeration	Brute Force	
+P5	Server-Side Injection	Content Spoofing	Email Hyperlink Injection Based on Email Provider	
+P5	Server-Side Injection	Content Spoofing	Flash Based External Authentication Injection	
+P5	Server-Side Injection	Content Spoofing	Homograph/IDN-Based	
+P5	Server-Side Injection	Content Spoofing	HTML Content Injection	
+P5	Server-Side Injection	Content Spoofing	Right-to-Left Override (RTLO)	
+P5	Server-Side Injection	Content Spoofing	Text Injection	
+P5	Server-Side Injection	Exposed Data	Non Sensitive Data	
+P5	Server-Side Injection	Parameter Pollution	Social Media Sharing Buttons	
+P5	Unvalidated Redirects and Forwards	Lack of Security Speed Bump Page		
+P5	Unvalidated Redirects and Forwards	Open Redirect	Flash-Based	
+P5	Unvalidated Redirects and Forwards	Open Redirect	Header-Based	
+P5	Unvalidated Redirects and Forwards	Open Redirect	POST-Based	
+P5	Unvalidated Redirects and Forwards	Tabnabbing		
+P5	Using Components with Known Vulnerabilities	Captcha Bypass	OCR (Optical Character Recognition)	
+P5	Using Components with Known Vulnerabilities	Outdated Software Version		
+P5	Using Components with Known Vulnerabilities	Rosetta Flash		
+Varies	Algorithmic Biases	Aggregation Bias		
+Varies	Algorithmic Biases	Processing Bias		
+Varies	Application-Level Denial-of-Service (DoS)	Excessive Resource Consumption	Injection (Prompt)	
+Varies	Blockchain Infrastructure Misconfiguration	Improper Bridge Validation and Verification Logic		
+Varies	Broken Access Control (BAC)	Exposed Sensitive Android Intent		
+Varies	Broken Access Control (BAC)	Exposed Sensitive iOS URL Scheme		
+Varies	Broken Access Control (BAC)	Privilege Escalation		
+Varies	Broken Authentication and Session Management	Failure to Invalidate Session	On Permission Change	
+Varies	Cloud Security	Misconfigured Services and APIs	Exposed Debug or Admin Interfaces	
+Varies	Cloud Security	Storage Misconfigurations	Publicly Accessible Cloud Storage	
+Varies	Cross-Site Request Forgery (CSRF)	Action-Specific	Authenticated Action	
+Varies	Cross-Site Request Forgery (CSRF)	Action-Specific	Unauthenticated Action	
+Varies	Cryptographic Weakness	Insecure Implementation	Improper Following of Specification (Other)	
+Varies	Cryptographic Weakness	Insecure Implementation	Missing Cryptographic Step	
+Varies	Cryptographic Weakness	Insecure Key Generation	Improper Asymmetric Exponent Selection	
+Varies	Cryptographic Weakness	Insecure Key Generation	Improper Asymmetric Prime Selection	
+Varies	Cryptographic Weakness	Insecure Key Generation	Insufficient Key Stretching	
+Varies	Cryptographic Weakness	Insufficient Verification of Data Authenticity	Cryptographic Signature	
+Varies	Cryptographic Weakness	Side-Channel Attack	Differential Fault Analysis	
+Varies	Cryptographic Weakness	Weak Hash	Lack of Salt	
+Varies	Cryptographic Weakness	Weak Hash	Predictable Hash Collision	
+Varies	Data Biases	Pre-existing Bias		
+Varies	Data Biases	Representation Bias		
+Varies	Decentralized Application Misconfiguration	DeFi Security	Flash Loan Attack	
+Varies	Decentralized Application Misconfiguration	DeFi Security	Function-Level Accounting Error	
+Varies	Decentralized Application Misconfiguration	DeFi Security	Improper Implementation of Governance	
+Varies	Decentralized Application Misconfiguration	DeFi Security	Pricing Oracle Manipulation	
+Varies	Decentralized Application Misconfiguration	Improper Authorization	Insufficient Signature Validation	
+Varies	Decentralized Application Misconfiguration	Insecure Data Storage	Sensitive Information Exposure	
+Varies	Decentralized Application Misconfiguration	Marketplace Security	Denial of Service	
+Varies	Decentralized Application Misconfiguration	Marketplace Security	Improper Validation and Checks For Deposits and Withdrawals	
+Varies	Decentralized Application Misconfiguration	Marketplace Security	Miscalculated Accounting Logic	
+Varies	Developer Biases	Implicit Bias		
+Varies	Indicators of Compromise			
+Varies	Insecure Data Transport	Cleartext Transmission of Sensitive Data		
+Varies	Insecure OS/Firmware	Data not encrypted at rest	Sensitive	
+Varies	Insecure OS/Firmware	Failure to Remove Sensitive Artifacts from Disk		
+Varies	Insecure OS/Firmware	Kiosk Escape or Breakout		
+Varies	Insecure OS/Firmware	Poorly Configured Disk Encryption		
+Varies	Insecure OS/Firmware	Poorly Configured Operating System Security		
+Varies	Insecure OS/Firmware	Recovery of Disk Contains Sensitive Material		
+Varies	Insecure OS/Firmware	Weakness in Firmware Updates	Firmware cannot be updated	
+Varies	Misinterpretation Biases	Context Ignorance		
+Varies	Physical Security Issues	Bypass of physical access control		
+Varies	Physical Security Issues	Weakness in physical access control	Cloneable Key	
+Varies	Physical Security Issues	Weakness in physical access control	Master Key Identification	
+Varies	Protocol Specific Misconfiguration	Improper Validation and Finalization Logic		
+Varies	Protocol Specific Misconfiguration	Misconfigured Staking Logic		
+Varies	Sensitive Data Exposure	Disclosure of Secrets	PII Leakage/Exposure	
+Varies	Sensitive Data Exposure	Cross Site Script Inclusion (XSSI)		
+Varies	Server Security Misconfiguration	Cache Deception		
+Varies	Server Security Misconfiguration	Cache Poisoning		
+Varies	Server Security Misconfiguration	Directory Listing Enabled	Sensitive Data Exposure	
+Varies	Server Security Misconfiguration	OAuth Misconfiguration	Insecure Redirect URI	
+Varies	Server Security Misconfiguration	OAuth Misconfiguration	Missing/Broken State Parameter	
+Varies	Server Security Misconfiguration	Path Traversal		
+Varies	Server Security Misconfiguration	Race Condition		
+Varies	Server Security Misconfiguration	HTTP Request Smuggling		
+Varies	Server Security Misconfiguration	Software Package Takeover		
+Varies	Server Security Misconfiguration	SSL Attack (BREACH, POODLE etc.)		
+Varies	Server Security Misconfiguration	Unsafe Cross-Origin Resource Sharing		
+Varies	Server-Side Injection	Exposed Data	Sensitive Data	
+Varies	Server-Side Injection	LDAP Injection		
+Varies	Server-Side Injection	Server-Side Template Injection (SSTI)	Custom	
+Varies	Smart Contract Misconfiguration	Bypass of Function Modifiers and Checks		
+Varies	Smart Contract Misconfiguration	Inaccurate Rounding Calculation		
+Varies	Societal Biases	Confirmation Bias		
+Varies	Societal Biases	Systemic Bias		
+Varies	Zero Knowledge Security Misconfiguration	Misconfigured Trusted Setup		
+Varies	Zero Knowledge Security Misconfiguration	Mismatching Bit Lengths		
+Varies	Zero Knowledge Security Misconfiguration	Missing Constraint		
+Varies	Zero Knowledge Security Misconfiguration	Missing Range Check	
