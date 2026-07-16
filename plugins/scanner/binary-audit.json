@@ -1,0 +1,23 @@
+{
+  "id": "binary-audit",
+  "name": "Binary / ELF Analyzer",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "checksec-style low-level analysis of compiled ELF binaries: missing NX/PIE/RELRO/stack-canary/FORTIFY protections, dangerous imported libc functions, and insecure RPATH/RUNPATH — using binutils.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["binary", "elf", "checksec", "exploit-mitigation", "reverse-engineering"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "binary_audit.elf:analyze_path",
+  "requiredTools": ["readelf", "nm"],
+  "configSchema": {
+    "type": "object",
+    "properties": { "path": { "type": "string", "description": "ELF file or directory of binaries" } },
+    "required": ["path"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Reads the provided binary/directory to analyze it; does not execute the binary." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
