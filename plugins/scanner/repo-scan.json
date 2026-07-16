@@ -1,0 +1,27 @@
+{
+  "id": "repo-scan",
+  "name": "GitHub Repo Scanner",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "Clones a GitHub repository (URL or owner/name) and scans the whole tree for IaC/DevOps misconfigurations and hardcoded secrets, with redaction and severity scoring.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["github", "secrets", "iac", "sca", "static-analysis"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "repo_scan.repo_scanner:scan_repo",
+  "requiredTools": ["git"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "repo": { "type": "string", "description": "GitHub URL, owner/name, or local path" },
+      "token": { "type": "string", "description": "optional token for private repos" }
+    },
+    "required": ["repo"]
+  },
+  "permissions": [
+    { "scope": "network:github", "reason": "Clones the target repository over HTTPS from github.com." },
+    { "scope": "scope:in-scope-only", "reason": "Only scan repositories that are in the engagement's declared scope." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
