@@ -14,9 +14,26 @@ SEVERITY_MEDIUM = "medium"
 SEVERITY_LOW = "low"
 
 _SECRET_ATTR = re.compile(r"(password|secret|api_key|access_key|private_key|token)$", re.IGNORECASE)
-_LITERAL = re.compile(r"^[A-Za-z0-9+/_\-=]{8,}$")
+# An HCL reference (var.x, local.x, data.x, module.x, each.value) or a ${...}
+# interpolation is NOT a hardcoded secret. Anything else literal is.
+_HCL_REFERENCE = re.compile(r"^(var|local|data|module|each|count|path)\.", re.IGNORECASE)
 _OPEN_CIDR = {"0.0.0.0/0", "::/0"}
 _SENSITIVE_PORTS = {22, 3389, 5432, 3306, 6379, 27017, 9200, 2375}
+
+
+def _is_hardcoded_secret_value(v) -> bool:
+    """True when a value assigned to a secret-named attribute is a literal
+    string (not a variable/interpolation reference). Length-gated to avoid
+    flagging trivial placeholders, but — unlike a charset whitelist — it does
+    NOT miss passwords containing special characters (P@ssw0rd!, s3cr3t#key)."""
+    if not isinstance(v, str):
+        return False
+    s = v.strip()
+    if len(s) < 6:
+        return False
+    if s.startswith("${") or _HCL_REFERENCE.match(s):
+        return False
+    return True
 
 
 def _finding(rule_id, severity, title, message, file_path, resource):
@@ -145,10 +162,33 @@ def check_terraform_doc(doc: dict, file_path: str) -> list[dict]:
 
         for attr_name, attr_val in body.items():
             if _SECRET_ATTR.search(attr_name):
-                v = _val(attr_val)
-                if isinstance(v, str) and _LITERAL.match(v) and not v.startswith("${"):
+                if _is_hardcoded_secret_value(_val(attr_val)):
                     findings.append(_finding("TF-008", SEVERITY_CRITICAL, f"Hardcoded credential in {attr_name}",
                                               f"{resource} sets {attr_name} to a literal string instead of a variable/secret reference.",
                                               file_path, resource))
+
+        # IMDSv1 allowed — the SSRF -> instance-credential-theft enabler. An EC2
+        # instance/launch template that permits IMDSv1 (http_tokens != "required",
+        # or no metadata_options block at all — the insecure default) lets any
+        # SSRF reach 169.254.169.254 and read IAM role credentials.
+        if rtype in ("aws_instance", "aws_launch_template", "aws_launch_configuration"):
+            md = body.get("metadata_options")
+            if isinstance(md, list):
+                md = md[0] if md else {}
+            if not md:
+                findings.append(_finding("TF-009", SEVERITY_HIGH, "IMDSv1 enabled (no metadata_options)",
+                                          f"{resource} has no metadata_options block, so IMDSv1 is allowed by default — an SSRF can steal instance IAM credentials. Set http_tokens = \"required\".",
+                                          file_path, resource))
+            elif isinstance(md, dict) and str(_val(md.get("http_tokens"))).lower() != "required":
+                findings.append(_finding("TF-009", SEVERITY_HIGH, "IMDSv1 enabled (http_tokens not required)",
+                                          f"{resource} sets metadata_options.http_tokens = {_val(md.get('http_tokens'))!r}; require IMDSv2 with http_tokens = \"required\" so an SSRF cannot read IAM credentials.",
+                                          file_path, resource))
+
+        # Unencrypted EBS volume — data at rest on the block device is plaintext.
+        if rtype == "aws_ebs_volume":
+            if _val(body.get("encrypted")) is not True:
+                findings.append(_finding("TF-010", SEVERITY_MEDIUM, "EBS volume not encrypted",
+                                          f"{resource} does not set encrypted = true; data at rest on this block device is unencrypted.",
+                                          file_path, resource))
 
     return findings
