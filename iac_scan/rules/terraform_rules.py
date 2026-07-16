@@ -191,4 +191,12 @@ def check_terraform_doc(doc: dict, file_path: str) -> list[dict]:
                                           f"{resource} does not set encrypted = true; data at rest on this block device is unencrypted.",
                                           file_path, resource))
 
+    # Multi-cloud: the same .tf file can declare GCP/Azure resources. Run those
+    # rule sets over the same parsed doc so a single Terraform scan covers AWS,
+    # GCP, and Azure. Imported lazily to avoid a circular import at module load.
+    from .gcp_rules import check_gcp_doc
+    from .azure_rules import check_azure_doc
+    findings.extend(check_gcp_doc(doc, file_path))
+    findings.extend(check_azure_doc(doc, file_path))
+
     return findings
