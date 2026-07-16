@@ -1,0 +1,4 @@
+# Optional heavy dependency for deep_binary. Not part of the core install.
+# The module imports without it (HAVE_ANGR = False) and only the symbolic
+# capabilities require it.
+angr>=9.2

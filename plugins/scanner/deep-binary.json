@@ -1,0 +1,28 @@
+{
+  "id": "deep-binary",
+  "name": "Deep Binary Analysis (Symbolic Execution)",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "Symbolically executes a compiled binary (angr) to solve for inputs that reach a target/dangerous state and to detect memory-corruption bugs where attacker input controls the instruction pointer.",
+  "dockerService": null,
+  "status": "community",
+  "tags": ["binary", "symbolic-execution", "angr", "memory-corruption", "exploit"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "deep_binary.symbolic:find_control_hijack",
+  "requiredTools": ["angr"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "binary": { "type": "string" },
+      "reach": { "type": "string", "description": "symbol or 0xADDR to solve an input for" },
+      "hijack": { "type": "boolean" }
+    },
+    "required": ["binary"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Loads the binary for symbolic analysis; it is not executed natively." },
+    { "scope": "compute:heavy", "reason": "Symbolic execution is CPU/RAM intensive and time-bounded per run." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
