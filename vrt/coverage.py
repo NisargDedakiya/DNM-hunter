@@ -88,7 +88,8 @@ _SPECIFIC: list[tuple] = [
     # ── Sensitive Data Exposure ──
     ("sensitive data exposure", "disclosure of secrets", STATIC, "secret_scanner+trufflehog_scan", ""),
     ("sensitive data exposure", "sensitive data hardcoded", STATIC, "secret_scanner", ""),
-    ("sensitive data exposure", "visible detailed error", STATIC, "code_audit", "CA-DEBUG"),
+    ("sensitive data exposure", "visible detailed error", STATIC, "code_audit+web_probe", "CA-DEBUG / live debug page"),
+    ("sensitive data exposure", "mixed content", DYNAMIC, "web_probe", "WP-MIXED"),
     ("sensitive data exposure", "internal ip disclosure", STATIC, "code_audit", ""),
     ("sensitive data exposure", "", DYNAMIC, "runtime", "token-in-URL/referer observed live"),
     # ── XSS / redirect (static sinks) ──
@@ -102,7 +103,13 @@ _SPECIFIC: list[tuple] = [
     ("server security misconfiguration", "missing secure or httponly", STATIC, "code_audit", "CA-COOKIE"),
     ("server security misconfiguration", "unsafe file upload", DYNAMIC, "runtime", ""),
     ("server security misconfiguration", "misconfigured dns", DYNAMIC, "baddns_scan", "subdomain takeover"),
-    ("server security misconfiguration", "", DYNAMIC, "runtime+wcvs", "headers/TLS/portals live"),
+    ("server security misconfiguration", "lack of security headers", DYNAMIC, "web_probe", "header presence probed live"),
+    ("server security misconfiguration", "clickjacking", DYNAMIC, "web_probe", "X-Frame-Options/CSP probed live"),
+    ("server security misconfiguration", "fingerprinting", DYNAMIC, "web_probe", "banner disclosure"),
+    ("server security misconfiguration", "potentially unsafe http method", DYNAMIC, "web_probe", "OPTIONS Allow"),
+    ("server security misconfiguration", "directory listing", DYNAMIC, "web_probe", "auto-index detected live"),
+    ("server security misconfiguration", "missing secure or httponly", DYNAMIC, "web_probe", "Set-Cookie flags probed live"),
+    ("server security misconfiguration", "", DYNAMIC, "web_probe+wcvs", "headers/TLS/portals live"),
     # ── Network ──
     ("network security misconfiguration", "", DYNAMIC, "gvm_scan", "network service scan"),
     # ── Access control / auth / CSRF (dynamic) ──

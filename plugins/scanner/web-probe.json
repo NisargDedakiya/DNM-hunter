@@ -1,0 +1,23 @@
+{
+  "id": "web-probe",
+  "name": "Dynamic HTTP Security Probe",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "VRT-mapped dynamic scanner that makes real HTTP requests to a live target and inspects the response for the misconfigurations a source scan cannot see: missing/weak security headers (HSTS, CSP, X-Content-Type-Options, X-Frame-Options), insecure cookie flags (Secure/HttpOnly/SameSite), permissive CORS, unsafe HTTP methods (TRACE/PUT/DELETE), clickjacking exposure, server/tech banner disclosure, directory listing, verbose error/debug pages, mixed content, and cleartext transport.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["dynamic", "dast", "vrt", "http", "security-headers", "cors", "cookies", "clickjacking"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "web_probe.scanner:probe_url",
+  "requiredTools": [],
+  "configSchema": {
+    "type": "object",
+    "properties": { "url": { "type": "string", "description": "live target URL to probe (http/https)" } },
+    "required": ["url"]
+  },
+  "permissions": [
+    { "scope": "network:http", "reason": "Sends GET/OPTIONS requests to the authorized target to inspect its live HTTP responses." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
