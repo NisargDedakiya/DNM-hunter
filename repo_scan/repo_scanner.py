@@ -106,7 +106,25 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
         prev = f"{result.error}; " if result.error else ""
         result.error = f"{prev}os_audit failed: {type(exc).__name__}: {exc}"
 
-    # 3) Value-pattern secret detection
+    # 3) OWASP LLM Top 10 — AI-application anti-patterns
+    try:
+        from llm_audit import scan_tree as llm_scan_tree
+        for l in llm_scan_tree(path):
+            findings.append(Finding(
+                kind="llm-owasp",
+                rule_id=f"{l.llm_id}:{l.rule_id}",
+                title=f"{l.llm_id} {l.category_name}: {l.title}",
+                severity=l.severity,
+                file=l.file,
+                line=l.line,
+                detail=l.detail,
+                category="llm",
+            ))
+    except Exception as exc:
+        prev = f"{result.error}; " if result.error else ""
+        result.error = f"{prev}llm_audit failed: {type(exc).__name__}: {exc}"
+
+    # 4) Value-pattern secret detection
     try:
         from .secret_scanner import scan_secrets
         for s in scan_secrets(path):

@@ -1,0 +1,23 @@
+{
+  "id": "llm-audit",
+  "name": "OWASP LLM Top 10 Auditor",
+  "category": "scanner",
+  "kind": "builtin",
+  "description": "Static detection of OWASP LLM Top 10 (2025) risks in AI-application source: prompt injection, insecure output handling, untrusted model/data loading, system-prompt secret leakage, unbounded consumption, and over-autonomous agents.",
+  "dockerService": null,
+  "status": "core",
+  "tags": ["llm", "owasp", "ai-security", "prompt-injection", "agent"],
+  "version": "1.0.0",
+  "author": "NisargHunter AI core",
+  "moduleContractEntrypoint": "llm_audit.scanner:scan_tree",
+  "requiredTools": [],
+  "configSchema": {
+    "type": "object",
+    "properties": { "path": { "type": "string", "description": "source tree or repo checkout" } },
+    "required": ["path"]
+  },
+  "permissions": [
+    { "scope": "fs:read", "reason": "Reads application source files to analyze; does not execute them." }
+  ],
+  "compatibility": { "minPlatformVersion": "2.0.0" }
+}
