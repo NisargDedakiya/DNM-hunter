@@ -8,8 +8,8 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from vrt import load, lookup, classify, coverage_report
-from vrt.coverage import STATIC, DYNAMIC, MANUAL, OUT
+from vrt import classify, coverage_report, load, lookup
+from vrt.coverage import DYNAMIC, OUT, STATIC
 
 
 class TestTaxonomy(unittest.TestCase):

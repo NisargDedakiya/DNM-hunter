@@ -26,7 +26,6 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 try:
     import angr  # type: ignore
@@ -43,7 +42,7 @@ except Exception:  # pragma: no cover - exercised only where angr is absent
 class ReachResult:
     reached: bool
     target: str
-    stdin: Optional[bytes] = None
+    stdin: bytes | None = None
     reason: str = ""
 
     def to_dict(self) -> dict:
@@ -55,7 +54,7 @@ class ReachResult:
 @dataclass
 class HijackResult:
     hijackable: bool
-    overflow_len: Optional[int] = None
+    overflow_len: int | None = None
     reason: str = ""
 
     def to_dict(self) -> dict:
@@ -67,7 +66,7 @@ def _require_angr():
         raise RuntimeError("angr is not installed; deep symbolic analysis is unavailable")
 
 
-def _resolve_target(proj, target) -> Optional[int]:
+def _resolve_target(proj, target) -> int | None:
     """Accept an int address or a symbol name; return the address or None."""
     if isinstance(target, int):
         return target
@@ -83,8 +82,9 @@ def _time_budget_stepper(deadline: float):
     def step_func(simgr):
         if time.time() > deadline:
             for stash in list(simgr.stashes):
-                simgr.move(from_stash=stash, to_stash="_timeout",
-                           filter_func=lambda s: stash not in ("found", "_timeout"))
+                if stash in ("found", "_timeout"):
+                    continue
+                simgr.move(from_stash=stash, to_stash="_timeout")
         return simgr
     return step_func
 

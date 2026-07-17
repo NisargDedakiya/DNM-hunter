@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nisarghunter-scan"
+version = "1.0.0"
+description = "NisargHunter AI security scanner suite — VRT-mapped static & dynamic vulnerability detection (SAST, IaC, OS/firmware, binaries, smart contracts, LLM apps, live HTTP)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "See LICENSE" }
+authors = [{ name = "NisargHunter AI" }]
+keywords = ["security", "sast", "dast", "vulnerability", "bugcrowd-vrt", "sarif", "pentest"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Topic :: Security",
+  "Programming Language :: Python :: 3 :: Only",
+]
+# The scanner suite core is dependency-free (standard library only) so it runs
+# anywhere. Individual heavy analysers declare their own extras below.
+dependencies = []
+
+[project.optional-dependencies]
+# Terraform HCL parsing for the IaC scanner.
+iac = ["python-hcl2>=4.3"]
+# Symbolic execution for the deep binary tier.
+deep-binary = ["angr>=9.2"]
+# Development / CI toolchain.
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+nh-scan = "scanner_suite.__main__:main"
+nh-code-audit = "code_audit.scanner:_main"
+nh-contract-audit = "contract_audit.scanner:_main"
+nh-llm-audit = "llm_audit.__main__:main"
+nh-web-probe = "web_probe.scanner:_main"
+nh-binary-audit = "binary_audit.elf:_main"
+nh-vrt-coverage = "vrt.coverage:_main"
+
+[tool.setuptools]
+# Explicit package list — the suite is a set of cooperating top-level packages.
+packages = [
+  "scanner_suite",
+  "code_audit",
+  "contract_audit",
+  "llm_audit",
+  "os_audit",
+  "binary_audit",
+  "deep_binary",
+  "web_probe",
+  "repo_scan",
+  "vrt",
+]
+include-package-data = true
+
+[tool.setuptools.package-data]
+vrt = ["taxonomy.tsv"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+# Production scope: the maintained scanner suite. Legacy modules are linted
+# incrementally as they are brought up to standard.
+include = [
+  "scanner_suite/**/*.py",
+  "code_audit/**/*.py",
+  "contract_audit/**/*.py",
+  "llm_audit/**/*.py",
+  "os_audit/**/*.py",
+  "binary_audit/**/*.py",
+  "deep_binary/**/*.py",
+  "web_probe/**/*.py",
+  "repo_scan/**/*.py",
+  "vrt/**/*.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+  "E501",  # line length is handled by the formatter, not enforced hard
+  "B008",  # function calls in argument defaults (argparse patterns)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*.py" = ["E501", "F841", "E702"]
+
+[tool.pytest.ini_options]
+testpaths = [
+  "scanner_suite", "code_audit", "contract_audit", "llm_audit", "os_audit",
+  "binary_audit", "deep_binary", "web_probe", "repo_scan", "vrt", "iac_scan",
+]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-q"

@@ -21,7 +21,7 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from urllib.parse import urlparse
 
 CRIT, HIGH, MED, LOW, INFO = "critical", "high", "medium", "low", "info"
@@ -178,8 +178,8 @@ def analyze_response(status: int, headers: dict, body: str, url: str,
 def probe_url(url: str, timeout: float = 15.0) -> list[WebFinding]:
     """Fetch `url` (and an OPTIONS request for method discovery) and analyse it.
     Network errors are returned as an INFO finding rather than raised."""
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     headers: dict[str, str] = {}
     body = ""

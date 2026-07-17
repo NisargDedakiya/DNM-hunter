@@ -15,7 +15,7 @@ import argparse
 import json
 import subprocess
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 CRIT, HIGH, MED, LOW, INFO = "critical", "high", "medium", "low", "info"

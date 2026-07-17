@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python — lint & test (scanner suite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install toolchain
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest python-hcl2
+      - name: Ruff (lint)
+        run: ruff check
+      - name: Pytest (scanner suite)
+        run: pytest
+
+  webapp:
+    name: Web app — type-check & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webapp
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Type-check
+        run: npm run type-check
+      - name: Unit tests (vitest)
+        run: npx vitest run
+
+  sarif-report:
+    name: Scanner suite — SARIF report (benchmark)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install suite deps
+        run: pip install python-hcl2
+      - name: Run unified scanner over the benchmark fixtures (SARIF)
+        # guinea_pigs is the deliberately-vulnerable benchmark, so this both
+        # proves the SARIF pipeline and verifies real detections in CI.
+        run: |
+          python -m scanner_suite guinea_pigs \
+            --format sarif --output nisarghunter.sarif --fail-on none
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nisarghunter-sarif
+          path: nisarghunter.sarif
+      # To wire the suite into GitHub code scanning for a REAL target repo,
+      # point `python -m scanner_suite <path>` at that repo and replace the
+      # step above with `github/codeql-action/upload-sarif@v3` (requires the
+      # `security-events: write` permission).

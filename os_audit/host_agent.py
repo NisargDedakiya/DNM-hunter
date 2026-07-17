@@ -20,11 +20,19 @@ import json
 import os
 import stat
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from .host_config import (audit_sshd_config, audit_sudoers, audit_passwd,
-                          audit_shadow, audit_fstab, _SYSCTL_RULES, CRIT, HIGH, MED, LOW)
+from .host_config import (
+    _SYSCTL_RULES,
+    CRIT,
+    MED,
+    audit_fstab,
+    audit_passwd,
+    audit_shadow,
+    audit_sshd_config,
+    audit_sudoers,
+)
 
 # Standard setuid-root binaries shipped by the distro — expected, not flagged.
 _STANDARD_SUID = {
@@ -110,7 +118,7 @@ def _inventory_suid(root: Path, scan_dirs: list[str], max_files: int = 20000) ->
         base = root / d.lstrip("/")
         if not base.exists():
             continue
-        for dirpath, dirnames, filenames in os.walk(base, followlinks=False):
+        for dirpath, _dirnames, filenames in os.walk(base, followlinks=False):
             for name in filenames:
                 count += 1
                 if count > max_files:
@@ -140,7 +148,7 @@ def _world_writable(root: Path, scan_dirs: list[str], max_files: int = 20000) ->
         base = root / d.lstrip("/")
         if not base.exists():
             continue
-        for dirpath, dirnames, filenames in os.walk(base, followlinks=False):
+        for dirpath, _dirnames, filenames in os.walk(base, followlinks=False):
             for name in filenames:
                 count += 1
                 if count > max_files:

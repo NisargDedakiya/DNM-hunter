@@ -20,7 +20,7 @@ numbers reflect code that exists, not aspiration.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from functools import lru_cache
 from pathlib import Path
 
@@ -63,7 +63,8 @@ def load() -> list[VrtEntry]:
         vid = base
         n = 2
         while vid in seen:
-            vid = f"{base}_{n}"; n += 1
+            vid = f"{base}_{n}"
+            n += 1
         seen.add(vid)
         entries.append(VrtEntry(vid, sev.lower() if sev.startswith("P") else "varies",
                                 cat, name, var))

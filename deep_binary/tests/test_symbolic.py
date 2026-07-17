@@ -13,7 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from deep_binary import HAVE_ANGR, reach_target, find_control_hijack
+from deep_binary import HAVE_ANGR, find_control_hijack, reach_target
 
 _HAVE_GCC = bool(shutil.which("gcc"))
 

@@ -22,7 +22,7 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 CRIT, HIGH, MED, LOW = "critical", "high", "medium", "low"
@@ -77,7 +77,7 @@ def scan_contract(text: str, file: str) -> list[ContractFinding]:
     # ── file-level: integer overflow exposure (pre-0.8 without SafeMath) ──
     if pragma and (pragma[0], pragma[1]) < (0, 8) and not has_safemath:
         if re.search(r"[+\-*]\s*=|\b\w+\s*[+\-*]\s*\w+", text):
-            ln = next((i for i, l in enumerate(lines, 1) if "pragma" in l), 1)
+            ln = next((i for i, pl in enumerate(lines, 1) if "pragma" in pl), 1)
             add("smart_contract.integer_overflow", "SC-OVERFLOW", HIGH,
                 "Arithmetic without SafeMath on Solidity <0.8 (integer overflow/underflow)",
                 ln, "Compiler <0.8 does not check arithmetic; unchecked math can overflow/underflow. "

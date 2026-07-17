@@ -13,11 +13,11 @@ import argparse
 import json
 import sys
 from collections import Counter
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from .host_config import audit_config_file
-from .native_code import scan_c_source, is_c_source
+from .native_code import is_c_source, scan_c_source
 
 _SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", ".next",
               "__pycache__", ".venv", "venv", "site-packages"}

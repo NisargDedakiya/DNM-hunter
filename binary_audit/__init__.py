@@ -5,6 +5,6 @@ dangerous imported symbols and insecure RPATH/RUNPATH — using standard binutil
 (readelf, nm). Finds the binary-level weaknesses that make memory-corruption
 bugs exploitable: no NX, no PIE, no stack canary, no RELRO, and unsafe imports.
 """
-from .elf import analyze_elf, analyze_path, ElfAnalysis
+from .elf import ElfAnalysis, analyze_elf, analyze_path
 
 __all__ = ["analyze_elf", "analyze_path", "ElfAnalysis"]

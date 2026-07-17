@@ -11,9 +11,8 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from repo_scan import scan_tree                    # noqa: E402
-from repo_scan.secret_scanner import scan_secrets, redact  # noqa: E402
-
+from repo_scan import scan_tree  # noqa: E402
+from repo_scan.secret_scanner import redact, scan_secrets  # noqa: E402
 
 # Build secret-shaped test values at RUNTIME from split parts. The assembled
 # string matches the detector regex, but no contiguous token literal exists in

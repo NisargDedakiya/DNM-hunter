@@ -5,6 +5,6 @@ LLM applications — prompt injection surfaces, unsafe model output handling,
 untrusted model/data loading, system-prompt secret leakage, unbounded
 consumption, and over-autonomous agents — mapping each finding to its LLMxx id.
 """
-from .scanner import scan_llm_code, scan_tree, LlmFinding, LLM_TOP10
+from .scanner import LLM_TOP10, LlmFinding, scan_llm_code, scan_tree
 
 __all__ = ["scan_llm_code", "scan_tree", "LlmFinding", "LLM_TOP10"]

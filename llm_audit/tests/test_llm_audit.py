@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from llm_audit import scan_llm_code, scan_tree, LLM_TOP10
+from llm_audit import LLM_TOP10, scan_llm_code, scan_tree
 
 
 def ids(findings):

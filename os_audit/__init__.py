@@ -6,6 +6,6 @@ Two static detectors, no root and no live host required:
   - native_code: classic low-level source vulnerabilities in C/C++
     (buffer-overflow-prone functions, command injection, format-string bugs).
 """
-from .runner import audit_tree, OsAuditResult
+from .runner import OsAuditResult, audit_tree
 
 __all__ = ["audit_tree", "OsAuditResult"]

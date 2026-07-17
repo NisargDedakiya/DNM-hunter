@@ -5,6 +5,6 @@ the whole tree — IaC/DevOps misconfiguration (iac_scan) and value-pattern secr
 detection (the js_recon SECRET_PATTERNS) — and aggregates the findings with
 severity + a summary. Composes existing modules; it does not reimplement them.
 """
-from .repo_scanner import scan_repo, scan_tree, RepoScanResult
+from .repo_scanner import RepoScanResult, scan_repo, scan_tree
 
 __all__ = ["scan_repo", "scan_tree", "RepoScanResult"]

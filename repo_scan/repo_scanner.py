@@ -20,7 +20,7 @@ import os
 import sys
 import tempfile
 from collections import Counter
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 _SEV_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
@@ -109,15 +109,15 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
     # 3) OWASP LLM Top 10 — AI-application anti-patterns
     try:
         from llm_audit import scan_tree as llm_scan_tree
-        for l in llm_scan_tree(path):
+        for lf in llm_scan_tree(path):
             findings.append(Finding(
                 kind="llm-owasp",
-                rule_id=f"{l.llm_id}:{l.rule_id}",
-                title=f"{l.llm_id} {l.category_name}: {l.title}",
-                severity=l.severity,
-                file=l.file,
-                line=l.line,
-                detail=l.detail,
+                rule_id=f"{lf.llm_id}:{lf.rule_id}",
+                title=f"{lf.llm_id} {lf.category_name}: {lf.title}",
+                severity=lf.severity,
+                file=lf.file,
+                line=lf.line,
+                detail=lf.detail,
                 category="llm",
             ))
     except Exception as exc:

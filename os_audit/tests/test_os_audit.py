@@ -10,10 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from os_audit.host_config import (audit_sshd_config, audit_sudoers, audit_sysctl,
-                                  audit_passwd, audit_shadow, audit_fstab)
-from os_audit.native_code import scan_c_source
 from os_audit import audit_tree
+from os_audit.host_config import audit_fstab, audit_passwd, audit_shadow, audit_sshd_config, audit_sudoers, audit_sysctl
+from os_audit.native_code import scan_c_source
 
 
 def rids(findings):

@@ -7,7 +7,11 @@ instruction pointer (unconstrained PC). angr is an optional dependency — the
 module imports without it and reports availability via HAVE_ANGR.
 """
 from .symbolic import (
-    HAVE_ANGR, reach_target, find_control_hijack, ReachResult, HijackResult,
+    HAVE_ANGR,
+    HijackResult,
+    ReachResult,
+    find_control_hijack,
+    reach_target,
 )
 
 __all__ = ["HAVE_ANGR", "reach_target", "find_control_hijack", "ReachResult", "HijackResult"]

@@ -3,7 +3,7 @@ import argparse
 import json
 import sys
 
-from . import HAVE_ANGR, reach_target, find_control_hijack
+from . import HAVE_ANGR, find_control_hijack, reach_target
 
 
 def main() -> int:

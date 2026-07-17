@@ -22,7 +22,7 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 CRIT, HIGH, MED, LOW, INFO = "critical", "high", "medium", "low", "info"
@@ -207,9 +207,11 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
                 continue
             var, rhs = m.group(1), m.group(2)
             if (bool(_USER_INPUT.search(rhs)) or _refs(rhs, tainted)) and var not in tainted:
-                tainted.add(var); changed = True
+                tainted.add(var)
+                changed = True
             if _is_query_build(rhs, tainted) and var not in sql_risky:
-                sql_risky.add(var); changed = True
+                sql_risky.add(var)
+                changed = True
         if not changed:
             break
 

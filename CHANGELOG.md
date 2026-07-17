@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.0] - 2026-07-17
+
+### Added
+
+- **Bugcrowd-VRT-mapped detection suite + unified orchestrator (production-grade).** A batch of static/dynamic analysers, each mapping findings to a canonical Bugcrowd VRT id, unified behind one entry point with standard SARIF output.
+  - **`code_audit`** — web-application source SAST (Python + JS/TS): SQL injection, command injection/RCE, code-eval, insecure deserialization, LFI/path-traversal, SSTI, XXE, LDAP injection, SSRF, XSS sinks, CRLF, open redirect, weak/broken crypto, insecure RNG, undersized keys, debug/TLS/cookie/web-storage misconfig. Taint- and parameterisation-aware (transitive intra-file taint; bound-parameter queries and literals are not flagged). Findings carry VRT + CWE.
+  - **`contract_audit`** — Solidity smart-contract scanner: reentrancy, tx.origin auth, unchecked low-level call, arbitrary delegatecall, unguarded selfdestruct, unprotected ownership/critical setters, pre-0.8 integer-overflow exposure, uninitialized storage, block-value randomness. Findings carry VRT + SWC.
+  - **`web_probe`** — dynamic live-HTTP scanner (GET/OPTIONS only): missing/weak security headers, insecure cookie flags, permissive CORS, unsafe HTTP methods, clickjacking, banner disclosure, directory listing, verbose debug pages, mixed content, cleartext transport. Pure `analyze_response()` core, network wrapper thin.
+  - **`vrt`** — the full Bugcrowd VRT (402 rows) as first-class data plus an honest coverage map: every row classified static / dynamic / manual / out-of-scope and tied to the real detector (`python -m vrt.coverage`).
+  - **`scanner_suite`** — one orchestrator over the whole static stack (`iac_scan`, `os_audit`, `llm_audit`, `code_audit`, `contract_audit`, `secret_scanner`, `binary_audit`), emitting **text, JSON, or SARIF 2.1.0** (GitHub code-scanning compatible) with a `--fail-on` CI severity gate. Exposed as the `nh-scan` console script.
+  - The two source scanners are wired into `repo_scan` (kinds `sast`, `smart-contract`) and shipped as marketplace plugins.
+
+### Changed
+
+- **Production packaging & standards.** Root [`pyproject.toml`](pyproject.toml) packages the scanner suite (console scripts, optional `iac`/`deep-binary`/`dev` extras, ruff + pytest config). New [`.github/workflows/ci.yml`](.github/workflows/ci.yml) gates every push/PR: Python (`ruff check` + `pytest`), web app (`type-check` + `vitest`), and a SARIF report over the benchmark fixtures uploaded as an artifact. Architecture documented in [docs/SECURITY_MODULES.md](docs/SECURITY_MODULES.md). Fixed a latent loop-variable-binding bug in `deep_binary`'s timeout stepper surfaced by lint.
+
+### Notes
+
+- 103 Python tests cover the suite; `ruff check` is clean over the maintained modules. Coverage across the VRT is honest: ~78% automatable (static + dynamic); the remaining rows (DeFi economics, ZK circuits, automotive/RF/physical, algorithmic bias) are classified manual/out-of-scope rather than claimed.
+
+---
+
 ## [5.3.2] - 2026-07-06
 
 ### Fixed
