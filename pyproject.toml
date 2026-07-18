@@ -42,6 +42,7 @@ nh-vrt-coverage = "vrt.coverage:_main"
 # Explicit package list — the suite is a set of cooperating top-level packages.
 packages = [
   "scanner_suite",
+  "report_gen",
   "code_audit",
   "contract_audit",
   "llm_audit",
@@ -73,6 +74,7 @@ include = [
   "web_probe/**/*.py",
   "repo_scan/**/*.py",
   "vrt/**/*.py",
+  "report_gen/**/*.py",
 ]
 
 [tool.ruff.lint]
@@ -87,8 +89,8 @@ ignore = [
 
 [tool.pytest.ini_options]
 testpaths = [
-  "scanner_suite", "code_audit", "contract_audit", "llm_audit", "os_audit",
-  "binary_audit", "deep_binary", "web_probe", "repo_scan", "vrt", "iac_scan",
+  "scanner_suite", "report_gen", "code_audit", "contract_audit", "llm_audit",
+  "os_audit", "binary_audit", "deep_binary", "web_probe", "repo_scan", "vrt", "iac_scan",
 ]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

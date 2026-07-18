@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.5.0] - 2026-07-18
+
+### Added
+
+- **Professional report generation (`report_gen`) — submission-ready output for bug hunters & pentesters.** Converts scanner-suite findings into the deliverable an analyst actually hands over: each finding is enriched with a **CVSS v3.1** score + vector (via `common.impact.cvss`, so severity label and score never contradict), its **VRT** category and **CWE**, concrete **verification/reproduction** steps (payloads, techniques, tools), **remediation**, and **references** (CWE/OWASP/SWC/spec). Curated per-rule guidance ([report_gen/knowledge.py](report_gen/knowledge.py)) for the injection, crypto, smart-contract, and dynamic rule families, with severity-shaped fallbacks so every finding gets a usable writeup.
+  - Renders **Markdown** (bounty submissions / issue trackers) and a **self-contained, printable HTML** report (client deliverable; light/dark; no external assets; XSS-safe escaping).
+  - Wired into the unified CLI: `nh-scan <target> --format md` / `--format html [-o report.html]`.
+
+### Notes
+
+- 111 Python tests pass; `ruff check` clean. Reports state explicitly that findings are automated and must be manually verified before submission or sign-off; CVSS scores are rule-level base defaults to be adjusted for environmental/temporal context.
+
+---
+
 ## [5.4.0] - 2026-07-17
 
 ### Added

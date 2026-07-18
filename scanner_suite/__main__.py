@@ -38,7 +38,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(prog="nh-scan",
                                  description="NisargHunter AI unified security scanner (VRT-mapped, SARIF-capable).")
     ap.add_argument("path", nargs="+", help="one or more directories / repo checkouts to scan")
-    ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
+    ap.add_argument("--format", choices=["text", "json", "sarif", "md", "html"], default="text")
     ap.add_argument("--output", "-o", help="write to a file instead of stdout")
     ap.add_argument("--fail-on", choices=["critical", "high", "medium", "low", "none"],
                     default="high", help="exit non-zero if a finding at/above this severity exists")
@@ -55,6 +55,10 @@ def main() -> int:
         out = json.dumps(result.to_dict(), indent=2)
     elif args.format == "sarif":
         out = json.dumps(to_sarif(result), indent=2)
+    elif args.format in ("md", "html"):
+        from report_gen import build_report, to_html, to_markdown
+        rep = build_report(result)
+        out = to_markdown(rep) if args.format == "md" else to_html(rep)
     else:
         out = _render_text(result)
 
