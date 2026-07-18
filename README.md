@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/nisargdedakiya/dnm-hunter/stargazers"><img height="24" src="https://img.shields.io/github/stars/nisargdedakiya/dnm-hunter?style=flat&color=2E8B57&label=Stars" alt="GitHub Stars"/></a>
-  <img height="24" src="https://img.shields.io/badge/v5.3.2-release-2E8B57?style=flat" alt="Version 5.3.2"/>
+  <img height="24" src="https://img.shields.io/badge/v5.5.0-release-2E8B57?style=flat" alt="Version 5.5.0"/>
   <img height="24" src="https://img.shields.io/badge/WARNING-SECURITY%20TOOL-B22222?style=flat" alt="Security Tool Warning"/>
   <img height="24" src="https://img.shields.io/badge/LICENSE-MIT-4169A1?style=flat" alt="MIT License"/>
   <img height="24" src="https://img.shields.io/badge/END--TO--END-PIPELINE-A01025?style=flat" alt="End-to-End Pipeline"/>
@@ -368,6 +368,7 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 
 - [Full Wiki Documentation](https://github.com/samugit83/redamon/wiki)
 - [Overview](#overview)
+- [Offline Scanner Suite (VRT-Mapped SAST/DAST)](#offline-scanner-suite--vrt-mapped-sastdast--reporting)
 - [Feature Highlights](#feature-highlights)
 - [System Architecture](#system-architecture)
 - [Components](#components)
@@ -393,6 +394,47 @@ The platform is built around six pillars:
 | **EvoGraph** | A persistent, evolutionary attack chain graph in Neo4j that tracks every step, finding, decision, and failure across the attack lifecycle, bridging the recon graph and enabling cross-session intelligence accumulation. |
 | **CypherFix** | Automated vulnerability remediation pipeline: an AI triage agent correlates and prioritizes findings from the graph, then a CodeFix agent clones the target repository, implements fixes using a ReAct loop with 11 code tools, and opens a GitHub pull request. |
 | **Project Settings Engine** | 500+ per-project parameters (exposed through the webapp UI) that control every tool's behavior, from Naabu thread counts to Nuclei severity filters to agent approval gates. |
+| **Offline Scanner Suite** | A self-contained, VRT-mapped static & dynamic analysis suite (`nh-scan`) that scans source code, IaC, binaries, smart contracts, LLM apps, and live HTTP endpoints — computing CVSS, classifying every finding against the Bugcrowd VRT, and emitting SARIF + submission-ready reports. Runs anywhere Python does (standard-library core, no Docker required). |
+
+---
+
+## Offline Scanner Suite — VRT-Mapped SAST/DAST + Reporting
+
+Beyond the live agent pipeline, NisargHunter AI ships a **dependency-light scanner suite** you can run against a repo checkout or a URL in seconds — no Docker, no API keys, standard-library core. Every finding is mapped to a canonical **[Bugcrowd VRT](https://bugcrowd.com/vulnerability-rating-taxonomy)** id, scored with **CVSS v3.1**, and can be rendered as a professional report or **SARIF 2.1.0** for GitHub code scanning.
+
+```bash
+pip install -e .                                  # installs the `nh-scan` CLI
+
+nh-scan ./path/to/repo                            # human-readable summary
+nh-scan ./path/to/repo --format sarif -o out.sarif   # GitHub code-scanning
+nh-scan ./path/to/repo --format html  -o report.html # client-deliverable report
+nh-scan ./path/to/repo --format md                   # bounty-submission markdown
+nh-scan ./path/to/repo --fail-on high                # CI gate (non-zero exit)
+
+python -m web_probe https://target.example           # live HTTP security probe
+python -m vrt.coverage                                # VRT coverage snapshot
+```
+
+**Analysers** (each maps findings to VRT + CWE/SWC, and runs standalone or via the `scanner_suite` orchestrator):
+
+| Module | Tier | Detects |
+|--------|------|---------|
+| **`code_audit`** | static (SAST) | SQLi, command-injection/RCE, code-eval, insecure deserialization, LFI/path-traversal, SSTI, XXE, LDAP, SSRF, XSS, CRLF, open-redirect, weak/broken crypto, insecure RNG, TLS/debug/cookie misconfig (Python + JS/TS, taint-aware) |
+| **`contract_audit`** | static | Solidity: reentrancy, tx.origin auth, unchecked call, arbitrary delegatecall, unguarded selfdestruct, owner takeover, integer overflow, uninitialized storage (VRT + SWC) |
+| **`llm_audit`** | static | OWASP LLM Top 10 (2025): prompt injection, insecure output handling, supply-chain, model poisoning, system-prompt leakage, vector/embedding, unbounded consumption, excessive autonomy |
+| **`iac_scan`** | static | Terraform / Docker / K8s / GitHub Actions misconfig across AWS, GCP, Azure |
+| **`os_audit`** | static | OS/firmware host hardening (sshd/sudoers/sysctl) + native C/C++ memory-safety bugs |
+| **`binary_audit`** | static | ELF hardening (NX/PIE/RELRO/canary/FORTIFY) + dangerous imports (checksec-style) |
+| **`deep_binary`** | static | angr symbolic execution — reach-target solving + control-flow-hijack detection |
+| **`web_probe`** | dynamic (DAST) | Live HTTP: security headers, cookie flags, CORS, unsafe methods, clickjacking, banner/dir-listing/debug/mixed-content |
+| **`repo_scan`** | static | Clone + scan any GitHub repo (composes the static analysers + secret detection) |
+| **`vrt`** | meta | The full Bugcrowd VRT (402 rows) as data + an **honest coverage map** (static / dynamic / manual / out-of-scope, each tied to the real detector) |
+| **`report_gen`** | reporting | Enriches findings with CVSS, VRT/CWE, verification steps, remediation, references → Markdown or self-contained HTML |
+| **`scanner_suite`** | orchestrator | One entry point over the whole static stack → text / JSON / **SARIF 2.1.0** with a `--fail-on` CI severity gate |
+
+Coverage across the VRT is **explicit and honest** — no faked detection. Of the ~400 VRT rows, ~78% are automatable (static + dynamic) and the rest (DeFi economics, ZK circuits, automotive/RF/physical, algorithmic bias) are classified `manual`/`out-of-scope` rather than claimed. See [docs/SECURITY_MODULES.md](docs/SECURITY_MODULES.md) for the full architecture.
+
+> The suite is covered by the CI workflow ([.github/workflows/ci.yml](.github/workflows/ci.yml)) — `ruff` lint + `pytest` on every push/PR, plus a SARIF report over the benchmark fixtures.
 
 ---
 
@@ -809,6 +851,7 @@ flowchart TB
 | **MCP Tool Servers** | Security tools via Model Context Protocol (Kali sandbox) | [README.MCP.md](readmes/README.MCP.md) |
 | **AI Agent Orchestrator** | LangGraph-based autonomous agent with ReAct pattern | [README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md) |
 | **CypherFix Agents** | Automated triage + code fix + GitHub PR | [README.CYPHERFIX_AGENTS.md](readmes/README.CYPHERFIX_AGENTS.md) |
+| **Offline Scanner Suite** (`nh-scan`) | VRT-mapped SAST/DAST over source, IaC, binaries, smart contracts, LLM apps & live HTTP; CVSS scoring, SARIF + report output | [docs/SECURITY_MODULES.md](docs/SECURITY_MODULES.md) · [scanner_suite/README.md](scanner_suite/README.md) |
 | **Web Application** | Next.js dashboard for visualization and AI interaction | [README.WEBAPP.md](readmes/README.WEBAPP.md) |
 | **GVM Scanner** | Greenbone/OpenVAS network vulnerability scanner (170K+ NVTs) | [README.GVM.md](readmes/README.GVM.md) |
 | **TruffleHog Scanner** | Deep secret scanning with 700+ detectors and credential verification | n/a |
@@ -824,6 +867,7 @@ flowchart TB
 | **Full Wiki** (user guide) | **[github.com/samugit83/redamon/wiki](https://github.com/samugit83/redamon/wiki)** |
 | AI-Assisted Development | **[Wiki: Ship Perfect PRs with AI](https://github.com/samugit83/redamon/wiki/AI-Assisted-Development)** |
 | Developer Guide | [readmes/README.DEV.md](readmes/README.DEV.md) |
+| Scanner Suite Architecture | [docs/SECURITY_MODULES.md](docs/SECURITY_MODULES.md) |
 | Architecture Diagrams | [readmes/ARCHITECTURE.md](readmes/ARCHITECTURE.md) |
 | Technology Stack | [readmes/TECH_STACK.md](readmes/TECH_STACK.md) |
 | Troubleshooting | [readmes/TROUBLESHOOTING.md](readmes/TROUBLESHOOTING.md) |
