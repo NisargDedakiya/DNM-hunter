@@ -6,7 +6,7 @@
   <b><i><big><big>Unmask the hidden before the world does</big></big></i></b>
 </p>
 <p align="center" style="font-size: 120%;">
-  An autonomous AI framework that chains reconnaissance, exploitation, and post-exploitation into a single pipeline, then goes further by triaging every finding, implementing code fixes, and opening pull requests on your repository. From first packet to merged patch, with human oversight at every critical step.
+  An AI-powered offensive security platform for bug bounty hunters and penetration testers. It combines two complementary engines: an <b>autonomous AI agent pipeline</b> that chains reconnaissance, exploitation, and post-exploitation — then triages findings, writes code fixes, and opens pull requests — and a self-contained, <b>VRT-mapped scanner suite</b> (<code>nh-scan</code>) that audits source code, cloud/IaC, binaries, smart contracts, LLM apps, and live web targets, scoring every finding with CVSS and producing submission-ready reports and SARIF. From first packet to merged patch — and from a raw repository to a client-ready report — with human oversight at every critical step.
 </p>
 
 <br/>
@@ -382,9 +382,9 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 
 ## Overview
 
-NisargHunter AI is a modular, containerized penetration testing framework that chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end offensive security pipeline. Every component runs inside Docker (no tools installed on your host) and communicates through well-defined APIs so each layer can evolve independently.
+NisargHunter AI is a modular, containerized offensive security platform for bug bounty hunters and penetration testers. It chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end pipeline — and pairs it with a dependency-light **offline scanner suite** that maps every finding to the Bugcrowd VRT, scores it with CVSS, and turns it into a submission-ready report or SARIF. The heavy tooling runs inside Docker (no tools installed on your host) and every component communicates through well-defined APIs, so each layer can evolve independently; the scanner suite runs anywhere Python does.
 
-The platform is built around six pillars:
+The platform is built around seven pillars:
 
 | Pillar | What it does |
 |--------|-------------|
