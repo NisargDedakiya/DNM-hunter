@@ -25,7 +25,7 @@ export interface Entitlements {
   planName: string
   status: string
   features: Feature[]
-  limits: { scansPerMonth: number; seats: number; targetsPerScan: number }
+  limits: { scansPerMonth: number; seats: number; targetsPerScan: number; programsTracked: number }
   usage: {
     scansUsed: number
     scansLimit: number
@@ -115,6 +115,15 @@ export async function assertFeature(userId: string, feature: Feature): Promise<s
   if (hasFeature(sub as unknown as UsageState, feature)) return null
   const plan = getPlan(sub.plan)
   return `The ${feature} capability is not included in the ${plan.name} plan. Upgrade to unlock it.`
+}
+
+/** Gate the number of bug-bounty programs the hunter may track. Returns null
+ * when a new program is allowed, or an upgrade reason when the limit is hit. */
+export async function assertProgramLimit(userId: string, currentCount: number): Promise<string | null> {
+  const sub = await ensureSubscription(userId)
+  const limit = getPlan(sub.plan).limits.programsTracked
+  if (isUnlimited(limit) || currentCount < limit) return null
+  return `Your ${getPlan(sub.plan).name} plan tracks up to ${limit} program(s). Upgrade to track more.`
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Loader2, Play, Download, Lock, ArrowLeft, Trash2 } from 'lucide-react'
+import { Loader2, Play, Download, Lock, ArrowLeft, Trash2, Target, Check } from 'lucide-react'
 import styles from '@/components/scan/Scans.module.css'
 
 type ScanType = 'url' | 'repo'
@@ -153,6 +153,29 @@ export default function ScansPage() {
 function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail; ent: Ent | null; onBack: () => void; onDelete: (id: string) => void }) {
   const has = (f: string) => ent?.features.includes(f)
   const dl = (fmt: string) => { window.location.href = `/api/scan/${detail.id}/report?format=${fmt}` }
+
+  // "Track as submission" — pick a program, turn a finding into a tracked bug.
+  const [programs, setPrograms] = useState<{ id: string; name: string }[]>([])
+  const [program, setProgram] = useState('')
+  const [tracked, setTracked] = useState<Record<string, boolean>>({})
+  const canTrack = has('hunt.finding_to_submission')
+  useEffect(() => {
+    if (!canTrack) return
+    fetch('/api/hunt/programs', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((p) => { setPrograms(p); if (p[0]) setProgram(p[0].id) })
+      .catch(() => {})
+  }, [canTrack])
+
+  const track = async (findingId: string) => {
+    if (!program) return
+    const r = await fetch('/api/hunt/from-finding', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ findingId, programId: program }),
+    })
+    if (r.ok) setTracked((t) => ({ ...t, [findingId]: true }))
+  }
   return (
     <div className={styles.card}>
       <button className={styles.back} onClick={onBack}><ArrowLeft size={14} /> Back to history</button>
@@ -177,11 +200,24 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
         )}
       </div>
 
+      {canTrack && detail.status !== 'failed' && detail.findings.length > 0 && (
+        <div className={styles.downloads}>
+          <Target size={14} />
+          {programs.length > 0 ? (
+            <select className={styles.select} value={program} onChange={(e) => setProgram(e.target.value)}>
+              {programs.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          ) : (
+            <span className={styles.lockNote}>Create a <Link className={styles.upgrade} href="/programs">program</Link> to track findings as submissions.</span>
+          )}
+        </div>
+      )}
+
       {detail.status === 'failed' ? (
         <p className={styles.err}>Scan failed: {detail.error}</p>
       ) : (
         <table className={styles.table}>
-          <thead><tr><th>Severity</th><th>CVSS</th><th>Finding</th><th>Location</th><th>VRT</th></tr></thead>
+          <thead><tr><th>Severity</th><th>CVSS</th><th>Finding</th><th>Location</th><th>VRT</th>{canTrack && <th></th>}</tr></thead>
           <tbody>
             {detail.findings.map((f) => (
               <tr key={f.id}>
@@ -190,6 +226,15 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
                 <td>{f.title}<div className={styles.findingDetail}>{f.detail}</div></td>
                 <td>{f.file ? `${f.file}${f.line ? ':' + f.line : ''}` : '—'}</td>
                 <td>{f.vrt || '—'}</td>
+                {canTrack && (
+                  <td>
+                    {tracked[f.id] ? (
+                      <span className={styles.lockNote}><Check size={13} /> Tracked</span>
+                    ) : (
+                      <button className={styles.rowBtn} disabled={!program} onClick={() => track(f.id)} title="Track as submission">Track</button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

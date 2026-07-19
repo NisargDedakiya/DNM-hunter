@@ -21,6 +21,11 @@ export type Feature =
   | 'api.access'           // programmatic API / CI tokens
   | 'collab.team'          // shared workspaces / seats
   | 'support.priority'     // priority support
+  // ── Bug-hunter workflow ──
+  | 'hunt.pipeline'        // cross-program submission pipeline board
+  | 'hunt.finding_to_submission' // one-click: scan finding → tracked submission
+  | 'hunt.earnings'        // earnings & acceptance-rate analytics
+  | 'hunt.templates'       // platform-formatted report templates (H1/Bugcrowd)
 
 // -1 means unlimited (kept JSON-serialisable, unlike Infinity).
 export const UNLIMITED = -1
@@ -29,6 +34,7 @@ export interface PlanLimits {
   scansPerMonth: number   // metered scan runs per billing period
   seats: number           // members who can share the account's workspaces
   targetsPerScan: number  // targets/assets a single scan may include
+  programsTracked: number // bug-bounty programs the hunter can track
 }
 
 export interface Plan {
@@ -53,12 +59,17 @@ const FREE: Plan = {
   tagline: 'For learning and the occasional scan.',
   priceMonthly: 0,
   priceYearly: 0,
-  limits: { scansPerMonth: 10, seats: 1, targetsPerScan: 1 },
-  features: ['scan.sast', 'scan.dast', 'scan.iac', 'scan.llm', 'report.markdown'],
+  limits: { scansPerMonth: 10, seats: 1, targetsPerScan: 1, programsTracked: 2 },
+  features: [
+    'scan.sast', 'scan.dast', 'scan.iac', 'scan.llm', 'report.markdown',
+    'hunt.pipeline', 'hunt.finding_to_submission',
+  ],
   highlights: [
     '10 scans / month',
     'SAST, IaC, LLM & live-HTTP scanners',
     'Markdown reports',
+    'Track up to 2 bug-bounty programs + submission pipeline',
+    'Turn findings into submissions',
     'Community support',
   ],
 }
@@ -69,11 +80,12 @@ const PRO: Plan = {
   tagline: 'For the working bug hunter.',
   priceMonthly: 49,
   priceYearly: 39,
-  limits: { scansPerMonth: 500, seats: 1, targetsPerScan: 25 },
+  limits: { scansPerMonth: 500, seats: 1, targetsPerScan: 25, programsTracked: UNLIMITED },
   features: [
     'scan.sast', 'scan.dast', 'scan.iac', 'scan.llm', 'scan.smart_contract',
     'scan.binary', 'scan.deep_binary', 'scan.github_repo', 'scan.scheduled',
     'report.markdown', 'report.html', 'export.sarif', 'api.access',
+    'hunt.pipeline', 'hunt.finding_to_submission', 'hunt.earnings', 'hunt.templates',
   ],
   featured: true,
   highlights: [
@@ -81,6 +93,7 @@ const PRO: Plan = {
     'Every scanner — incl. smart-contract, binary & deep symbolic',
     'GitHub-repo scanning & scheduled scans',
     'HTML reports + SARIF export',
+    'Unlimited programs, earnings analytics & platform report templates',
     'API / CI access',
   ],
 }
@@ -91,12 +104,13 @@ const TEAM: Plan = {
   tagline: 'For pentest teams and agencies.',
   priceMonthly: 199,
   priceYearly: 159,
-  limits: { scansPerMonth: UNLIMITED, seats: 10, targetsPerScan: UNLIMITED },
+  limits: { scansPerMonth: UNLIMITED, seats: 10, targetsPerScan: UNLIMITED, programsTracked: UNLIMITED },
   features: [
     'scan.sast', 'scan.dast', 'scan.iac', 'scan.llm', 'scan.smart_contract',
     'scan.binary', 'scan.deep_binary', 'scan.github_repo', 'scan.scheduled',
     'report.markdown', 'report.html', 'export.sarif', 'api.access',
     'collab.team', 'support.priority',
+    'hunt.pipeline', 'hunt.finding_to_submission', 'hunt.earnings', 'hunt.templates',
   ],
   highlights: [
     'Unlimited scans',

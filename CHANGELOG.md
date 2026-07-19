@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.8.0] - 2026-07-19
+
+### Added
+
+- **Bug Hunter cockpit + subscription-gated hunter features.** The workflow layer that makes a bounty hunter's day easier and drives the subscription.
+  - **`/hunt` page** — the hunter's whole pipeline in one place: earnings, acceptance rate, open count and a submission board across *every* program, with inline status/bounty editing.
+  - **Turn a scan finding into a tracked submission** — a "Track" action on the scan detail creates a draft submission on a chosen program, pre-filled with the finding's title, severity, location, VRT/CWE, description and remediation. The bridge from *scanner found it* → *I'm tracking this bug*.
+  - **Plan entitlements for hunters** ([plans.ts](webapp/src/lib/subscription/plans.ts)): `hunt.pipeline` + `hunt.finding_to_submission` (all plans, to drive engagement), `hunt.earnings` (analytics) and `hunt.templates` (Pro+); a `programsTracked` limit (Free 2, Pro/Team unlimited). Free users see the pipeline and can track findings, but **earnings figures are withheld** until they upgrade.
+  - **Pure pipeline analytics** ([hunt/stats.ts](webapp/src/lib/hunt/stats.ts)) — earned / pending / acceptance-rate / open counts, unit-tested (7 tests, no divide-by-zero on empty input).
+  - **API**: `GET /api/hunt` (cockpit; earnings gated behind `hunt.earnings`), `POST /api/hunt/from-finding` (feature-gated, ownership-checked), `PATCH /api/hunt/submissions/[id]` (advance status / record bounty), `GET /api/hunt/programs` (session-scoped picker).
+
+### Notes
+
+- Live-verified against a running server + Postgres: scan → track finding → mark paid $750 → cockpit shows the earnings and 100% acceptance on Pro; a Free account sees `earningsLocked` with the $ figures withheld and the 2-program limit. Type-check passes, production build compiles all new routes/pages, 76 feature tests pass, and the only failing source test is the pre-existing `WorkflowView` (unrelated).
+
+---
+
 ## [5.7.0] - 2026-07-19
 
 ### Added

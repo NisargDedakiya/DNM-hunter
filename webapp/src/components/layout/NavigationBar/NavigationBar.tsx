@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert, Sparkles, Radar } from 'lucide-react'
+import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert, Sparkles, Radar, Crosshair } from 'lucide-react'
 import styles from './NavigationBar.module.css'
 
 interface NavItem {
@@ -23,6 +23,12 @@ const navItems: NavItem[] = [
     label: 'Scans',
     href: '/scans',
     icon: <Radar size={16} />,
+    enabled: true,
+  },
+  {
+    label: 'Bug Hunter',
+    href: '/hunt',
+    icon: <Crosshair size={16} />,
     enabled: true,
   },
   {
