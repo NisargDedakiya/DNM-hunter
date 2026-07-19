@@ -104,6 +104,11 @@ model Scan {
   maxCvss  Float  @default(0) @map("max_cvss")
   error    String? @db.Text
 
+  // Public read-only share link (client delivery). Null until the owner shares;
+  // an opaque token in the URL, revocable by clearing it.
+  shareToken String?   @unique @map("share_token")
+  sharedAt   DateTime? @map("shared_at")
+
   findings ScanFinding[]
 
   createdAt DateTime @default(now()) @map("created_at")

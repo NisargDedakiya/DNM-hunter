@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Loader2, Play, Download, Lock, ArrowLeft, Trash2, Target, Check } from 'lucide-react'
+import { Loader2, Play, Download, Lock, ArrowLeft, Trash2, Target, Check, Share2, Copy } from 'lucide-react'
 import styles from '@/components/scan/Scans.module.css'
 
 type ScanType = 'url' | 'repo'
@@ -185,6 +185,19 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
     })
     if (r.ok) setTracked((t) => ({ ...t, [findingId]: true }))
   }
+
+  // Shareable public report link (client delivery). Gated on report.html (Pro).
+  const canShare = !sample && has('report.html')
+  const [shareUrl, setShareUrl] = useState('')
+  const [copied, setCopied] = useState(false)
+  const share = async () => {
+    const r = await fetch(`/api/scan/${detail.id}/share`, { method: 'POST', credentials: 'include' })
+    if (!r.ok) return
+    const body = await r.json()
+    const url = `${window.location.origin}${body.path}`
+    setShareUrl(url)
+    try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch { /* ignore */ }
+  }
   return (
     <div className={styles.card}>
       <button className={styles.back} onClick={onBack}><ArrowLeft size={14} /> Back to history</button>
@@ -209,10 +222,23 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
         <button className={`${styles.dl} ${!has('export.sarif') ? styles.dlLocked : ''}`} onClick={() => has('export.sarif') ? dl('sarif') : null} disabled={!has('export.sarif')}>
           {has('export.sarif') ? <Download size={14} /> : <Lock size={14} />} SARIF
         </button>
+        {canShare && (
+          <button className={styles.dl} onClick={share}><Share2 size={14} /> Share link</button>
+        )}
         {(!has('report.html') || !has('export.sarif')) && (
-          <span className={styles.lockNote}>HTML &amp; SARIF export are Pro. <Link className={styles.upgrade} href="/pricing">Upgrade →</Link></span>
+          <span className={styles.lockNote}>HTML, SARIF &amp; shareable links are Pro. <Link className={styles.upgrade} href="/pricing">Upgrade →</Link></span>
         )}
       </div>
+
+      {shareUrl && (
+        <div className={styles.downloads}>
+          <input className={styles.input} readOnly value={shareUrl} onFocus={(e) => e.target.select()} style={{ minWidth: 280 }} />
+          <button className={styles.dl} onClick={() => { navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }}>
+            {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Copied' : 'Copy'}
+          </button>
+          <span className={styles.lockNote}>Anyone with this link can view the report (read-only).</span>
+        </div>
+      )}
 
       {canTrack && detail.status !== 'failed' && detail.findings.length > 0 && (
         <div className={styles.downloads}>

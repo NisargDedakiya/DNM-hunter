@@ -65,6 +65,8 @@ describe('middleware - public paths', () => {
     '/api/subscription/webhook', // billing-provider callback, secured by signature
     '/api/scan/sample',          // public demo report (fixed data)
     '/api/scan/sample/report',   // public demo report export
+    '/api/scan/shared/abc123',   // public shared report (token capability)
+    '/shared/abc123',            // public shared report viewer page
   ])('allows %s without auth', async (path) => {
     const req = makeRequest(path)
     const res = await middleware(req)

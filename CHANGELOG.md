@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.11.0] - 2026-07-19
+
+### Added
+
+- **Shareable report links — client delivery + a viral growth loop.** A Pro user can turn any scan into a public, read-only report link to hand to a client; every shared link also markets the product (a "Run your own scan →" CTA), so it drives inbound signups.
+  - **Create/revoke** (`POST` / `DELETE /api/scan/[id]/share`) — owner only, gated on `report.html` (Pro). Generates an opaque token; revoke clears it.
+  - **Public read-only view** — `GET /api/scan/shared/[token]` (findings, never the owner's identity) and `GET /api/scan/shared/[token]/report?format=md|html|sarif` render the full report, no auth. A branded `/shared/[token]` viewer page shows the findings, download buttons, and a signup CTA. Whitelisted in the auth middleware; the token is the capability.
+  - **Scan detail** gains a "Share link" button (Pro) with copy-to-clipboard; Free sees an upgrade nudge.
+  - **Schema**: `Scan.shareToken` (unique) + `sharedAt` + migration.
+
+### Notes
+
+- Live-verified end-to-end: Pro creates a link (200), a public visitor with no cookie sees the report (200, no owner leak), Free is refused (403 `feature_locked`), an invalid token is 404, and revoke (200) makes the token 404 afterward. Fixed a CSS-module bug (bare `code` selector) found during verification. Type-check passes; build compiles all new routes/page; 61 scan+middleware tests pass; no regressions.
+
+---
+
 ## [5.10.0] - 2026-07-19
 
 ### Added

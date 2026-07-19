@@ -1,0 +1,27 @@
+.page { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--text-tertiary); font-size: 0.82rem; font-weight: 600; margin-bottom: 20px; }
+.h1 { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px; }
+.sub { color: var(--text-secondary); margin: 0 0 18px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.chip { --c: #888; color: var(--c); border: 1px solid var(--c); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: 13px; text-transform: capitalize; }
+
+.downloads { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 20px; }
+.dl { border: 1px solid var(--border-strong, var(--border-default)); background: var(--bg-elevated); color: var(--text-primary); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+.dlPrimary { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--text-on-accent, #fff); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.table th, .table td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border-subtle, var(--border-default)); vertical-align: top; }
+.table th { color: var(--text-tertiary); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.num { font-variant-numeric: tabular-nums; }
+.sev { font-weight: 700; text-transform: capitalize; }
+.sevcritical { color: #b3123b; } .sevhigh { color: #d1471c; } .sevmedium { color: #c08a00; } .sevlow { color: #2b6cb0; } .sevinfo { color: #5a6270; }
+.detail { color: var(--text-tertiary); font-size: 0.82rem; margin-top: 3px; }
+.table code { background: rgba(128,128,128,.15); padding: 1px 5px; border-radius: 4px; font: 13px ui-monospace, Menlo, monospace; }
+
+.cta { margin-top: 40px; padding: 24px; text-align: center; background: var(--accent-primary-subtle, rgba(46,139,87,.1)); border: 1px solid var(--accent-primary); border-radius: 12px; }
+.ctaTitle { font-weight: 800; color: var(--text-primary); font-size: 1.05rem; margin: 0 0 6px; }
+.ctaText { color: var(--text-secondary); margin: 0 0 14px; font-size: 0.9rem; }
+.ctaBtn { display: inline-block; background: var(--accent-primary); color: var(--text-on-accent, #fff); border-radius: 8px; padding: 10px 20px; font-weight: 700; text-decoration: none; }
+
+.center { text-align: center; color: var(--text-tertiary); padding: 60px 24px; }
+.footer { text-align: center; color: var(--text-tertiary); font-size: 0.78rem; margin-top: 28px; }
