@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.7.0] - 2026-07-19
+
+### Added
+
+- **Self-serve in-app Scans — the feature that makes the subscription worth buying.** A logged-in user can now run a scan, keep a searchable history, and export a submission-ready report, all gated by their plan.
+  - **`/scans` page** — pick a scan type (live **URL** or **GitHub repo**), run it, and see findings (severity · CVSS · VRT · location) with a per-plan quota meter. History persists per user. Added a **Scans** entry to the primary nav.
+  - **Scan runner** ([webapp/src/lib/scan/runner.ts](webapp/src/lib/scan/runner.ts)) bridges the app to the Python suite via the installed console scripts (`nh-web-probe`, `nh-scan`); a pure `parseFindings`/`summarize`/`isValidTarget` core is unit-tested and never throws.
+  - **Premium report export** ([report.ts](webapp/src/lib/scan/report.ts)) — self-contained TypeScript renderers produce **Markdown** (all plans), **HTML** (client deliverable) and **SARIF 2.1.0** (code scanning) from stored findings, with per-VRT remediation, CVSS, and CWE.
+  - **API**: `POST /api/scan` (feature-gate 403 → quota-gate 402 → run → persist), `GET /api/scan` (history), `GET/DELETE /api/scan/[id]`, `GET /api/scan/[id]/report?format=` (HTML/SARIF gated to paid plans).
+  - **Monetization wiring**: `url` scans are on Free; `repo` scanning, HTML reports and SARIF export require Pro — enforced by the entitlement gates. Verified end-to-end live (real scan → 5 findings → Markdown free → SARIF/HTML 403 on Free, 200 on Pro; quota metered).
+  - **Schema**: new `Scan` + `ScanFinding` models + migration.
+- **`python -m web_probe` CLI** — added the missing `web_probe/__main__.py` (surfaced while wiring the runner).
+
+### Notes
+
+- Live-verified against a running server + Postgres: URL scan returns real findings, history/report/export work, and every gate returns the right status (201/402/403/404), with quota decrementing. 9 scan unit tests; webapp type-check passes; production build compiles all new routes; no regressions.
+
+---
+
 ## [5.6.0] - 2026-07-19
 
 ### Added

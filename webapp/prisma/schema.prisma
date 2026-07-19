@@ -45,6 +45,7 @@ model User {
   comments              Comment[]
   auditLogs             AuditLog[]
   subscription          Subscription?
+  scans                 Scan[]
 
   createdAt     DateTime          @default(now()) @map("created_at")
   updatedAt     DateTime          @updatedAt @map("updated_at")
@@ -87,6 +88,47 @@ model Subscription {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("subscriptions")
+}
+
+// A single in-app scan run and its findings — the self-serve product surface.
+// Persisted so users get history/retention (a subscription value driver).
+model Scan {
+  id       String @id @default(cuid())
+  userId   String @map("user_id")
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  target   String                                   // repo URL / local path / target URL
+  scanType String @map("scan_type")                 // 'url' | 'repo'
+  status   String @default("completed")             // 'completed' | 'failed'
+  total    Int    @default(0)
+  bySeverity Json @default("{}") @map("by_severity") // {critical,high,medium,low,info}
+  maxCvss  Float  @default(0) @map("max_cvss")
+  error    String? @db.Text
+
+  findings ScanFinding[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("scans")
+}
+
+model ScanFinding {
+  id       String @id @default(cuid())
+  scanId   String @map("scan_id")
+  scan     Scan   @relation(fields: [scanId], references: [id], onDelete: Cascade)
+  scanner  String @default("")
+  ruleId   String @map("rule_id")
+  title    String
+  severity String
+  file     String  @default("")
+  line     Int?
+  detail   String  @default("") @db.Text
+  vrt      String  @default("")
+  cwe      String  @default("")
+  cvss     Float   @default(0)
+
+  @@index([scanId])
+  @@map("scan_findings")
 }
 
 // A long-lived bearer credential for programmatic/CI access to the API,
