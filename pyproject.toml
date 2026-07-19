@@ -52,6 +52,8 @@ packages = [
   "web_probe",
   "repo_scan",
   "vrt",
+  "iac_scan",
+  "iac_scan.rules",
 ]
 include-package-data = true
 
