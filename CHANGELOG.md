@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.10.0] - 2026-07-19
+
+### Added
+
+- **Self-serve home (`/overview`) — the first thing users see now reflects the product.** New bug hunters and pentesters previously landed on the recon-agent dashboard; now the root and post-login land on a self-serve cockpit built around scan → report → track.
+  - **One-call aggregation** (`GET /api/overview`): plan + quota, recent scans (with top severity), scan/program counts, and a bug-hunt summary (open submissions, acceptance rate, earnings — earnings withheld unless the plan includes `hunt.earnings`).
+  - **Quick actions** (Run a scan · Bug Hunter · See a sample report · Plans), **usage/earnings stat cards**, a **recent-scans** table, and a **first-run 3-step onboarding checklist** shown until the user has any scan or submission (`firstRun`).
+  - Added **Home** as the first left-nav item; root `/` and post-login now redirect to `/overview` (the header logo + Dashboard link still point to the existing `/dashboard`, unchanged).
+
+### Notes
+
+- Live-verified: `/api/overview` returns the Pro cockpit ($750 earned, 1/500 scans) and a fresh account gets `firstRun: true` with earnings withheld; unauthenticated → 401. Type-check passes; build compiles the new route/page; 83 layout+feature tests pass (GlobalHeader logo→/dashboard assertions still green); no regressions.
+
+---
+
 ## [5.9.0] - 2026-07-19
 
 ### Added

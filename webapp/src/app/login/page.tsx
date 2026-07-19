@@ -34,7 +34,7 @@ export default function LoginPage() {
       }
 
       // Force full page reload to pick up the new cookie in middleware
-      window.location.href = '/graph'
+      window.location.href = '/overview'
     } catch {
       setError('Unable to connect to the server')
       setLoading(false)

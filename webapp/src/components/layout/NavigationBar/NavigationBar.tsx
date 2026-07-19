@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert, Sparkles, Radar, Crosshair } from 'lucide-react'
+import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert, Sparkles, Radar, Crosshair, Home } from 'lucide-react'
 import styles from './NavigationBar.module.css'
 
 interface NavItem {
@@ -13,6 +13,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {
+    label: 'Home',
+    href: '/overview',
+    icon: <Home size={16} />,
+    enabled: true,
+  },
   {
     label: 'Projects',
     href: '/projects',
