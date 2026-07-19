@@ -62,6 +62,7 @@ describe('middleware - public paths', () => {
     '/api/auth/login',
     '/api/auth/logout',
     '/api/health',
+    '/api/subscription/webhook', // billing-provider callback, secured by signature
   ])('allows %s without auth', async (path) => {
     const req = makeRequest(path)
     const res = await middleware(req)

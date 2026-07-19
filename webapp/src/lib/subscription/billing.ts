@@ -60,6 +60,10 @@ export async function activatePlan(
       externalSubscriptionId: opts.externalSubscriptionId ?? undefined,
       currentPeriodStart: now,
       currentPeriodEnd: isFree ? null : nextResetDate(now),
+      // A plan change starts a fresh billing period, so metered usage resets —
+      // otherwise a user who exhausted the free quota would carry it into Pro.
+      scansUsed: 0,
+      usageResetAt: now,
     },
   })
 }
