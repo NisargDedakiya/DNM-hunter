@@ -66,6 +66,11 @@ export default function PricingPage() {
           Scan source, cloud, binaries, smart contracts, LLM apps and live targets —
           scored against the Bugcrowd VRT with CVSS, SARIF export, and submission-ready reports.
         </p>
+        <p className={styles.subtitle} style={{ marginTop: 8 }}>
+          <a className={styles.upgrade} href="/api/scan/sample/report?format=html" target="_blank" rel="noopener noreferrer">
+            See a sample report →
+          </a>
+        </p>
         <div className={styles.cycleToggle} role="tablist" aria-label="Billing cycle">
           <button
             className={`${styles.cycleBtn} ${cycle === 'monthly' ? styles.cycleBtnActive : ''}`}

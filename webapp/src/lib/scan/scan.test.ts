@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { parseFindings, summarize, isValidTarget } from './runner'
 import { toSarif, toMarkdown, toHtml, remediationFor, type ReportFinding, type ReportMeta } from './report'
+import { sampleMeta, sampleScanPayload, SAMPLE_FINDINGS } from './sample'
 
 const SUITE_JSON = JSON.stringify({
   summary: { total: 2 },
@@ -93,5 +94,26 @@ describe('report renderers', () => {
     expect(html).toContain('<style>')
     expect(html).not.toContain('<script>alert(1)</script>') // escaped
     expect(html).toContain('&lt;script&gt;')
+  })
+})
+
+describe('public sample scan', () => {
+  it('sampleMeta summarises the fixed findings', () => {
+    const m = sampleMeta()
+    expect(m.total).toBe(SAMPLE_FINDINGS.length)
+    expect(m.bySeverity.critical).toBeGreaterThan(0)
+    expect(m.maxCvss).toBe(9.8)
+  })
+
+  it('payload has stable ids and renders as a valid report', () => {
+    const p = sampleScanPayload()
+    expect(p.id).toBe('sample')
+    expect(p.isSample).toBe(true)
+    expect(p.findings.every((f) => typeof f.id === 'string')).toBe(true)
+    // the sample renders through every format without error
+    const meta = sampleMeta()
+    expect(toMarkdown(meta, SAMPLE_FINDINGS)).toContain('# Security Assessment Report')
+    expect((toSarif(meta, SAMPLE_FINDINGS) as any).runs[0].results.length).toBe(SAMPLE_FINDINGS.length)
+    expect(toHtml(meta, SAMPLE_FINDINGS).startsWith('<!doctype html>')).toBe(true)
   })
 })

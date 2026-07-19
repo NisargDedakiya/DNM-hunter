@@ -9,7 +9,9 @@ const REQUEST_ID_HEADER = 'x-request-id'
 // '/api/subscription/webhook' is public because external billing providers
 // (e.g. Stripe) POST to it without a session cookie — it is secured by
 // signature verification inside the route, not by the session middleware.
-const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/login-2fa', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync', '/api/subscription/webhook']
+// '/api/scan/sample' (+ /report) is public so prospects can preview a real
+// report before signing up — it returns fixed demo data, no user state.
+const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/auth/login-2fa', '/api/auth/logout', '/api/health', '/api/version/check', '/api/global/tunnel-config/sync', '/api/subscription/webhook', '/api/scan/sample']
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET

@@ -14,7 +14,7 @@ interface Finding {
   id: string; scanner: string; ruleId: string; title: string; severity: string
   file: string; line: number | null; detail: string; vrt: string; cwe: string; cvss: number
 }
-interface ScanDetail extends ScanRow { findings: Finding[]; error?: string | null }
+interface ScanDetail extends ScanRow { findings: Finding[]; error?: string | null; isSample?: boolean }
 interface Ent { plan: string; features: string[]; usage: { scansUsed: number; scansLimit: number; scansRemaining: number } }
 
 const SEV = ['critical', 'high', 'medium', 'low', 'info']
@@ -67,6 +67,10 @@ export default function ScansPage() {
   const openScan = async (id: string) => {
     const r = await fetch(`/api/scan/${id}`, { credentials: 'include' })
     if (r.ok) setDetail(await r.json())
+  }
+  const openSample = async () => {
+    const r = await fetch('/api/scan/sample')
+    if (r.ok) { setError(''); setDetail(await r.json()) }
   }
   const del = async (id: string) => {
     if (!confirm('Delete this scan?')) return
@@ -126,7 +130,10 @@ export default function ScansPage() {
         <div className={styles.card}>
           <p className={styles.sectionTitle}>History</p>
           {scans.length === 0 ? (
-            <div className={styles.empty}>No scans yet — run your first one above.</div>
+            <div className={styles.empty}>
+              <p>No scans yet — run your first one above, or</p>
+              <button className={styles.btn} style={{ marginTop: 10 }} onClick={openSample}>See a sample report</button>
+            </div>
           ) : (
             <table className={styles.table}>
               <thead><tr><th>Target</th><th>Type</th><th>Findings</th><th>Max CVSS</th><th>When</th><th></th></tr></thead>
@@ -151,14 +158,16 @@ export default function ScansPage() {
 }
 
 function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail; ent: Ent | null; onBack: () => void; onDelete: (id: string) => void }) {
-  const has = (f: string) => ent?.features.includes(f)
+  const sample = !!detail.isSample
+  // On the public sample, every export is open (it's a demo of the deliverable).
+  const has = (f: string) => sample || !!ent?.features.includes(f)
   const dl = (fmt: string) => { window.location.href = `/api/scan/${detail.id}/report?format=${fmt}` }
 
   // "Track as submission" — pick a program, turn a finding into a tracked bug.
   const [programs, setPrograms] = useState<{ id: string; name: string }[]>([])
   const [program, setProgram] = useState('')
   const [tracked, setTracked] = useState<Record<string, boolean>>({})
-  const canTrack = has('hunt.finding_to_submission')
+  const canTrack = !sample && !!ent?.features.includes('hunt.finding_to_submission')
   useEffect(() => {
     if (!canTrack) return
     fetch('/api/hunt/programs', { credentials: 'include' })
@@ -179,6 +188,11 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
   return (
     <div className={styles.card}>
       <button className={styles.back} onClick={onBack}><ArrowLeft size={14} /> Back to history</button>
+      {sample && (
+        <p className={styles.hint} style={{ marginBottom: 10 }}>
+          This is a <strong>sample report</strong> on a demo target — try the exports below, then run a real scan above.
+        </p>
+      )}
       <p className={styles.sectionTitle}>{detail.target} — {detail.total} finding(s)</p>
 
       <div className={styles.pills}>

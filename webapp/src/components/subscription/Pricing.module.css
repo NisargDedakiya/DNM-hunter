@@ -184,3 +184,6 @@
   font-size: 0.8rem;
   margin-top: var(--space-6, 24px);
 }
+
+.upgrade { color: var(--accent-primary); font-weight: 600; text-decoration: none; }
+.upgrade:hover { text-decoration: underline; }

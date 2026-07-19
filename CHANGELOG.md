@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.9.0] - 2026-07-19
+
+### Added
+
+- **Public sample report — instant, no-signup preview of the deliverable (activation & top-of-funnel).** A prospect can see a real, polished report before creating an account, which is the strongest driver of signups and positive reviews for a tool like this.
+  - **`GET /api/scan/sample`** and **`GET /api/scan/sample/report?format=md|html|sarif`** are **public** (no auth) and return a fixed, realistic demo scan (8 findings across a repo: SQLi, RCE, reentrancy, insecure deserialization, SSRF, public S3, weak hash, missing CSP) rendered through the same report engine as real scans. Whitelisted in the auth middleware (secured by being static demo data).
+  - **First-run experience**: the `/scans` empty state now offers a "See a sample report" button that loads the demo into the interactive detail view with all exports open (it's a demo of the deliverable); the pricing page links "See a sample report →" (opens the live HTML report in a new tab).
+  - Sample lib ([scan/sample.ts](webapp/src/lib/scan/sample.ts)) is pure and unit-tested; the detail view is demo-aware (exports open, Track/Delete hidden).
+
+### Notes
+
+- Live-verified: both public endpoints return 200 with no cookie; the HTML report renders a full client-ready document (~10 KB, self-contained). Type-check passes; build compiles the new routes; 13 scan tests + 46 middleware tests (incl. the new public-path cases) pass; no regressions.
+
+---
+
 ## [5.8.0] - 2026-07-19
 
 ### Added
