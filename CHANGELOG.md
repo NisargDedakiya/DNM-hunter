@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.0] - 2026-07-19
+
+### Added
+
+- **Subscriptions & plan-based entitlements — the monetization flow.** A self-contained subscription system in the web app: **Free / Pro / Team** tiers with per-plan feature gating and metered scan quotas.
+  - **Plan catalogue + entitlements** ([webapp/src/lib/subscription/plans.ts](webapp/src/lib/subscription/plans.ts), [entitlements.ts](webapp/src/lib/subscription/entitlements.ts)) — the single source of truth for pricing, feature flags (`scan.*`, `report.html`, `export.sarif`, `api.access`, `collab.team`, …), and limits (scans/month, seats). Pure quota logic (period reset, `canRunScan`, `toEntitlements`) is unit-tested; async helpers (`ensureSubscription`, `assertFeature`, `consumeScan`) wrap Prisma.
+  - **Provider-agnostic billing** ([billing.ts](webapp/src/lib/subscription/billing.ts)) — a **mock** provider (default; activates instantly, ideal for self-hosted/on-prem/eval) and an optional **Stripe** provider that engages only when `STRIPE_SECRET_KEY` is set. The `stripe` package is loaded via a guarded runtime import, so it is never a build-time dependency.
+  - **API**: `GET /api/subscription` (plan + usage + catalogue), `POST /api/subscription/checkout`, `/cancel`, `/consume` (atomic quota gate — 402 when exhausted, 403 when the plan lacks a feature), and `/webhook` (Stripe signature-verified; mock in dev).
+  - **UI**: a `/pricing` page (monthly/yearly toggle, plan cards, upgrade flow) and a `/settings/billing` management page (current plan, usage meters, included features, cancel). A **Plans & Billing** entry was added to the primary navigation.
+  - **Schema**: new `Subscription` model (one row per user, created lazily on the free plan) + migration.
+
+### Notes
+
+- 14 new unit tests (plan catalogue + quota/entitlement math); full webapp type-check passes and the production build compiles all new routes/pages. Billing defaults to the offline mock mode — no payment processor or keys required to run.
+
+---
+
 ## [5.5.0] - 2026-07-18
 
 ### Added

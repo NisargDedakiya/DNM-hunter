@@ -44,11 +44,49 @@ model User {
   notificationChannels  NotificationChannel[]
   comments              Comment[]
   auditLogs             AuditLog[]
+  subscription          Subscription?
 
   createdAt     DateTime          @default(now()) @map("created_at")
   updatedAt     DateTime          @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+// Per-user subscription + usage metering. One row per user (created lazily on
+// first access, defaulting to the free plan). The plan/entitlement definitions
+// live in src/lib/subscription/plans.ts — this table only stores the user's
+// current plan, billing state, and metered usage for the active period.
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Plan id from plans.ts: 'free' | 'pro' | 'team'. Free text (not an enum) so
+  // adding a tier never needs a migration — plans.ts is the source of truth.
+  plan   String @default("free")
+  // Lifecycle: 'active' | 'trialing' | 'past_due' | 'canceled'.
+  status String @default("active")
+
+  // Billing integration. 'mock' works fully offline (self-hosted / dev); when
+  // STRIPE_SECRET_KEY is set the provider is 'stripe' and the external ids link
+  // to the Stripe customer/subscription.
+  billingProvider        String  @default("mock") @map("billing_provider")
+  externalCustomerId     String? @map("external_customer_id")
+  externalSubscriptionId String? @map("external_subscription_id")
+
+  currentPeriodStart DateTime  @default(now()) @map("current_period_start")
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
+
+  // Metered usage for the current period (reset when usageResetAt elapses).
+  scansUsed    Int      @default(0) @map("scans_used")
+  seatsUsed    Int      @default(1) @map("seats_used")
+  usageResetAt DateTime @default(now()) @map("usage_reset_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
 }
 
 // A long-lived bearer credential for programmatic/CI access to the API,

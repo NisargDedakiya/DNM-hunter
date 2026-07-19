@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert } from 'lucide-react'
+import { Network, ShieldCheck, Target, ClipboardList, FolderOpen, ShieldAlert, Sparkles } from 'lucide-react'
 import styles from './NavigationBar.module.css'
 
 interface NavItem {
@@ -48,6 +48,12 @@ const navItems: NavItem[] = [
     href: '/actions',
     icon: <ClipboardList size={16} />,
     enabled: false,
+  },
+  {
+    label: 'Plans & Billing',
+    href: '/pricing',
+    icon: <Sparkles size={16} />,
+    enabled: true,
   },
 ]
 
