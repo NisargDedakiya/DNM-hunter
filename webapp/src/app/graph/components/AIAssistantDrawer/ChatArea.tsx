@@ -229,7 +229,7 @@ export function ChatArea({
         {chatItems.length === 0 && (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>
-              <img src="/logo.png" alt="NisargHunter AI" width={72} height={72} style={{ objectFit: 'contain' }} />
+              <img src="/logo.png" alt="DNM-Hunter" width={72} height={72} style={{ objectFit: 'contain' }} />
             </div>
             <h3 className={styles.emptyTitle}>How can I help you?</h3>
             <p className={styles.emptyDescription}>
@@ -273,7 +273,7 @@ export function ChatArea({
           <div className={`${styles.message} ${styles.messageAssistant}`}>
             <div className={`${styles.messageIcon} ${styles.loadingEyeIcon}`}>
               <div className={styles.eyeContainer}>
-                <img src="/logo.png" alt="NisargHunter AI" width={34} height={21} className={styles.loadingEye} ref={eyeRef} />
+                <img src="/logo.png" alt="DNM-Hunter" width={34} height={21} className={styles.loadingEye} ref={eyeRef} />
                 <div className={styles.eyePupil} />
               </div>
             </div>

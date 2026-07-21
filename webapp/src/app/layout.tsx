@@ -10,11 +10,15 @@ import { AppLayout } from '@/components/layout'
 import { ThemeDbBridge } from '@/components/ThemeDbBridge'
 
 export const metadata: Metadata = {
-  title: 'NisargHunter AI',
-  description: 'Security reconnaissance and vulnerability assessment dashboard',
+  title: 'DNM-Hunter — Hunt bugs. Secure future.',
+  description: 'DNM-Hunter — security reconnaissance and vulnerability assessment platform for bug hunters and pentesters.',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/favicon.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/apple-icon.png',
   },
 }
 

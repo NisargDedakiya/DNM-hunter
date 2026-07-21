@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="DNM-Hunter">
+  <!-- Favicon-optimised DNM-Hunter mark: bolder crosshair + a solid bug
+       silhouette so it stays legible down to 16px. -->
+  <circle cx="128" cy="128" r="90" fill="none" stroke="#e53935" stroke-width="13"/>
+  <g stroke="#e53935" stroke-width="16" stroke-linecap="round">
+    <line x1="128" y1="18" x2="128" y2="58"/>
+    <line x1="128" y1="198" x2="128" y2="238"/>
+    <line x1="18" y1="128" x2="58" y2="128"/>
+    <line x1="198" y1="128" x2="238" y2="128"/>
+  </g>
+  <g fill="#e53935" stroke="#e53935" stroke-width="12" stroke-linecap="round">
+    <!-- legs -->
+    <line x1="128" y1="132" x2="86" y2="104"/>
+    <line x1="128" y1="132" x2="170" y2="104"/>
+    <line x1="128" y1="140" x2="80" y2="140"/>
+    <line x1="128" y1="140" x2="176" y2="140"/>
+    <line x1="128" y1="148" x2="86" y2="176"/>
+    <line x1="128" y1="148" x2="170" y2="176"/>
+    <!-- head + body -->
+    <circle cx="128" cy="104" r="15" stroke="none"/>
+    <ellipse cx="128" cy="146" rx="26" ry="34" stroke="none"/>
+  </g>
+</svg>

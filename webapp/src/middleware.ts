@@ -108,6 +108,9 @@ async function handleRequest(request: NextRequest, requestId: string): Promise<N
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname === '/logo.png' ||
+    pathname === '/logo.svg' ||
+    pathname === '/apple-icon.png' ||
+    pathname === '/icon-512.png' ||
     pathname === '/js_logo.png'
   ) {
     return next(request, requestId)
@@ -186,5 +189,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|favicon.png|logo.png|js_logo.png).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|favicon.png|favicon.svg|logo.png|logo.svg|apple-icon.png|icon-512.png|js_logo.png).*)'],
 }

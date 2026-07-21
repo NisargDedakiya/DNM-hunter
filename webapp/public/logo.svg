@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-label="DNM-Hunter">
+  <!-- DNM-HUNTER emblem: a bug held in a targeting reticle over a shield.
+       "Hunt bugs. Secure future." Rendered in the app accent (crimson #e53935)
+       so it works on any background; scales crisp from favicon to hero size. -->
+  <defs>
+    <linearGradient id="dnmShield" x1="128" y1="150" x2="128" y2="230" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e53935" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#e53935" stop-opacity="0.03"/>
+    </linearGradient>
+  </defs>
+
+  <!-- shield backing (secure) -->
+  <path d="M128 150 L170 163 L170 190 C170 210 150 222 128 231 C106 222 86 210 86 190 L86 163 Z"
+        fill="url(#dnmShield)" stroke="#e53935" stroke-width="3" stroke-opacity="0.55"
+        stroke-linejoin="round"/>
+
+  <!-- targeting reticle (hunt) -->
+  <circle cx="128" cy="128" r="92" stroke="#e53935" stroke-width="6"/>
+  <g stroke="#e53935" stroke-width="9" stroke-linecap="round">
+    <line x1="128" y1="14" x2="128" y2="52"/>
+    <line x1="128" y1="204" x2="128" y2="242"/>
+    <line x1="14" y1="128" x2="52" y2="128"/>
+    <line x1="204" y1="128" x2="242" y2="128"/>
+  </g>
+
+  <!-- the bug in the crosshair -->
+  <g transform="translate(65.6 60) scale(5.2)" stroke="#e53935" stroke-width="1.15"
+     stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M9 9v-1a3 3 0 0 1 6 0v1"/>
+    <path d="M8 9h8a6 6 0 0 1 1 3v3a5 5 0 0 1 -10 0v-3a6 6 0 0 1 1 -3"/>
+    <path d="M3 13l4 0"/>
+    <path d="M17 13l4 0"/>
+    <path d="M12 20l0 -6"/>
+    <path d="M4 19l3.35 -2"/>
+    <path d="M20 19l-3.35 -2"/>
+    <path d="M4 7l3.75 2.4"/>
+    <path d="M20 7l-3.75 2.4"/>
+  </g>
+</svg>

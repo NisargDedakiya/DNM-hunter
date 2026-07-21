@@ -7,6 +7,13 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [],
+    // The brand emblem ships as a first-party SVG (public/logo.svg). Next's
+    // image optimizer refuses SVG unless explicitly allowed; these are our own
+    // trusted assets, and the strict CSP + attachment disposition below defang
+    // the usual risk of optimizing untrusted user-supplied SVGs.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   env: {

@@ -55,7 +55,7 @@ export default function RegisterPage() {
   return (
     <div className={styles.page}>
       <Image
-        src="/logo.png"
+        src="/logo.svg"
         alt=""
         width={520}
         height={520}
@@ -66,11 +66,12 @@ export default function RegisterPage() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.logoRow}>
-            <Image src="/logo.png" alt="NisargHunter AI" width={63} height={40} priority />
+            <Image src="/logo.svg" alt="DNM-Hunter" width={44} height={44} priority />
             <span className={styles.logoText}>
-              <span className={styles.logoAccent}>NisargHunter</span> AI
+              <span className={styles.logoAccent}>DNM</span>-HUNTER
             </span>
           </div>
+          <p className={styles.tagline}>Hunt bugs. Secure future.</p>
           <p className={styles.subtitle}>Create your account</p>
         </div>
 

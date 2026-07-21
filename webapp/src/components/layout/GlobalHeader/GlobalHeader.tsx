@@ -37,9 +37,9 @@ export function GlobalHeader() {
   return (
     <header className={styles.header}>
       <Link href="/dashboard" className={styles.logo}>
-        <Image src="/logo.png" alt="NisargHunter AI" width={28} height={28} className={styles.logoImg} />
+        <Image src="/logo.svg" alt="DNM-Hunter" width={28} height={28} className={styles.logoImg} />
         <span className={styles.logoText}>
-          <span className={styles.logoAccent}>NisargHunter</span> AI
+          <span className={styles.logoAccent}>DNM</span>-HUNTER
         </span>
       </Link>
 

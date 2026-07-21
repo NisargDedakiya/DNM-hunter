@@ -17,7 +17,7 @@ export function Footer() {
       <div className={styles.content}>
         <div className={styles.left}>
           <span className={styles.copyright}>
-            © {currentYear} NisargHunter AI. All rights reserved.
+            © {currentYear} DNM-Hunter. All rights reserved.
           </span>
           <a
             href={DISCLAIMER_GITHUB_URL}
