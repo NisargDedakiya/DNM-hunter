@@ -1,0 +1,60 @@
+# =============================================================================
+# NisargHunter AI — Scanner Suite image (nh-scan and friends)
+#
+# A self-contained container for the VRT-mapped static/dynamic scanner suite.
+# All tools the scanners need are pre-installed, so it runs the same on Windows,
+# macOS and Linux via Docker Desktop — no host installs beyond Docker.
+#
+# Build:
+#   docker build -f Dockerfile.scanner -t nisarghunter-scan .
+#
+# Scan a folder (PowerShell):
+#   docker run --rm -v "${PWD}:/target" nisarghunter-scan nh-scan /target
+# Scan a folder (Linux/macOS/WSL/Git-Bash):
+#   docker run --rm -v "$PWD:/target" nisarghunter-scan nh-scan /target
+#
+# Other entry points also on PATH:
+#   nh-web-probe https://example.com          # live-HTTP (DAST) scan
+#   nh-scan /target --format sarif             # SARIF 2.1.0 (code scanning)
+#   nh-scan /target --format html -o /target/report.html
+#   python -m vrt.coverage                     # VRT coverage report
+# =============================================================================
+FROM python:3.12-slim
+
+LABEL org.opencontainers.image.title="NisargHunter AI — Scanner Suite" \
+      org.opencontainers.image.description="VRT-mapped SAST/DAST scanner suite (nh-scan): SQLi/RCE/XXE/SSTI/SSRF, crypto, Solidity, IaC, LLM Top 10, ELF hardening, live HTTP." \
+      org.opencontainers.image.source="https://github.com/NisargDedakiya/DNM-hunter"
+
+# System tools the scanners shell out to:
+#   binutils -> readelf / nm / objdump  (binary_audit: ELF hardening & imports)
+#   gcc      -> compile target/test binaries when needed
+#   git      -> repo_scan clones a GitHub repo before scanning it
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends binutils gcc git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . /app
+
+# The suite's core is Python standard-library only. python-hcl2 unlocks the
+# Terraform IaC rules. Installing the package puts the nh-* console scripts on
+# PATH. Deep symbolic execution (angr) is a heavy optional extra — build with a
+# follow-up `pip install ".[deep-binary]"` if you need deep_binary.
+RUN pip install --no-cache-dir python-hcl2 \
+    && pip install --no-cache-dir -e .
+
+# Belt-and-suspenders: make every first-party package importable (the CVSS
+# engine in `common/`, the secret patterns in `recon/`) regardless of the
+# editable-install path finder.
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Scans run against a bind-mounted target directory or a URL.
+WORKDIR /target
+
+# No fixed ENTRYPOINT so any console script works:
+#   docker run ... nisarghunter-scan nh-scan /target
+#   docker run ... nisarghunter-scan nh-web-probe https://example.com
+# With no command, print usage.
+CMD ["nh-scan", "--help"]
