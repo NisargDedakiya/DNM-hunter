@@ -59,7 +59,9 @@ function makeRequest(
 describe('middleware - public paths', () => {
   test.each([
     '/login',
+    '/register',                 // self-serve sign-up page
     '/api/auth/login',
+    '/api/auth/register',        // self-serve sign-up API
     '/api/auth/logout',
     '/api/health',
     '/api/subscription/webhook', // billing-provider callback, secured by signature

@@ -1,40 +1,50 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useVersionCheck } from '@/hooks/useVersionCheck'
-import styles from './page.module.css'
+import styles from '../login/page.module.css'
 
-export default function LoginPage() {
-  const router = useRouter()
+export default function RegisterPage() {
   const { currentVersion } = useVersionCheck()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
+    if (password !== confirm) {
+      setError('Passwords do not match')
+      return
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
+
+    setLoading(true)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       })
 
       if (!res.ok) {
-        const data = await res.json()
-        setError(data.error || 'Login failed')
+        const data = await res.json().catch(() => ({}))
+        setError(data.error || 'Registration failed')
         setLoading(false)
         return
       }
 
-      // Force full page reload to pick up the new cookie in middleware
+      // Registration signs the user in (sets the auth cookie). Force a full
+      // page reload so middleware sees the new cookie.
       window.location.href = '/overview'
     } catch {
       setError('Unable to connect to the server')
@@ -61,7 +71,7 @@ export default function LoginPage() {
               <span className={styles.logoAccent}>NisargHunter</span> AI
             </span>
           </div>
-          <p className={styles.subtitle}>Sign in to your account</p>
+          <p className={styles.subtitle}>Create your account</p>
         </div>
 
         <div className={styles.body}>
@@ -69,16 +79,30 @@ export default function LoginPage() {
             {error && <div className={styles.error}>{error}</div>}
 
             <div className={styles.field}>
+              <label htmlFor="name" className={styles.label}>Name</label>
+              <input
+                id="name"
+                type="text"
+                className={styles.input}
+                placeholder="Your name"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                autoFocus
+                autoComplete="name"
+              />
+            </div>
+
+            <div className={styles.field}>
               <label htmlFor="email" className={styles.label}>Email</label>
               <input
                 id="email"
                 type="email"
                 className={styles.input}
-                placeholder="admin@nisarghunter.local"
+                placeholder="you@example.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                autoFocus
                 autoComplete="email"
               />
             </div>
@@ -89,25 +113,40 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 className={styles.input}
-                placeholder="Enter your password"
+                placeholder="At least 8 characters"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
+                minLength={8}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label htmlFor="confirm" className={styles.label}>Confirm password</label>
+              <input
+                id="confirm"
+                type="password"
+                className={styles.input}
+                placeholder="Re-enter your password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                required
+                autoComplete="new-password"
               />
             </div>
 
             <button
               type="submit"
               className={styles.submitButton}
-              disabled={loading || !email || !password}
+              disabled={loading || !name || !email || !password || !confirm}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
 
             <div className={styles.altAction}>
-              <span>Don&apos;t have an account?</span>
-              <Link href="/register" className={styles.altLink}>Register</Link>
+              <span>Already have an account?</span>
+              <Link href="/login" className={styles.altLink}>Sign in</Link>
             </div>
           </form>
         </div>

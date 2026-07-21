@@ -105,7 +105,7 @@ export const RATE_LIMIT_TIERS: Record<'auth' | 'default', RateLimitTier> = {
   },
 }
 
-const AUTH_TIER_PATHS = ['/api/auth/login', '/api/auth/login-2fa']
+const AUTH_TIER_PATHS = ['/api/auth/login', '/api/auth/login-2fa', '/api/auth/register']
 
 export function tierForPath(pathname: string): RateLimitTier {
   if (AUTH_TIER_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
