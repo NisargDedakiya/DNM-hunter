@@ -32,32 +32,68 @@ scanner + web app **natively** on Windows with a couple of Linux-only exceptions
 
 Runs everything: web app, PostgreSQL, Neo4j, the scanners, and the agent.
 
-**Prerequisites**
-1. Install **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** and,
-   when prompted, **enable the WSL2 backend** (Settings → General → *Use the WSL 2
-   based engine*). Install a WSL2 distro (`wsl --install` in an admin PowerShell)
-   if you don't have one.
-2. Give Docker Desktop enough resources (Settings → Resources): **≥ 8 GB RAM**
-   (16 GB recommended if you enable GVM/OpenVAS).
+### Step 1 — Install Docker Desktop with WSL2
 
-**Run** — from a **WSL2 shell** (Ubuntu), clone into the Linux filesystem
-(`~/…`, not `/mnt/c/…`, for speed and correct file permissions):
+1. Open an **admin PowerShell** and install WSL2 if you don't have it:
+   ```powershell
+   wsl --install
+   ```
+   Reboot if prompted, then finish the Ubuntu first-run (create a username/password).
+2. Install **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**.
+   During setup, keep **"Use the WSL 2 based engine"** ticked (Settings → General),
+   and under **Settings → Resources → WSL Integration** enable your Ubuntu distro.
+3. Give Docker enough resources (**Settings → Resources**): **≥ 8 GB RAM** — the
+   launcher enforces this and refuses to start core services below ~8 GB. Use
+   **16 GB** if you plan to enable GVM/OpenVAS.
+
+### Step 2 — Get the code (inside WSL2)
+
+Open your **Ubuntu (WSL2)** terminal and clone into the **Linux** filesystem
+(`~/…`, *not* `/mnt/c/…` — faster and avoids permission issues):
 
 ```bash
 git clone https://github.com/NisargDedakiya/DNM-hunter.git
 cd DNM-hunter
-cp .env.example .env          # then edit secrets/LLM keys as needed
-./nisarghunter.sh install     # builds images and starts the core stack
 ```
 
-Or drive Compose directly:
+### Step 3 — Install and start
 
 ```bash
-docker compose up -d          # core services
-docker compose ps             # check health
+./nisarghunter.sh install
 ```
 
-Open the web app at **http://localhost:3000** and sign in.
+That's it — the launcher checks prerequisites (Docker, Compose v2, git),
+**auto-generates all required secrets** into `.env`, builds the images, starts
+the core stack, and prompts you to create an admin user. First build takes a
+while (it's compiling the web app and several scanner images).
+
+Optional flags:
+
+| Command | Adds |
+|---------|------|
+| `./nisarghunter.sh install` | Core stack (web app, DB, agent, scanners) |
+| `./nisarghunter.sh install --kbase` | + local AI Knowledge Base (~4.4 GB heavier) |
+| `./nisarghunter.sh install --gvm` | + GVM/OpenVAS network scanner (needs 16 GB; ~30 min feed sync) |
+| `./nisarghunter.sh install --gvm --kbase` | Everything |
+
+> You only need to touch `.env` to add **LLM/API keys** (for the AI agent) — copy
+> the template first if so: `cp .env.example .env` *before* running install, then
+> fill in the keys. Auth/DB secrets are generated for you either way.
+
+### Step 4 — Use it
+
+Open **http://localhost:3000** in your Windows browser and sign in with the admin
+user you just created.
+
+```bash
+./nisarghunter.sh status      # health of every service
+./nisarghunter.sh stop        # stop the stack
+./nisarghunter.sh update      # pull + rebuild after a git pull
+```
+
+Prefer raw Compose? `docker compose up -d` starts the core services and
+`docker compose ps` shows health — but `nisarghunter.sh` is the supported path
+(it handles secrets, the RAM gate, and the admin bootstrap for you).
 
 > **Windows path note:** always work inside the WSL2 filesystem. The orchestrator
 > already handles Windows-style Docker Desktop paths (see the `sibling_host_path`
