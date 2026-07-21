@@ -13,11 +13,44 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-# Reuse the canonical pattern set (stdlib-only import chain — safe to load here).
-try:
-    from recon.helpers.js_recon.patterns import JS_SECRET_PATTERNS
-except Exception:  # pragma: no cover - fallback keeps the scanner usable in isolation
-    JS_SECRET_PATTERNS = []
+
+def _load_secret_patterns() -> list:
+    """Load the canonical JS secret pattern set.
+
+    ``patterns.py`` is itself stdlib-only, but importing it through the package
+    path (``recon.helpers.js_recon.patterns``) first executes
+    ``recon/helpers/__init__.py``, which eagerly pulls in the Docker / nuclei /
+    CVE helpers and their third-party dependencies. In a minimal install (e.g.
+    CI, or the standalone scanner container) those deps are absent, so the
+    package import raises and secret scanning silently degrades to zero patterns.
+
+    Load the module file directly instead — bypassing the heavy package
+    ``__init__`` — to honour the scanner's zero-dependency contract. Fall back to
+    the normal package import, then to an empty set.
+    """
+    patterns_file = (
+        Path(__file__).resolve().parents[1] / "recon" / "helpers" / "js_recon" / "patterns.py"
+    )
+    if patterns_file.is_file():
+        try:
+            import importlib.util
+
+            spec = importlib.util.spec_from_file_location("_nh_js_secret_patterns", patterns_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)  # type: ignore[union-attr]
+            return list(getattr(module, "JS_SECRET_PATTERNS", []))
+        except Exception:  # pragma: no cover - fall through to the package import
+            pass
+    try:
+        from recon.helpers.js_recon.patterns import JS_SECRET_PATTERNS as _pkg_patterns
+
+        return list(_pkg_patterns)
+    except Exception:  # pragma: no cover - keeps the scanner usable in isolation
+        return []
+
+
+# Reuse the canonical pattern set (loaded without triggering recon's heavy __init__).
+JS_SECRET_PATTERNS = _load_secret_patterns()
 
 # Directories that are noise or not the target's own code.
 _SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", ".next",

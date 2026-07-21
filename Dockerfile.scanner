@@ -37,10 +37,11 @@ WORKDIR /app
 COPY . /app
 
 # The suite's core is Python standard-library only. python-hcl2 unlocks the
-# Terraform IaC rules. Installing the package puts the nh-* console scripts on
-# PATH. Deep symbolic execution (angr) is a heavy optional extra — build with a
+# Terraform IaC rules and pyyaml the Docker Compose / Kubernetes / GitHub
+# Actions rules. Installing the package puts the nh-* console scripts on PATH.
+# Deep symbolic execution (angr) is a heavy optional extra — build with a
 # follow-up `pip install ".[deep-binary]"` if you need deep_binary.
-RUN pip install --no-cache-dir python-hcl2 \
+RUN pip install --no-cache-dir python-hcl2 pyyaml \
     && pip install --no-cache-dir -e .
 
 # Belt-and-suspenders: make every first-party package importable (the CVSS

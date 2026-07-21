@@ -238,29 +238,40 @@ describe('workflowLayout / computeLayout', () => {
     }
   })
 
-  test('input node is at the leftmost position', () => {
+  test('input anchors the leftmost column (only universal data nodes may sit further left)', () => {
+    // Three-band layout: the Input node and the universal data nodes
+    // (Domain/Subdomain/IP) share group 0, the leftmost column. The universal
+    // data band is wider than the input, so it can extend slightly left of the
+    // (horizontally centered) input. Every OTHER node — tools and transitional
+    // data nodes in later groups — must sit at or to the right of the input.
     const { nodes } = buildLayoutNodes()
     const positions = computeLayout(nodes)
     const posMap = new Map(positions.map(p => [p.id, p]))
 
     const inputX = posMap.get('input')!.x
+    const universalIds = new Set([...UNIVERSAL_DATA_NODES].map(nt => `data-${nt}`))
     for (const p of positions) {
-      if (p.id !== 'input') {
-        expect(p.x, `${p.id} (x=${p.x}) is to the left of input (x=${inputX})`).toBeGreaterThanOrEqual(inputX)
-      }
+      if (p.id === 'input' || universalIds.has(p.id)) continue
+      expect(p.x, `${p.id} (x=${p.x}) should not be left of input (x=${inputX})`).toBeGreaterThanOrEqual(inputX)
     }
   })
 
-  test('universal data nodes are to the right of input', () => {
+  test('universal data nodes anchor the leftmost column (left of every tool)', () => {
+    // Universal data nodes are the seed inputs shown top-left, in the input's
+    // group-0 column — so they sit to the left of every tool-band node.
     const { nodes } = buildLayoutNodes()
     const positions = computeLayout(nodes)
     const posMap = new Map(positions.map(p => [p.id, p]))
 
-    const inputX = posMap.get('input')!.x
+    const toolXs = positions.filter(p => p.id.startsWith('tool-')).map(p => p.x)
+    const minToolX = Math.min(...toolXs)
     for (const nt of UNIVERSAL_DATA_NODES) {
       const dataX = posMap.get(`data-${nt}`)?.x
       if (dataX !== undefined) {
-        expect(dataX).toBeGreaterThan(inputX)
+        expect(
+          dataX,
+          `universal ${nt} (x=${dataX}) should be in the leftmost column, left of the first tool (x=${minToolX})`,
+        ).toBeLessThan(minToolX)
       }
     }
   })
@@ -379,10 +390,16 @@ describe('workflow graph logic', () => {
         dataNodeStatus.set(nodeType, 'active')
         continue
       }
-      const hasActiveProducer = WORKFLOW_TOOLS.some(
-        t => formData[t.enabledField] && getToolProduces(t.id).includes(nodeType)
+      // Mirror useWorkflowGraph: a data type is active only when an enabled
+      // tool is a TRUE SOURCE of it — one that produces it without also
+      // consuming it. Recyclers/expanders (e.g. Katana consumes AND produces
+      // BaseURL) can't bootstrap the type from nothing, so they don't count.
+      const hasTrueSource = WORKFLOW_TOOLS.some(
+        t => formData[t.enabledField]
+          && getToolProduces(t.id).includes(nodeType)
+          && !getToolConsumes(t.id).includes(nodeType)
       )
-      dataNodeStatus.set(nodeType, hasActiveProducer ? 'active' : 'starved')
+      dataNodeStatus.set(nodeType, hasTrueSource ? 'active' : 'starved')
     }
 
     // Tool chain-broken status

@@ -12,7 +12,10 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ImportError:  # pragma: no cover - YAML rules degrade gracefully when absent
+    yaml = None
 
 try:
     import hcl2
@@ -84,13 +87,13 @@ class IacScanRunner:
                     self._record(findings, "dockerfile")
                     all_findings.extend(findings)
 
-                elif name in ("docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"):
+                elif yaml is not None and name in ("docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"):
                     doc = yaml.safe_load(path.read_text(errors="replace"))
                     findings = check_compose_doc(doc, rel)
                     self._record(findings, "compose")
                     all_findings.extend(findings)
 
-                elif name.endswith((".yml", ".yaml")) and self._looks_like_k8s_or_workflow(path):
+                elif yaml is not None and name.endswith((".yml", ".yaml")) and self._looks_like_k8s_or_workflow(path):
                     self._scan_yaml_multi(path, rel, all_findings)
 
                 elif name.endswith(".tf") and hcl2 is not None:

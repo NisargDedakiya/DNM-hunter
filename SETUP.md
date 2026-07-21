@@ -147,8 +147,9 @@ docker run --rm -v "$PWD:/target" nisarghunter-scan nh-scan /target --fail-on hi
 ```
 
 What's pre-installed in the image: Python 3.12, the scanner suite (`nh-*`
-console scripts), `python-hcl2` (Terraform IaC rules), and **binutils** +
-**gcc** + **git** (for ELF binary analysis and repo cloning). Deep symbolic
+console scripts), `python-hcl2` (Terraform IaC rules) + `pyyaml` (Docker
+Compose / Kubernetes / GitHub Actions rules), and **binutils** + **gcc** +
+**git** (for ELF binary analysis and repo cloning). Deep symbolic
 execution (angr) is a heavy optional extra — add it with
 `pip install ".[deep-binary]"` in a derived image if you need `deep_binary`.
 
@@ -163,8 +164,7 @@ fine.
 **Scanner suite** (Python 3.10+):
 
 ```bash
-python -m pip install -e .            # installs the nh-* console scripts
-pip install python-hcl2               # enables the Terraform IaC rules
+python -m pip install -e ".[iac]"     # nh-* console scripts + IaC parsers (hcl2 + pyyaml)
 nh-scan ./path/to/target --format html -o report.html
 ```
 
@@ -193,8 +193,9 @@ just Postgres in Docker: `docker run -e POSTGRES_PASSWORD=... -p 5432:5432 postg
   change the published port in `docker-compose.yml`.
 - **Out of memory when GVM is enabled** — raise Docker Desktop's RAM limit or run
   without GVM (`./nisarghunter.sh` core services only).
-- **`iac_scan` findings missing** — make sure `python-hcl2` is installed (it is,
-  in the container image and in `pip install ".[iac]"`).
+- **`iac_scan` findings missing** — make sure `python-hcl2` **and** `pyyaml` are
+  installed (both are, in the container image and in `pip install ".[iac]"`).
+  `python-hcl2` covers Terraform; `pyyaml` covers Compose/Kubernetes/GHA.
 
 ## Notes
 

@@ -22,8 +22,9 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-# Terraform HCL parsing for the IaC scanner.
-iac = ["python-hcl2>=4.3"]
+# IaC scanner: Terraform HCL parsing (python-hcl2) + YAML parsing for
+# Docker Compose / Kubernetes / GitHub Actions manifests (pyyaml).
+iac = ["python-hcl2>=4.3", "pyyaml>=6.0"]
 # Symbolic execution for the deep binary tier.
 deep-binary = ["angr>=9.2"]
 # Development / CI toolchain.
