@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     const config = JSON.parse(decryptSecret(channel.configEncrypted)) as ChannelConfig
     const result = await sendNotification(channel.type as NotificationChannelType, config, {
       event: 'test',
-      title: 'NisargHunter AI — Test Notification',
+      title: 'DNM-Hunter — Test Notification',
       message: `This is a test message from the "${channel.name}" notification channel.`,
     })
 

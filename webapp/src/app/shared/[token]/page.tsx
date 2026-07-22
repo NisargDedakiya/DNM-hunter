@@ -35,7 +35,7 @@ export default function SharedReportPage({ params }: { params: Promise<{ token: 
 
   return (
     <div className={styles.page}>
-      <div className={styles.brand}><ShieldCheck size={16} /> NisargHunter AI — Security Report</div>
+      <div className={styles.brand}><ShieldCheck size={16} /> DNM-Hunter — Security Report</div>
       <h1 className={styles.h1}>Security Assessment</h1>
       <p className={styles.sub}>
         Target <strong>{data.target}</strong> · {new Date(data.createdAt).toLocaleDateString()} ·
@@ -70,7 +70,7 @@ export default function SharedReportPage({ params }: { params: Promise<{ token: 
       </table>
 
       <div className={styles.cta}>
-        <p className={styles.ctaTitle}>Generated with NisargHunter AI</p>
+        <p className={styles.ctaTitle}>Generated with DNM-Hunter</p>
         <p className={styles.ctaText}>Scan your own code, cloud, binaries, smart contracts and live targets — free to start.</p>
         <a className={styles.ctaBtn} href="/pricing">Run your own scan →</a>
       </div>

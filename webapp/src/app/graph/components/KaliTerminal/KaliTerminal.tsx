@@ -380,7 +380,7 @@ export const KaliTerminal = memo(function KaliTerminal({ userId, projectId }: Ka
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <TerminalIcon size={14} className={styles.terminalIcon} />
-          <span className={styles.title}>NisargHunter AI Terminal</span>
+          <span className={styles.title}>DNM-Hunter Terminal</span>
           <span className={styles.subtitle}>kali-sandbox</span>
         </div>
         <div className={styles.toolbarRight}>

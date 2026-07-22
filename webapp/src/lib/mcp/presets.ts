@@ -1,6 +1,6 @@
 /**
  * Prefilled MCP server templates — 10 publicly-available, security-relevant
- * MCP servers chosen for NisargHunter AI's pentest workflow.
+ * MCP servers chosen for DNM-Hunter's pentest workflow.
  *
  * Each preset fills `id, name, description, transport, url/command/args,
  * default_phases, auth structure, env structure` — but leaves `token` and

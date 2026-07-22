@@ -120,7 +120,7 @@ export function toSarif(meta: ReportMeta, findings: ReportFinding[]): object {
     version: '2.1.0',
     $schema: 'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json',
     runs: [{
-      tool: { driver: { name: 'NisargHunter AI', version: '1.0.0', rules: [...rules.values()] } },
+      tool: { driver: { name: 'DNM-Hunter', version: '1.0.0', rules: [...rules.values()] } },
       results,
       properties: { target: meta.target, summary: { total: meta.total, bySeverity: meta.bySeverity } },
     }],
@@ -135,7 +135,7 @@ export function toMarkdown(meta: ReportMeta, findings: ReportFinding[]): string 
     `- **Target:** ${meta.target}`,
     `- **Scan type:** ${meta.scanType}`,
     `- **Generated:** ${date} UTC`,
-    `- **Tool:** NisargHunter AI`, '',
+    `- **Tool:** DNM-Hunter`, '',
     '## Executive summary', '',
     `The assessment identified **${meta.total} finding(s)**. Highest severity: **${highest(meta.bySeverity)}** (max CVSS ${meta.maxCvss}).`, '',
     '| Severity | Count |', '|----------|-------|',
@@ -190,7 +190,7 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04
 .finding .meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:13px;margin:0 0 12px}
 @media print{.finding{break-inside:avoid}}</style></head><body><div class="wrap">
 <h1>Security Assessment Report</h1>
-<p class="sub">Target: <b>${esc(meta.target)}</b> · ${esc(date)} UTC · NisargHunter AI</p>
+<p class="sub">Target: <b>${esc(meta.target)}</b> · ${esc(date)} UTC · DNM-Hunter</p>
 <h2>Executive summary</h2><p>The assessment identified <b>${meta.total} finding(s)</b>. Highest severity: <b>${highest(meta.bySeverity)}</b> (max CVSS ${meta.maxCvss}).</p>
 <div class="chips">${chips}</div>
 <h2>Findings overview</h2><table><thead><tr><th>#</th><th>Severity</th><th>CVSS</th><th>Finding</th><th>Location</th><th>VRT</th></tr></thead><tbody>${rows}</tbody></table>

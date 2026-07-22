@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const remediation = remediationFor(finding.vrt, finding.severity)
     const notes = [
-      `Auto-created from a NisargHunter scan of ${finding.scan.target}.`,
+      `Auto-created from a DNM-Hunter scan of ${finding.scan.target}.`,
       finding.file ? `Location: ${finding.file}${finding.line ? ':' + finding.line : ''}` : '',
       `Rule: ${finding.ruleId}  ·  VRT: ${finding.vrt || '—'}${finding.cwe ? '  ·  ' + finding.cwe : ''}  ·  CVSS: ${finding.cvss}`,
       '', `Description: ${finding.detail}`, '', `Remediation: ${remediation}`,

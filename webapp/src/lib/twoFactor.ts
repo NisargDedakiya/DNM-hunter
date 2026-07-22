@@ -2,7 +2,7 @@ import { generateSecret, verify, generateURI } from 'otplib'
 import QRCode from 'qrcode'
 import { randomBytes } from 'crypto'
 
-const ISSUER = 'NisargHunter AI'
+const ISSUER = 'DNM-Hunter'
 
 export function generateTotpSecret(): string {
   return generateSecret()

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   const session = getSession()
   try {
-    // Secrets in NisargHunter AI always live in the :Secret node. They can be attached via
+    // Secrets in DNM-Hunter always live in the :Secret node. They can be attached via
     //   (BaseURL)-[:HAS_SECRET]->(Secret)              // resource_mixin
     //   (JsReconFinding {finding_type:'js_file'})-[:HAS_SECRET]->(Secret)  // js_recon_mixin
     // Union both traversals and keep each Secret once.
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       jsFileUrl: r.get('jsFileUrl') as string | null,
     }))
 
-    // Priority weighting. `secret_type` in NisargHunter AI is the pattern-family name
+    // Priority weighting. `secret_type` in DNM-Hunter is the pattern-family name
     // (e.g. "AWS Secret Key", "GitHub Token Classic", "JWT Token", ...). Match
     // priority by keyword on the lower-cased label.
     const typePriority = (rawType: string): number => {

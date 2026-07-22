@@ -73,7 +73,7 @@ describe('report renderers', () => {
   it('SARIF 2.1.0 shape is valid', () => {
     const doc: any = toSarif(META, FINDINGS)
     expect(doc.version).toBe('2.1.0')
-    expect(doc.runs[0].tool.driver.name).toBe('NisargHunter AI')
+    expect(doc.runs[0].tool.driver.name).toBe('DNM-Hunter')
     expect(doc.runs[0].results).toHaveLength(2)
     const ruleIds = doc.runs[0].tool.driver.rules.map((r: any) => r.id)
     for (const r of doc.runs[0].results) expect(ruleIds).toContain(r.ruleId)

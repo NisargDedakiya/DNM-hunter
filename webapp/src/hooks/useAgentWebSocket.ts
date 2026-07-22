@@ -1,7 +1,7 @@
 /**
  * useAgentWebSocket Hook
  *
- * Custom React hook for managing WebSocket connection to the NisargHunter AI agent backend.
+ * Custom React hook for managing WebSocket connection to the DNM-Hunter agent backend.
  * Provides automatic reconnection, message handling, and type-safe communication.
  */
 

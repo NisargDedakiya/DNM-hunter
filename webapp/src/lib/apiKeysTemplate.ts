@@ -85,7 +85,7 @@ export function buildTemplate(
   }
 
   return {
-    _instructions: 'Fill in your API keys below. Leave empty strings for keys you don\'t use. For key rotation, add multiple keys to the array. Upload this file back to NisargHunter AI at Settings > API Keys & Tunneling.',
+    _instructions: 'Fill in your API keys below. Leave empty strings for keys you don\'t use. For key rotation, add multiple keys to the array. Upload this file back to DNM-Hunter at Settings > API Keys & Tunneling.',
     keys,
     rotation,
     tunneling,

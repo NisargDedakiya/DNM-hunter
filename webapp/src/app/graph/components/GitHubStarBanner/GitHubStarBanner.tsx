@@ -32,7 +32,7 @@ export function GitHubStarBanner({ hasAttackChain }: GitHubStarBannerProps) {
     <div className={styles.banner}>
       <Star size={16} className={styles.icon} />
       <span className={styles.text}>
-        Enjoying NisargHunter AI? A <a href="https://github.com/nisargdedakiya/dnm-hunter" target="_blank" rel="noopener noreferrer">GitHub star</a> helps others discover the project.
+        Enjoying DNM-Hunter? A <a href="https://github.com/nisargdedakiya/dnm-hunter" target="_blank" rel="noopener noreferrer">GitHub star</a> helps others discover the project.
       </span>
       <button className={styles.close} onClick={handleDismiss} aria-label="Dismiss">
         <X size={14} />

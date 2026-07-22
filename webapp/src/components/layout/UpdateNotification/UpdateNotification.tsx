@@ -129,7 +129,7 @@ export function UpdateNotification() {
           <Download size={20} className={styles.downloadIcon} />
           <div>
             <p className={styles.versionText}>
-              NisargHunter AI <strong>v{latestVersion}</strong> is available.
+              DNM-Hunter <strong>v{latestVersion}</strong> is available.
               You are running <strong>v{currentVersion}</strong>.
             </p>
           </div>

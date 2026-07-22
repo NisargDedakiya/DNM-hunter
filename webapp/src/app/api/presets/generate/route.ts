@@ -18,7 +18,7 @@ import { assertSafeLlmBaseUrl, BaseUrlValidationError } from '@/lib/llm-url-guar
 // provider — including OpenAI-compatible deployments like Microsoft Foundry.
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `You are a recon pipeline configuration expert for NisargHunter AI, an AI-powered red-team reconnaissance platform.
+const SYSTEM_PROMPT = `You are a recon pipeline configuration expert for DNM-Hunter, an AI-powered red-team reconnaissance platform.
 
 Given a user's natural-language description, produce a JSON object whose keys are recon pipeline parameters and whose values configure the scan strategy.
 
