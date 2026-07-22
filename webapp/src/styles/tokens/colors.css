@@ -22,18 +22,18 @@
   --color-gray-950: #0a0a0a;
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     CRIMSON (Primary / Brand - NisargHunter AI)
+     CRIMSON (Primary / Brand - DNM-Hunter, matched to the logo's scarlet red)
      ═══════════════════════════════════════════════════════════════════════════ */
-  --color-crimson-50: #fef2f2;
-  --color-crimson-100: #fee2e2;
-  --color-crimson-200: #ffcdd2;
-  --color-crimson-300: #ef9a9a;
-  --color-crimson-400: #ef5350;
-  --color-crimson-500: #e53935;
-  --color-crimson-600: #d32f2f;
-  --color-crimson-700: #c62828;
-  --color-crimson-800: #b71c1c;
-  --color-crimson-900: #7f1d1d;
+  --color-crimson-50: #fef2f3;
+  --color-crimson-100: #fde0e2;
+  --color-crimson-200: #fbc3c7;
+  --color-crimson-300: #f38f96;
+  --color-crimson-400: #ef4650;
+  --color-crimson-500: #e11221;  /* logo red — primary accent */
+  --color-crimson-600: #c50f1c;
+  --color-crimson-700: #a30d18;
+  --color-crimson-800: #820b14;
+  --color-crimson-900: #5c0d12;
 
   /* ═══════════════════════════════════════════════════════════════════════════
      BLUE (Secondary / Info)

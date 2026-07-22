@@ -1,23 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="DNM-Hunter">
-  <!-- Favicon-optimised DNM-Hunter mark: bolder crosshair + a solid bug
-       silhouette so it stays legible down to 16px. -->
-  <circle cx="128" cy="128" r="90" fill="none" stroke="#e53935" stroke-width="13"/>
-  <g stroke="#e53935" stroke-width="16" stroke-linecap="round">
-    <line x1="128" y1="18" x2="128" y2="58"/>
-    <line x1="128" y1="198" x2="128" y2="238"/>
-    <line x1="18" y1="128" x2="58" y2="128"/>
-    <line x1="198" y1="128" x2="238" y2="128"/>
+  <!-- Favicon: bold hooded head inside a crosshair, legible down to 16px. -->
+  <circle cx="128" cy="128" r="92" fill="none" stroke="#e11221" stroke-width="13"/>
+  <g stroke="#e11221" stroke-width="16" stroke-linecap="round">
+    <line x1="128" y1="18" x2="128" y2="52"/>
+    <line x1="128" y1="204" x2="128" y2="238"/>
+    <line x1="18" y1="128" x2="52" y2="128"/>
+    <line x1="204" y1="128" x2="238" y2="128"/>
   </g>
-  <g fill="#e53935" stroke="#e53935" stroke-width="12" stroke-linecap="round">
-    <!-- legs -->
-    <line x1="128" y1="132" x2="86" y2="104"/>
-    <line x1="128" y1="132" x2="170" y2="104"/>
-    <line x1="128" y1="140" x2="80" y2="140"/>
-    <line x1="128" y1="140" x2="176" y2="140"/>
-    <line x1="128" y1="148" x2="86" y2="176"/>
-    <line x1="128" y1="148" x2="170" y2="176"/>
-    <!-- head + body -->
-    <circle cx="128" cy="104" r="15" stroke="none"/>
-    <ellipse cx="128" cy="146" rx="26" ry="34" stroke="none"/>
+  <!-- hood silhouette -->
+  <path d="M128 66
+           C158 72 176 96 180 128
+           C182 150 178 168 170 182
+           L150 182
+           C151 158 146 146 128 143
+           C110 146 105 158 106 182
+           L86 182
+           C78 168 74 150 76 128
+           C80 96 98 72 128 66 Z"
+        fill="#e11221"/>
+  <!-- face + eyes -->
+  <path d="M128 150 C112 150 103 136 103 118 C103 100 114 88 128 88 C142 88 153 100 153 118 C153 136 144 150 128 150 Z" fill="#0a0a0c"/>
+  <g fill="#e11221">
+    <path d="M112 112 L126 121 L124 132 L110 123 Z"/>
+    <path d="M144 112 L130 121 L132 132 L146 123 Z"/>
   </g>
 </svg>
