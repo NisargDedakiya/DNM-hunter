@@ -5,7 +5,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import React from 'react'
 
 /* ------------------------------------------------------------------ */
@@ -99,18 +99,18 @@ describe('GlobalHeader – logo link', () => {
     expect(logoLink.tagName).toBe('A')
   })
 
-  test('logo links to /dashboard', () => {
+  test('logo links to /overview', () => {
     render(<GlobalHeader />)
     const logoLink = getLogoLink()
-    expect(logoLink.getAttribute('href')).toBe('/dashboard')
+    expect(logoLink.getAttribute('href')).toBe('/overview')
   })
 
   test('logo contains the brand image with correct src and alt', () => {
     render(<GlobalHeader />)
     const img = screen.getByAltText('DNM-Hunter')
     expect(img.getAttribute('src')).toBe('/logo.svg')
-    expect(img.getAttribute('width')).toBe('28')
-    expect(img.getAttribute('height')).toBe('28')
+    expect(img.getAttribute('width')).toBe('26')
+    expect(img.getAttribute('height')).toBe('26')
   })
 
   test('logo contains the "DNM" accent and "HUNTER" text', () => {
@@ -133,7 +133,7 @@ describe('GlobalHeader – logo link', () => {
   })
 })
 
-describe('GlobalHeader – logo href is /dashboard on every route', () => {
+describe('GlobalHeader – logo href is /overview on every route', () => {
   test.each([
     '/graph',
     '/cypherfix',
@@ -143,11 +143,11 @@ describe('GlobalHeader – logo href is /dashboard on every route', () => {
     '/settings',
     '/graph/some-sub-view',
     '/projects/123/edit',
-  ])('logo links to /dashboard when pathname is %s', (route) => {
+  ])('logo links to /overview when pathname is %s', (route) => {
     mockPathname = route
     render(<GlobalHeader />)
     const logoLink = getLogoLink()
-    expect(logoLink.getAttribute('href')).toBe('/dashboard')
+    expect(logoLink.getAttribute('href')).toBe('/overview')
   })
 })
 
@@ -166,12 +166,22 @@ describe('GlobalHeader – structure', () => {
     expect(redZoneLink.getAttribute('href')).toBe('/graph')
   })
 
-  test('header contains all core nav links', () => {
+  test('header shows the primary nav links directly', () => {
     render(<GlobalHeader />)
-    const expectedLabels = ['Dashboard', 'Programs', 'Red Zone', 'CypherFix', 'Insights', 'Reports']
+    const expectedLabels = ['Dashboard', 'Programs', 'Red Zone', 'Scans', 'Reports']
     for (const label of expectedLabels) {
       const link = screen.getByRole('link', { name: new RegExp(label, 'i') })
       expect(link).toBeDefined()
     }
+  })
+
+  test('secondary links live behind the "More" menu until opened', () => {
+    render(<GlobalHeader />)
+    // Collapsed by default.
+    expect(screen.queryByRole('link', { name: /CypherFix/i })).toBeNull()
+    // Opening the menu reveals them.
+    fireEvent.click(screen.getByRole('button', { name: /More/i }))
+    expect(screen.getByRole('link', { name: /CypherFix/i })).toBeDefined()
+    expect(screen.getByRole('link', { name: /Insights/i })).toBeDefined()
   })
 })
