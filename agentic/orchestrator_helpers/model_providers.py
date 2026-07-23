@@ -1,12 +1,16 @@
 """
-Model provider discovery for NisargHunter AI Agent.
+Model provider discovery for the DNM-Hunter agent.
 
 Fetches available models from configured AI providers (OpenAI, Anthropic,
 OpenRouter, AWS Bedrock) and returns them in a unified format for the frontend.
 Provider keys come from user settings in the database (passed as params).
+
+The lists are pulled live from each provider's own API, so newly released
+models appear automatically — there is no hard-coded model catalogue to update.
 """
 
 import logging
+import re
 from typing import Any
 
 import httpx
@@ -44,18 +48,22 @@ async def fetch_openai_models(api_key: str = "") -> list[dict]:
 
     data = resp.json().get("data", [])
 
-    # Keep only chat-capable models (gpt-*, o1-*, o3-*)
-    chat_prefixes = ("gpt-", "o1-", "o3-", "o4-")
-    # Exclude known non-chat suffixes
+    # Keep only chat/reasoning-capable models. Written to match FUTURE releases
+    # automatically: any gpt-* / chatgpt-* and any o<N> reasoning model
+    # (o1, o3, o4, o5, …), so newly released models show up with no code change.
+    def _is_chat_model(mid: str) -> bool:
+        return mid.startswith(("gpt-", "chatgpt-")) or bool(re.match(r"^o\d", mid))
+
+    # Exclude known non-chat suffixes / substrings (embeddings, audio, image, etc.)
     exclude_suffixes = ("-instruct", "-realtime", "-transcribe", "-tts", "-search",
                         "-audio", "-mini-tts")
     exclude_substrings = ("dall-e", "whisper", "embedding", "moderation", "davinci",
-                          "babbage", "curie")
+                          "babbage", "curie", "realtime", "audio", "image", "sora")
 
     models = []
     for m in data:
         mid = m.get("id", "")
-        if not any(mid.startswith(p) for p in chat_prefixes):
+        if not _is_chat_model(mid):
             continue
         if any(mid.endswith(s) for s in exclude_suffixes):
             continue
