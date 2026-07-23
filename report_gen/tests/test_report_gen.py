@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
+from dataclasses import dataclass, field
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -64,6 +65,54 @@ class TestEnrichment(unittest.TestCase):
         order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
         ranks = [order[f.severity] for f in ef]
         self.assertEqual(ranks, sorted(ranks))
+
+    def test_kb_enriches_owasp_capec_impact(self):
+        # command injection maps to the vuln_kb entry → OWASP + CAPEC + impact.
+        cmdi = [f for f in enrich(self.result.findings) if f.rule_id == "CA-CMDI"][0]
+        self.assertIn("A03", cmdi.owasp)
+        self.assertTrue(cmdi.capec.startswith("CAPEC-"))
+        self.assertTrue(cmdi.impact)
+        self.assertIn("timing", cmdi.how_to_verify)  # the oracle that would confirm it
+
+
+class TestExploitStatus(unittest.TestCase):
+    @dataclass
+    class _F:
+        scanner: str
+        rule_id: str
+        title: str
+        severity: str
+        file: str
+        line: int | None
+        detail: str
+        vrt: str = ""
+        confidence: str = ""
+        verdict: str = ""
+
+    @dataclass
+    class _R:
+        target: str
+        findings: list
+        errors: list = field(default_factory=list)
+
+    def test_static_finding_is_not_verified(self):
+        f = self._F("code_audit", "CA-SQLI", "SQLi", "critical", "a.py", 5,
+                    "[VRT server_side_injection.sql_injection; CWE-89]",
+                    "server_side_injection.sql_injection", "firm", "")
+        ef = enrich([f])[0]
+        self.assertFalse(ef.exploit_verified)
+        md = to_markdown(build_report(self._R("t", [f])))
+        self.assertIn("Exploit verified.** No", md)
+        self.assertIn("To confirm live", md)
+
+    def test_oracle_confirmed_finding_is_verified(self):
+        f = self._F("web_attack", "WA-SSRF", "SSRF", "high", "https://x/?url=", None,
+                    "out-of-band callback", "server_side_injection.ssrf", "", "confirmed")
+        ef = enrich([f])[0]
+        self.assertTrue(ef.exploit_verified)
+        html = to_html(build_report(self._R("t", [f])))
+        self.assertIn("Exploit verified", html)
+        self.assertIn("verify ok", html)   # green "verified" badge
 
 
 class TestRender(unittest.TestCase):

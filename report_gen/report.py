@@ -23,6 +23,14 @@ try:
 except Exception:  # pragma: no cover - common may be unavailable in isolation
     _HAVE_CVSS = False
 
+try:
+    from vuln_kb import match as _kb_match
+except Exception:  # pragma: no cover - degrade gracefully without the KB
+    def _kb_match(rule_id=None, vrt=None):
+        return None
+
+_OWASP_URL = "https://owasp.org/Top10/"
+
 _SEV_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 _SEV_COLOR = {"critical": "#b3123b", "high": "#d1471c", "medium": "#c08a00",
               "low": "#2b6cb0", "info": "#5a6270"}
@@ -44,6 +52,13 @@ class EnrichedFinding:
     verification: str
     remediation: str
     references: list[str] = field(default_factory=list)
+    # Enriched from vuln_kb (standards mapping + how-to-verify + exploit status).
+    owasp: str = ""            # e.g. "A03 / API8"
+    capec: str = ""           # e.g. "CAPEC-66"
+    impact: str = ""          # what an attacker achieves
+    confidence: str = ""      # firm | tentative | heuristic (from the detector)
+    exploit_verified: bool = False   # True only if an oracle confirmed it live
+    how_to_verify: str = ""   # the oracle/method that would prove it
 
 
 @dataclass
@@ -81,10 +96,30 @@ def enrich(findings) -> list[EnrichedFinding]:
         # numeric score never contradict (no "High, CVSS 9.8").
         sev = severity_rating(score).lower() if _HAVE_CVSS else f.severity
         cwe = _extract_cwe(getattr(f, "detail", "") or "")
+        vrt = getattr(f, "vrt", "") or ""
         # references: curated + the CWE we found + the VRT id
         refs = list(g.references)
         if cwe and not any(cwe in r for r in refs):
             refs.append(cwe)
+
+        # ── knowledge-base enrichment: OWASP/CAPEC mapping, impact, how-to-verify ──
+        owasp = capec = impact = how = ""
+        kb = _kb_match(f.rule_id, vrt)
+        if kb is not None:
+            owasp = " / ".join(x for x in (kb.owasp_web, kb.owasp_api) if x)
+            capec = kb.capec
+            impact = kb.impact
+            how = f"[{kb.verify.method}] {kb.verify.how}"
+            if not cwe:
+                cwe = kb.cwe
+            for extra in (kb.owasp_web and _OWASP_URL,):
+                if extra and extra not in refs:
+                    refs.append(extra)
+
+        # confidence + whether an oracle actually verified it live (verify layer)
+        confidence = str(getattr(f, "confidence", "") or "")
+        verified = str(getattr(f, "verdict", "") or "").lower() == "confirmed"
+
         out.append(EnrichedFinding(
             scanner=getattr(f, "scanner", ""),
             rule_id=f.rule_id,
@@ -93,16 +128,32 @@ def enrich(findings) -> list[EnrichedFinding]:
             file=getattr(f, "file", "") or "",
             line=getattr(f, "line", None),
             detail=getattr(f, "detail", "") or "",
-            vrt=getattr(f, "vrt", "") or "",
+            vrt=vrt,
             cwe=cwe,
             cvss_score=score,
             cvss_vector=vector,
             verification=g.verification,
             remediation=g.remediation,
             references=refs,
+            owasp=owasp,
+            capec=capec,
+            impact=impact,
+            confidence=confidence,
+            exploit_verified=verified,
+            how_to_verify=how,
         ))
     out.sort(key=lambda e: (_SEV_ORDER.get(e.severity, 9), -e.cvss_score))
     return out
+
+
+def _exploit_line(f: EnrichedFinding) -> str:
+    """One honest sentence on whether the finding is proven or a lead."""
+    if f.exploit_verified:
+        return "**Exploit verified.** Yes — confirmed against the live target by the verification engine."
+    conf = f" (detector confidence: {f.confidence})" if f.confidence else ""
+    how = f" To confirm live: {f.how_to_verify}." if f.how_to_verify else ""
+    return (f"**Exploit verified.** No — flagged by {f.scanner or 'analysis'}{conf}; "
+            f"not yet runtime-verified.{how}")
 
 
 def build_report(result, title: str = "Security Assessment Report") -> Report:
@@ -165,9 +216,19 @@ def to_markdown(report: Report) -> str:
             f"(`{f.cvss_vector}`)",
             f"- **Rule:** `{f.rule_id}`  |  **Scanner:** {f.scanner}",
             f"- **Location:** `{loc}`",
-            f"- **Classification:** VRT `{f.vrt or '—'}`" + (f"  |  {f.cwe}" if f.cwe else ""),
+            "- **Classification:** VRT `{}`{}{}{}".format(
+                f.vrt or "—",
+                f"  |  {f.cwe}" if f.cwe else "",
+                f"  |  OWASP {f.owasp}" if f.owasp else "",
+                f"  |  {f.capec}" if f.capec else ""),
             "",
             f"**Description.** {f.detail}",
+            "",
+        ]
+        if f.impact:
+            lines += [f"**Impact.** {f.impact}", ""]
+        lines += [
+            _exploit_line(f),
             "",
             f"**Verification / reproduction.** {f.verification}",
             "",
@@ -220,8 +281,12 @@ def to_html(report: Report) -> str:
         <span><strong>Location</strong> <code>{e(loc)}</code></span>
         <span><strong>VRT</strong> {e(f.vrt or '—')}</span>
         {f'<span><strong>CWE</strong> {e(f.cwe)}</span>' if f.cwe else ''}
+        {f'<span><strong>OWASP</strong> {e(f.owasp)}</span>' if f.owasp else ''}
+        {f'<span><strong>CAPEC</strong> {e(f.capec)}</span>' if f.capec else ''}
       </div>
       <p><strong>Description.</strong> {e(f.detail)}</p>
+      {f'<p><strong>Impact.</strong> {e(f.impact)}</p>' if f.impact else ''}
+      <p><span class="verify {'ok' if f.exploit_verified else 'lead'}">{'✓ Exploit verified' if f.exploit_verified else '○ Not runtime-verified'}</span> {e(_exploit_line(f).split('** ', 1)[1] if '** ' in _exploit_line(f) else '')}</p>
       <p><strong>Verification / reproduction.</strong> {e(f.verification)}</p>
       <p><strong>Remediation.</strong> {e(f.remediation)}</p>
       <p class="refs"><strong>References.</strong> {refs}</p>
@@ -266,6 +331,10 @@ def to_html(report: Report) -> str:
     font-size:13px; margin:0 0 12px; }}
   .finding p {{ margin:8px 0; }}
   .refs {{ color:var(--muted); font-size:13px; }}
+  .verify {{ font-weight:700; font-size:12px; padding:2px 8px; border-radius:999px;
+    border:1px solid currentColor; margin-right:6px; white-space:nowrap; }}
+  .verify.ok {{ color:#1a7f37; }}
+  .verify.lead {{ color:#8a6d00; }}
   .disclaimer {{ color:var(--muted); font-size:13px; margin-top:32px;
     border-top:1px solid var(--line); padding-top:16px; }}
   @media print {{ .finding {{ break-inside:avoid; }} }}

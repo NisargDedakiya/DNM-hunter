@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import asdict, dataclass
 
@@ -334,6 +335,38 @@ def get(name: str) -> Vuln | None:
 
 def all_vulns() -> list[Vuln]:
     return list(KB)
+
+
+# Reverse indexes so a scanner finding (rule id or VRT) can be mapped to its KB
+# entry — this is how the report generator enriches a finding with OWASP/CAPEC/
+# remediation without the scanner having to carry all of it.
+_RULE_RE = re.compile(r"(?:CA|MA|LLM)-[A-Z0-9]+(?:-[A-Z0-9]+)*")
+_RULE_INDEX: dict[str, Vuln] = {}
+_VRT_INDEX: dict[str, Vuln] = {}
+_FAMILY_INDEX: dict[str, Vuln] = {}
+for _v in KB:
+    _VRT_INDEX.setdefault(_v.vrt, _v)
+    _FAMILY_INDEX.setdefault(_v.vrt.split(".", 1)[0], _v)
+    for _eng in _v.engines:
+        for _rule in _RULE_RE.findall(_eng):
+            _RULE_INDEX.setdefault(_rule, _v)
+
+
+def match(rule_id: str | None = None, vrt: str | None = None) -> Vuln | None:
+    """Best-effort map a scanner finding to its knowledge-base entry.
+
+    Tries the exact rule id first (CA-SQLI → SQL Injection), then the exact VRT,
+    then the VRT family (server_side_injection.* → the family's representative).
+    """
+    if rule_id and rule_id in _RULE_INDEX:
+        return _RULE_INDEX[rule_id]
+    if vrt:
+        if vrt in _VRT_INDEX:
+            return _VRT_INDEX[vrt]
+        fam = vrt.split(".", 1)[0]
+        if fam in _FAMILY_INDEX:
+            return _FAMILY_INDEX[fam]
+    return None
 
 
 # ── Risk scoring engine: combine severity + confidence + verification + EPSS ──

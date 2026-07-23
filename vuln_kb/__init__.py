@@ -12,6 +12,6 @@ report generator reads it to enrich findings.
     compose_risk("critical", confidence="firm", exploit_verified=True)
 """
 
-from .knowledge import KB, Verify, Vuln, all_vulns, compose_risk, get
+from .knowledge import KB, Verify, Vuln, all_vulns, compose_risk, get, match
 
-__all__ = ["Vuln", "Verify", "KB", "get", "all_vulns", "compose_risk"]
+__all__ = ["Vuln", "Verify", "KB", "get", "match", "all_vulns", "compose_risk"]
