@@ -25,6 +25,8 @@ export default function ScansPage() {
   const [detail, setDetail] = useState<ScanDetail | null>(null)
   const [scanType, setScanType] = useState<ScanType>('url')
   const [target, setTarget] = useState('')
+  const [active, setActive] = useState(false)
+  const [authorized, setAuthorized] = useState(false)
   const [running, setRunning] = useState(false)
   const [error, setError] = useState('')
 
@@ -45,7 +47,10 @@ export default function ScansPage() {
       const r = await fetch('/api/scan', {
         method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scanType, target: target.trim() }),
+        body: JSON.stringify({
+          scanType, target: target.trim(),
+          ...(scanType === 'url' && active ? { active: true, authorized } : {}),
+        }),
       })
       const body = await r.json()
       if (!r.ok) {
@@ -103,10 +108,24 @@ export default function ScansPage() {
             onChange={(e) => setTarget(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !running && target.trim() && run()}
           />
-          <button className={styles.btn} onClick={run} disabled={running || !target.trim() || (scanType === 'repo' && repoLocked)}>
+          <button className={styles.btn} onClick={run} disabled={running || !target.trim() || (scanType === 'repo' && repoLocked) || (scanType === 'url' && active && !authorized)}>
             {running ? <Loader2 size={15} className="spin" /> : <Play size={15} />} Scan
           </button>
         </div>
+        {scanType === 'url' && (
+          <div className={styles.activeBox}>
+            <label className={styles.check}>
+              <input type="checkbox" checked={active} onChange={(e) => { setActive(e.target.checked); if (!e.target.checked) setAuthorized(false) }} />
+              <span><strong>Active injection testing</strong> — crawl the site and send live SQLi / XSS / SSRF / command-injection payloads, then confirm each one with the verification engine (only oracle-confirmed issues are reported).</span>
+            </label>
+            {active && (
+              <label className={`${styles.check} ${styles.authCheck}`}>
+                <input type="checkbox" checked={authorized} onChange={(e) => setAuthorized(e.target.checked)} />
+                <span>I confirm I am <strong>authorised to actively test this target</strong> (I own it or have explicit written permission). Active testing without authorisation may be illegal.</span>
+              </label>
+            )}
+          </div>
+        )}
         {scanType === 'repo' && repoLocked && (
           <p className={styles.hint}><Lock size={12} /> GitHub-repo scanning is a Pro feature. <Link className={styles.upgrade} href="/pricing">Upgrade →</Link></p>
         )}
@@ -263,7 +282,13 @@ function ScanDetailView({ detail, ent, onBack, onDelete }: { detail: ScanDetail;
               <tr key={f.id}>
                 <td><span className={`${styles.sev} ${styles['sev' + f.severity as keyof typeof styles]}`}>{f.severity}</span></td>
                 <td className={styles.num}>{f.cvss}</td>
-                <td>{f.title}<div className={styles.findingDetail}>{f.detail}</div></td>
+                <td>
+                  {f.title}
+                  {(f.ruleId?.startsWith('WA-') || f.detail?.startsWith('Verified via')) && (
+                    <span className={styles.verified} title="Confirmed against the live target by the verification engine"><Check size={11} /> Verified</span>
+                  )}
+                  <div className={styles.findingDetail}>{f.detail}</div>
+                </td>
                 <td>{f.file ? `${f.file}${f.line ? ':' + f.line : ''}` : '—'}</td>
                 <td>{f.vrt || '—'}</td>
                 {canTrack && (

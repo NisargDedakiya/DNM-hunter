@@ -1,5 +1,8 @@
 // In-app scan runner. Bridges the web app to the Python scanner suite:
-//   type 'url'  → `python -m web_probe <url> --json`        (live HTTP / DAST)
+//   type 'url'  → `nh-web-probe <url> --json`               (passive live HTTP / DAST)
+//   type 'url' + active → also `nh-web-attack <url> --json` (ACTIVE injection —
+//        crawl + inject SQLi/XSS/SSRF/cmdi and confirm with the verify oracles).
+//        Only run when the caller has confirmed authorisation to test the target.
 //   type 'repo' → `nh-scan <repo-or-path> --format json`    (full static suite)
 //
 // The parsing/normalisation is a pure function (unit-tested); the process spawn
@@ -121,9 +124,22 @@ function spawnJson(cmd: string, args: string[], timeoutMs: number): Promise<{ co
   })
 }
 
+export interface ScanOptions {
+  /** ACTIVE injection testing (crawl + inject + verify). Attacking the target,
+   * so it must never run unless the caller has confirmed authorisation. */
+  active?: boolean
+  timeoutMs?: number
+}
+
 /** Run a scan by spawning the Python suite. Never throws — failures come back
- * as { ok:false, error }. */
-export async function runScan(type: ScanType, target: string, timeoutMs = 120_000): Promise<ScanRunResult> {
+ * as { ok:false, error }.
+ *
+ * For a URL scan, `active` additionally runs the injection engine and merges its
+ * oracle-confirmed findings (SQLi/XSS/SSRF/cmdi) with the passive header checks.
+ * The caller (the API route) is responsible for the authorisation gate; this
+ * function only wires the process. */
+export async function runScan(type: ScanType, target: string, opts: ScanOptions = {}): Promise<ScanRunResult> {
+  const timeoutMs = opts.timeoutMs ?? 120_000
   if (!isValidTarget(type, target)) {
     return { ok: false, findings: [], bySeverity: {}, total: 0, maxCvss: 0, error: 'Invalid target' }
   }
@@ -138,6 +154,21 @@ export async function runScan(type: ScanType, target: string, timeoutMs = 120_00
   if (!stdout.trim()) {
     return { ok: false, findings: [], bySeverity: {}, total: 0, maxCvss: 0, error: stderr.slice(0, 400) || `scanner exited ${code}` }
   }
-  const findings = sortFindings(parseFindings(type, stdout))
+  let findings = parseFindings(type, stdout)
+
+  // Active injection pass (URL scans only, opt-in + authorised). Merge in the
+  // confirmed findings; a failure here must not fail the passive scan.
+  if (type === 'url' && opts.active) {
+    try {
+      const attack = await spawnJson('nh-web-attack', [target, '--json'], timeoutMs)
+      if (attack.stdout.trim()) {
+        findings = findings.concat(parseFindings('url', attack.stdout))
+      }
+    } catch {
+      /* passive results still stand */
+    }
+  }
+
+  findings = sortFindings(findings)
   return { ok: true, findings, ...summarize(findings) }
 }

@@ -35,6 +35,26 @@ describe('scan runner parsing', () => {
     expect(f[0].severity).toBe('low')
   })
 
+  it('parses web_attack {findings} shape (active injection, verified)', () => {
+    const wa = JSON.stringify({
+      seed: 'https://x.example/', injection_points: 3, candidates_tested: 9,
+      summary: { confirmed: 1 },
+      findings: [{
+        scanner: 'web_attack', rule_id: 'WA-SQLI', title: 'SQL injection', severity: 'critical',
+        file: 'https://x.example/item?id=1', line: null,
+        detail: "Verified via timing (confidence 0.90) at param 'id' (GET): response slowed by 3.00s",
+        vrt: 'server_side_injection.sql_injection', cwe: 'CWE-89', verdict: 'confirmed', confidence: 0.9,
+      }],
+    })
+    const f = parseFindings('url', wa)
+    expect(f).toHaveLength(1)
+    expect(f[0].scanner).toBe('web_attack')
+    expect(f[0].ruleId).toBe('WA-SQLI')
+    expect(f[0].file).toBe('https://x.example/item?id=1')
+    expect(f[0].vrt).toBe('server_side_injection.sql_injection')
+    expect(f[0].detail.startsWith('Verified via')).toBe(true) // drives the "Verified" badge
+  })
+
   it('returns [] on invalid json (never throws)', () => {
     expect(parseFindings('repo', 'not json')).toEqual([])
     expect(parseFindings('url', '')).toEqual([])

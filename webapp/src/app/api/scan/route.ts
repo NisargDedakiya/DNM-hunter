@@ -46,9 +46,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const scanType: ScanType = body?.scanType === 'repo' ? 'repo' : 'url'
     const target = String(body?.target ?? '').trim()
+    const active = scanType === 'url' && body?.active === true
 
     if (!isValidTarget(scanType, target)) {
       return NextResponse.json({ error: 'Invalid or missing target' }, { status: 400 })
+    }
+
+    // Authorisation gate for ACTIVE injection testing. Active testing sends live
+    // attack payloads, so it is only lawful against a target the operator is
+    // authorised to test. Require an explicit confirmation and refuse otherwise.
+    if (active && body?.authorized !== true) {
+      return NextResponse.json(
+        {
+          error: 'Active injection testing requires you to confirm you are authorised to test this target.',
+          code: 'authorization_required',
+        },
+        { status: 400 },
+      )
     }
 
     // 1) feature gate
@@ -63,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3) run
-    const result = await runScan(scanType, target)
+    const result = await runScan(scanType, target, { active })
 
     // 4) persist (even a failed run is recorded, for the user's history)
     const scan = await prisma.scan.create({

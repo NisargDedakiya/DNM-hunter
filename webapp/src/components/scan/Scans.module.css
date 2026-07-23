@@ -48,3 +48,16 @@
 .detail { margin-top: var(--space-5, 20px); }
 .back { background: none; border: none; color: var(--accent-primary); cursor: pointer; font: inherit; padding: 0; margin-bottom: 12px; }
 .findingDetail { color: var(--text-secondary); font-size: 0.82rem; margin-top: 4px; }
+
+/* Active-testing authorisation controls */
+.activeBox { margin-top: 12px; display: flex; flex-direction: column; gap: 10px;
+  border-top: 1px solid var(--border-subtle, rgba(128,128,128,.18)); padding-top: 12px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.82rem;
+  color: var(--text-secondary); cursor: pointer; line-height: 1.45; }
+.check input { margin-top: 2px; flex: none; }
+.authCheck { color: var(--color-amber-600, #b45309); }
+
+/* "Verified" badge on an oracle-confirmed finding */
+.verified { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px;
+  padding: 1px 7px; border-radius: 999px; font-size: 0.7rem; font-weight: 700;
+  color: #1a7f37; border: 1px solid currentColor; vertical-align: middle; white-space: nowrap; }

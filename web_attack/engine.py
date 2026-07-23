@@ -19,7 +19,7 @@ won't leave the authorised host and the verifier refuses out-of-scope targets.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 
 from verify import (
     Candidate,
@@ -54,6 +54,13 @@ _CLASS_META = {
                              "Remote code execution"),
     VulnClass.SSRF:         ("server_security_misconfiguration.server_side_request_forgery",
                              "high", "CWE-918", "Server-side request forgery"),
+}
+
+# Short, stable rule id per class (surfaces as WA-* in the report/UI).
+_RULE_ID = {
+    VulnClass.BLIND_SQLI: "WA-SQLI", VulnClass.BOOLEAN_SQLI: "WA-SQLI",
+    VulnClass.REFLECTED_XSS: "WA-XSS", VulnClass.BLIND_CMDI: "WA-CMDI",
+    VulnClass.BLIND_RCE: "WA-RCE", VulnClass.SSRF: "WA-SSRF",
 }
 
 # Param-name hints that indicate a URL-taking parameter (worth SSRF testing).
@@ -96,9 +103,29 @@ class WebAttackFinding:
     confidence: float
     evidence: str
     verdict: str = "confirmed"
+    rule_id: str = ""
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        # Runner-compatible shape (scanner/rule_id/file/line/detail/vrt/cwe) plus
+        # the active-testing extras (verdict/confidence/oracle) so the report can
+        # show a "verified" badge. detail leads with the proof.
+        return {
+            "scanner": "web_attack",
+            "rule_id": self.rule_id,
+            "title": self.title,
+            "severity": self.severity,
+            "file": self.url,
+            "line": None,
+            "detail": f"Verified via {self.oracle} (confidence {self.confidence:.2f}) "
+                      f"at param '{self.param}' ({self.method}): {self.evidence}",
+            "vrt": self.vrt,
+            "cwe": self.cwe,
+            "param": self.param,
+            "method": self.method,
+            "oracle": self.oracle,
+            "confidence": self.confidence,
+            "verdict": self.verdict,
+        }
 
 
 @dataclass
@@ -125,8 +152,9 @@ def _finding_from(result: VerificationResult, cand: Candidate) -> WebAttackFindi
     vrt, sev, cwe, title = _CLASS_META.get(
         result.vuln_class, ("server_side_injection", "medium", "", result.vuln_class))
     detail = result.evidence[0].detail if result.evidence else result.note
+    rule_id = _RULE_ID.get(result.vuln_class, "WA-INJECT")
     return WebAttackFinding(vrt, sev, cwe, title, cand.target, cand.param, cand.method,
-                            result.oracle, result.confidence, detail)
+                            result.oracle, result.confidence, detail, rule_id=rule_id)
 
 
 class WebAttackEngine:
