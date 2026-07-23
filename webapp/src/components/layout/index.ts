@@ -1,6 +1,6 @@
 export { AppLayout } from './AppLayout'
-export { GlobalHeader } from './GlobalHeader'
-export { NavigationBar } from './NavigationBar'
+export { Sidebar } from './Sidebar'
+export { TopBar } from './TopBar'
 export { Footer } from './Footer'
 export { DisclaimerGate } from './DisclaimerGate'
 export { UpdateNotification } from './UpdateNotification'

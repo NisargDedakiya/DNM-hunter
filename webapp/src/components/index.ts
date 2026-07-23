@@ -1,2 +1,2 @@
 export { ThemeToggle } from './ThemeToggle'
-export { AppLayout, GlobalHeader, NavigationBar, Footer } from './layout'
+export { AppLayout, Sidebar, TopBar, Footer } from './layout'

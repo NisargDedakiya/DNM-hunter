@@ -1,0 +1,25 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 52px;
+  padding: 0 var(--space-4);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.spacer { flex: 1; }
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-default);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.iconBtn:hover { color: var(--text-primary); background: var(--bg-tertiary); }

@@ -1,6 +1,7 @@
 'use client'
 
-import { GlobalHeader } from '../GlobalHeader'
+import { Sidebar } from '../Sidebar'
+import { TopBar } from '../TopBar'
 import { Footer } from '../Footer'
 import { DisclaimerGate } from '../DisclaimerGate'
 import { UpdateNotification } from '../UpdateNotification'
@@ -13,11 +14,14 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className={styles.layout}>
-      <GlobalHeader />
-      <main className={styles.main}>
-        <DisclaimerGate>{children}</DisclaimerGate>
-      </main>
-      <Footer />
+      <Sidebar />
+      <div className={styles.body}>
+        <TopBar />
+        <main className={styles.main}>
+          <DisclaimerGate>{children}</DisclaimerGate>
+        </main>
+        <Footer />
+      </div>
       <UpdateNotification />
     </div>
   )

@@ -1,0 +1,193 @@
+.sidebar {
+  --sb-width: 244px;
+  --sb-width-collapsed: 76px;
+  width: var(--sb-width);
+  flex-shrink: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-default);
+  overflow: hidden;
+  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed {
+  width: var(--sb-width-collapsed);
+}
+
+/* Only animate width after first client paint (avoid load fl‑in jump) */
+.sidebar:not(.ready) { transition: none; }
+
+/* ---- Brand ---- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 68px;
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.brandLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+  flex: 1;
+}
+
+.brandLogo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(225, 18, 33, 0.35));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.brandLink:hover .brandLogo {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 14px rgba(225, 18, 33, 0.6));
+}
+
+.brandText {
+  font-size: 1.05rem;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.brandAccent { color: var(--accent-primary); }
+
+.collapseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-default);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.collapseBtn:hover { color: var(--text-primary); background: var(--bg-quaternary); }
+.collapsed .collapseBtn { margin: 0 auto; }
+
+/* ---- Nav ---- */
+
+.nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-3) var(--space-2-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.nav::-webkit-scrollbar { width: 6px; }
+.nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+.group { display: flex; flex-direction: column; gap: 2px; }
+
+.groupTitle {
+  margin: 0 0 4px var(--space-2);
+  font-size: 0.66rem;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+  padding: var(--space-2) var(--space-2-5);
+  border-radius: var(--radius-default);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.item:hover { color: var(--text-primary); background: var(--bg-quaternary); }
+
+.itemActive,
+.itemActive:hover {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.itemIcon { display: flex; flex-shrink: 0; }
+.itemLabel { overflow: hidden; }
+
+/* Animated active indicator bar on the left edge */
+.activeBar {
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  height: 60%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-primary);
+  transform: translateY(-50%);
+  animation: growBar 0.2s ease-out;
+}
+
+@keyframes growBar {
+  from { height: 0; opacity: 0; }
+  to { height: 60%; opacity: 1; }
+}
+
+.collapsed .item { justify-content: center; padding: var(--space-2); }
+
+/* ---- Footer ---- */
+
+.footer {
+  flex-shrink: 0;
+  padding: var(--space-2-5);
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-1);
+  overflow: hidden;
+}
+.collapsed .footerRow { justify-content: center; }
+.collapsed .footer { align-items: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar, .brandLogo, .item, .collapseBtn { transition: none; }
+  .activeBar { animation: none; }
+}
+
+/* The sidebar is always a dark chrome surface, even in light theme */
+:global([data-theme="light"]) .sidebar {
+  --bg-secondary: var(--color-gray-900);
+  --bg-quaternary: var(--color-gray-700);
+  --text-primary: var(--color-gray-50);
+  --text-secondary: var(--color-gray-400);
+  --text-tertiary: var(--color-gray-500);
+  --border-default: var(--color-gray-800);
+  --border-strong: var(--color-gray-700);
+}
