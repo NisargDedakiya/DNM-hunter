@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { probeProviderDirect } from '@/lib/llm/directProbe'
 
 interface RouteParams {
   params: Promise<{ id: string; providerId: string }>
@@ -56,10 +57,22 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         body: JSON.stringify(config),
       })
     } catch {
+      // Agent unreachable — fall back to validating the key directly against the
+      // provider's own API (works for the common key-based / OpenAI-compatible
+      // providers without needing the agent service running).
+      const probe = await probeProviderDirect(config)
+      if (probe.supported) {
+        return NextResponse.json(
+          probe.ok
+            ? { success: true, message: `Key valid — ${probe.models.length} model(s) available (validated directly).` }
+            : { success: false, error: probe.error || 'The provider rejected this API key.' },
+          { status: probe.ok ? 200 : 400 }
+        )
+      }
       return NextResponse.json(
         {
           success: false,
-          error: `Could not reach the AI agent service at ${AGENT_API_URL}. The agent is what validates provider keys and discovers models — make sure its container is running and healthy (check "docker compose ps" / "./nisarghunter.sh status"). This is not a problem with your API key.`,
+          error: `Could not reach the AI agent service at ${AGENT_API_URL}, and this provider type can only be validated by the agent. Start the agent container (check "docker compose ps" / "./nisarghunter.sh status") and try again. This is not a problem with your API key.`,
         },
         { status: 502 }
       )
