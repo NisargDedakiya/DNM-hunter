@@ -27,16 +27,17 @@ from pathlib import Path
 
 CRIT, HIGH, MED, LOW, INFO = "critical", "high", "medium", "low", "info"
 
-_SRC_EXT = {".py", ".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs"}
+_SRC_EXT = {".py", ".js", ".ts", ".jsx", ".tsx", ".mjs", ".cjs", ".php"}
 _SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", ".next",
               "__pycache__", ".venv", "venv", "site-packages", "migrations"}
 
-# ── user-input taint sources (Python + JS/TS web frameworks) ──
+# ── user-input taint sources (Python + JS/TS + PHP web frameworks) ──
 _USER_INPUT = re.compile(
     r"(request\.(args|form|values|json|data|files|GET|POST|body|query|params|cookies|headers)"
     r"|req\.(body|query|params|cookies|headers)"
     r"|\.args\.get|\.get_json|flask\.request|self\.get_argument"
-    r"|params\[|query\[|body\[|\$_(GET|POST|REQUEST|COOKIE)"
+    r"|params\[|query\[|body\[|\$_(GET|POST|REQUEST|COOKIE|SERVER|FILES|ENV)"
+    r"|php://input|apache_request_headers|getallheaders"
     r"|url\.searchParams|process\.argv|input\s*\()", re.IGNORECASE)
 # variable assigned from a user-input source → tainted
 _INPUT_ASSIGN = re.compile(
@@ -247,7 +248,37 @@ _HEURISTIC_SINKS = {"CA-IDOR"}
 # be parameterisation-aware (a bound-parameter query is safe even with taint).
 _QUERY_SINKS = {"CA-SQLI", "CA-LDAP"}
 
-_ASSIGN_RE = re.compile(r"\s*(?:(?:const|let|var)\s+)?([A-Za-z_]\w*)\s*=\s*([^=].*)$")
+# Leading `\$?` so PHP assignments ($name = ...) are captured too; the sigil is
+# dropped from the variable name, and `_refs` matches it back inside `$name`.
+_ASSIGN_RE = re.compile(r"\s*(?:(?:const|let|var)\s+)?\$?([A-Za-z_]\w*)\s*=\s*([^=].*)$")
+
+# PHP output-encoding functions — if one wraps the echoed value it is not XSS.
+_PHP_XSS_SANITIZERS = re.compile(
+    r"htmlspecialchars|htmlentities|filter_var|\bintval|\bfloatval|\(int\)|\(float\)"
+    r"|urlencode|rawurlencode|json_encode|strip_tags|escapeshellarg", re.IGNORECASE)
+
+# PHP-specific taint sinks (applied only to .php files). Same (vrt, rule, sev,
+# cwe, title, regex) shape as _TAINT_SINKS.
+_PHP_SINKS = [
+    ("server_side_injection.sql_injection", "CA-SQLI", CRIT, "CWE-89",
+     "SQL query built from untrusted input (SQL injection)",
+     re.compile(r"\b(mysqli_query|mysql_query|mysqli_multi_query|pg_query|pg_send_query|sqlite_query|->prepare)\s*\(", re.IGNORECASE)),
+    ("server_side_injection.rce", "CA-CMDI", CRIT, "CWE-78",
+     "OS command built from untrusted input (command injection / RCE)",
+     re.compile(r"\b(system|shell_exec|passthru|popen|proc_open|pcntl_exec)\s*\(", re.IGNORECASE)),
+    ("server_side_injection.rce", "CA-EVAL", CRIT, "CWE-95",
+     "Untrusted input passed to a code-evaluation sink (RCE)",
+     re.compile(r"\b(eval|assert|create_function)\s*\(", re.IGNORECASE)),
+    ("cross_site_scripting.reflected", "CA-XSS", HIGH, "CWE-79",
+     "Untrusted input echoed to the page without output encoding (cross-site scripting)",
+     re.compile(r"\b(echo|print|printf|print_r|vprintf|fpassthru)\b", re.IGNORECASE)),
+    ("server_side_injection.file_inclusion_local", "CA-LFI", HIGH, "CWE-98",
+     "File path built from untrusted input (local file inclusion / path traversal)",
+     re.compile(r"\b(include|include_once|require|require_once|fopen|file_get_contents|readfile|highlight_file|show_source)\b", re.IGNORECASE)),
+    ("server_side_injection.ssrf", "CA-SSRF", HIGH, "CWE-918",
+     "Outbound request to an untrusted URL (server-side request forgery)",
+     re.compile(r"\b(curl_exec|curl_init|file_get_contents|fsockopen|get_headers)\s*\(", re.IGNORECASE)),
+]
 
 
 def _refs(text: str, vars_: set[str]) -> bool:
@@ -263,7 +294,10 @@ def _string_interp(rhs: str) -> bool:
         or ".format(" in rhs
         or re.search(r"['\"]\s*\+", rhs)             # "..." + x
         or re.search(r"\+\s*[frb]?['\"]", rhs)       # x + "..."
-        or re.search(r"['\"]\s*%\s*[\(\w]", rhs))    # "..." % (x)  (operator, not %s)
+        or re.search(r"['\"]\s*%\s*[\(\w]", rhs)     # "..." % (x)  (operator, not %s)
+        or re.search(r"['\"]\s*\.\s*\$", rhs)        # "..." . $x   (PHP concat)
+        or re.search(r"\$\w+\s*\.\s*['\"]", rhs)     # $x . "..."   (PHP concat)
+        or re.search(r'"[^"]*\$\{?\w', rhs))         # "...$x..."   (PHP interpolation)
 
 
 def _is_query_build(rhs: str, tainted: set[str]) -> bool:
@@ -280,8 +314,16 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
     findings: list[CodeFinding] = []
     lines = text.splitlines()
     is_py = file.endswith(".py")
+    is_php = file.endswith(".php")
+    taint_sinks = _TAINT_SINKS + _PHP_SINKS if is_php else _TAINT_SINKS
+    _seen: set[tuple] = set()
 
     def add(vrt, rule, sev, title, i, detail, cwe="", confidence="firm"):
+        # PHP and the generic rules can both match the same construct (e.g. a bare
+        # `query(`); collapse identical (rule, line) hits.
+        if (rule, i) in _seen:
+            return
+        _seen.add((rule, i))
         findings.append(CodeFinding(vrt, rule, sev, title, file, i, detail, cwe, confidence))
 
     # ── Light intra-file taint with transitive propagation ──
@@ -314,12 +356,15 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
             continue
 
         # taint-sensitive injection sinks
-        for vrt, rule, sev, cwe, title, sink_rx in _TAINT_SINKS:
+        for vrt, rule, sev, cwe, title, sink_rx in taint_sinks:
             m = sink_rx.search(line)
             if not m:
                 continue
             arg_region = line[m.end() - 1:]  # from the "(" onward
             if _looks_literal_only(arg_region):
+                continue
+            # PHP echo/print of an output-encoded value is not XSS.
+            if is_php and rule == "CA-XSS" and _PHP_XSS_SANITIZERS.search(line):
                 continue
             if rule in _QUERY_SINKS:
                 # only a string built from input is injectable; bound params are safe

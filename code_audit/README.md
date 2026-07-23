@@ -1,8 +1,16 @@
 # code_audit — Web-Application Source SAST
 
 Static detection of the **server-side and web** vulnerability classes that are
-visible in source code, mapped to the Bugcrowd VRT. Languages: Python and
-JavaScript/TypeScript, with language-agnostic crypto rules.
+visible in source code, mapped to the Bugcrowd VRT. Languages: Python,
+JavaScript/TypeScript and **PHP**, with language-agnostic crypto rules.
+
+PHP coverage is taint-aware: sources (`$_GET/$_POST/$_REQUEST/$_COOKIE/$_SERVER/
+$_FILES`, `php://input`) flow through `$var` assignments into PHP sinks —
+`mysqli_query`/`pg_query`/`->prepare` (SQLi), `system`/`shell_exec`/`passthru`
+(command injection), `echo`/`print` (reflected XSS, skipped when wrapped in
+`htmlspecialchars`/`intval`/…), `include`/`require`/`fopen` (LFI), `curl_exec`/
+`file_get_contents` (SSRF) and `eval`/`assert` (RCE). Parameterised
+`->prepare("… ?")` and encoded output are **not** flagged.
 
 ## What it detects
 

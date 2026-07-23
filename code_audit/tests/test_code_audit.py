@@ -264,6 +264,52 @@ class TestConfidence(unittest.TestCase):
         self.assertEqual(f.confidence, "tentative")
 
 
+_VULN_PHP = '''<?php
+$id = $_GET["id"];
+$q = "SELECT * FROM users WHERE id = " . $id;
+mysqli_query($conn, $q);                       // SQLi (concat-built query)
+echo $_GET["name"];                            // reflected XSS
+system("ping " . $_GET["host"]);               // command injection
+include $_GET["page"] . ".php";                // LFI / path traversal
+$data = file_get_contents($_GET["url"]);       // SSRF
+eval($_POST["code"]);                          // RCE
+'''
+
+_SAFE_PHP = '''<?php
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");   // parameterised
+$stmt->bind_param("i", $_GET["id"]);
+echo htmlspecialchars($_GET["name"]);          // output-encoded — safe
+echo "static content";                         // constant
+include "config.php";                          // constant path
+$n = intval($_GET["n"]);                       // cast — safe
+'''
+
+
+class TestPhp(unittest.TestCase):
+    def test_php_injection_classes(self):
+        got = rules(scan_code(_VULN_PHP, "app.php"))
+        for r in ("CA-SQLI", "CA-XSS", "CA-CMDI", "CA-LFI", "CA-SSRF", "CA-EVAL"):
+            self.assertIn(r, got, f"{r} should be detected in the vulnerable PHP")
+
+    def test_php_sqli_is_critical_firm(self):
+        f = [x for x in scan_code(_VULN_PHP, "app.php") if x.rule_id == "CA-SQLI"][0]
+        self.assertEqual(f.severity, "critical")
+        self.assertEqual(f.confidence, "firm")
+
+    def test_php_safe_file_is_clean(self):
+        got = rules(scan_code(_SAFE_PHP, "safe.php"))
+        for r in ("CA-SQLI", "CA-XSS", "CA-LFI", "CA-CMDI"):
+            self.assertNotIn(r, got, f"{r} must NOT fire on the safe PHP (parameterised/encoded)")
+
+    def test_php_files_are_scanned_by_tree(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "index.php").write_text(_VULN_PHP)
+            found = scan_tree(d)
+            self.assertTrue(any(f.file.endswith(".php") for f in found))
+
+
 class TestPrecision(unittest.TestCase):
     def test_parameterised_query_not_flagged(self):
         self.assertNotIn("CA-SQLI", rules(scan_code(_SAFE_PY, "safe.py")))
