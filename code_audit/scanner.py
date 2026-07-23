@@ -124,6 +124,11 @@ _TAINT_SINKS = [
     ("broken_access_control.idor", "CA-IDOR", MED, "CWE-639",
      "User-controlled object identifier used in a data lookup (possible IDOR)",
      re.compile(r"\b(objects\.get|objects\.filter|get_object_or_404|get_or_404|findById|findByPk|\.findOne|\.find_one|\.query\.get|prisma\.\w+\.(?:findUnique|findFirst))\s*\(", re.IGNORECASE)),
+    # CSV/formula injection — untrusted data written to a spreadsheet cell. A
+    # leading =/+/-/@ makes the value a formula when the file is opened in Excel.
+    ("external_behavior.csv_injection", "CA-CSV", MED, "CWE-1236",
+     "Untrusted input written to a CSV/spreadsheet cell (formula/CSV injection)",
+     re.compile(r"\b(writerow|writerows|csv\.writer|\.writeRow|createObjectCsvWriter|\.addRow|writerow_dict|DictWriter)\s*\(|\.writeRecords\s*\(", re.IGNORECASE)),
 ]
 
 # ── Context-free rules (no taint needed): (vrt, rule, sev, cwe, title, regex, langs) ──
@@ -185,11 +190,36 @@ _STATIC_RULES = [
     ("server_security_misconfiguration.cors_misconfiguration", "CA-CORS", MED, "CWE-942",
      "Permissive CORS — reflected origin, or wildcard origin with credentials",
      re.compile(r"(Access-Control-Allow-Origin['\"]?\s*[:,][^;\n]*\b(?:req|request|origin)\b|origin\s*:\s*(?:true|['\"]\*['\"])[^)}\n]*credentials\s*:\s*true|credentials\s*:\s*true[^)}\n]*origin\s*:\s*(?:true|['\"]\*['\"]))", re.IGNORECASE)),
+    # CSRF protection explicitly disabled/exempted (definitive misconfig → firm)
+    ("cross_site_request_forgery.application_wide", "CA-CSRF", MED, "CWE-352",
+     "CSRF protection disabled or exempted",
+     # @csrf_exempt decorator or csrf_exempt(view) call — NOT the bare import.
+     re.compile(r"(@csrf_exempt|csrf_exempt\s*\(|@csrf\.exempt|csrf\s*[:=]\s*(?:False|false)|csrfProtection\s*[:=]\s*(?:False|false)|WTF_CSRF_ENABLED\s*=\s*False|CSRF_ENABLED\s*=\s*False|SameSite\s*[:=]\s*['\"]?None)", re.IGNORECASE)),
+    # Hard-coded / default credentials (P1 "Using Default Credentials")
+    ("server_security_misconfiguration.using_default_credentials", "CA-DEFAULTCRED", HIGH, "CWE-798",
+     "Hard-coded or default credentials in source",
+     re.compile(r"((?:password|passwd|pwd|admin_pass|db_pass|default_password)\s*[:=]\s*['\"](?:admin|password|passw0rd|changeme|root|123456|letmein|default|secret|test123)['\"]|username\s*[:=]\s*['\"]admin['\"][^\n]{0,40}password\s*[:=]\s*['\"])", re.IGNORECASE)),
+    # GraphQL introspection / GraphiQL left enabled (schema disclosure)
+    ("sensitive_data_exposure.graphql_introspection_enabled", "CA-GRAPHQL", LOW, "CWE-200",
+     "GraphQL introspection / GraphiQL enabled (schema disclosure)",
+     re.compile(r"(introspection['\"]?\s*[:=]\s*(?:True|true)|graphiql['\"]?\s*[:=]\s*(?:True|true)|GraphiQL|IntrospectionQuery|__schema\s*\{)", re.IGNORECASE)),
+    # Predictable PRNG seed — deterministic randomness for a security value
+    ("cryptographic_weakness.insufficient_entropy", "CA-SEED", MED, "CWE-337",
+     "Predictable PRNG seed (deterministic randomness)",
+     re.compile(r"(random\.seed\s*\(\s*(?:\d+|['\"]|0x)|np\.random\.seed\s*\(\s*\d|srand\s*\(\s*(?:\d+|time)|mt_srand\s*\(\s*\d)", re.IGNORECASE)),
+    # Hard-coded / static IV or nonce — breaks CBC/GCM confidentiality
+    ("cryptographic_weakness.insufficient_entropy", "CA-IV", MED, "CWE-329",
+     "Hard-coded / static IV or nonce used for encryption",
+     re.compile(r"\b(iv|nonce)\s*[:=]\s*(b?['\"][^'\"]{2,}['\"]|bytes\(\s*\d+\s*\)|['\"]\\?x00|Buffer\.alloc\s*\(\s*\d+\s*\)|new\s+byte\[)", re.IGNORECASE)),
+    # Sensitive token/secret placed in a URL / query string (leaks via logs, Referer)
+    ("sensitive_data_exposure.sensitive_token_in_url", "CA-TOKENURL", LOW, "CWE-598",
+     "Sensitive token/secret placed in a URL query string",
+     re.compile(r"[?&](?:access_token|api_?key|token|password|secret|session|auth)=['\"]?\s*[+`$]", re.IGNORECASE)),
 ]
 
 # Static rules whose match is a definitive misconfiguration (not context-
 # dependent) — treated as firm rather than tentative.
-_FIRM_STATIC = {"CA-JWT-NONE", "CA-JWT-NOVERIFY"}
+_FIRM_STATIC = {"CA-JWT-NONE", "CA-JWT-NOVERIFY", "CA-CSRF"}
 # Taint sinks that are only a lead, needing manual authorization/logic review.
 _HEURISTIC_SINKS = {"CA-IDOR"}
 

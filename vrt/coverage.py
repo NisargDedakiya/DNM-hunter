@@ -91,6 +91,8 @@ _SPECIFIC: list[tuple] = [
     ("sensitive data exposure", "visible detailed error", STATIC, "code_audit+web_probe", "CA-DEBUG / live debug page"),
     ("sensitive data exposure", "mixed content", DYNAMIC, "web_probe", "WP-MIXED"),
     ("sensitive data exposure", "internal ip disclosure", STATIC, "code_audit", ""),
+    ("sensitive data exposure", "graphql introspection", STATIC, "code_audit+web_probe", "CA-GRAPHQL"),
+    ("sensitive data exposure", "sensitive token in url", STATIC, "code_audit", "CA-TOKENURL (token in query string)"),
     ("sensitive data exposure", "", DYNAMIC, "runtime", "token-in-URL/referer observed live"),
     # ── XSS / redirect (static sinks) ──
     ("cross-site scripting", "", STATIC, "code_audit", "CA-XSS sink patterns"),
@@ -102,6 +104,7 @@ _SPECIFIC: list[tuple] = [
     ("server security misconfiguration", "unsafe cross-origin", STATIC, "code_audit", "CA-CORS reflected/wildcard+creds"),
     ("server security misconfiguration", "missing secure or httponly", STATIC, "code_audit", "CA-COOKIE"),
     ("server security misconfiguration", "unsafe file upload", STATIC, "code_audit", "CA-UPLOAD (user filename→disk); confirm live"),
+    ("server security misconfiguration", "using default credentials", STATIC, "code_audit+secret_scanner", "CA-DEFAULTCRED; confirm live"),
     ("server security misconfiguration", "misconfigured dns", DYNAMIC, "baddns_scan", "subdomain takeover"),
     ("server security misconfiguration", "lack of security headers", DYNAMIC, "web_probe", "header presence probed live"),
     ("server security misconfiguration", "clickjacking", DYNAMIC, "web_probe", "X-Frame-Options/CSP probed live"),
@@ -120,12 +123,16 @@ _SPECIFIC: list[tuple] = [
     ("broken authentication", "authentication bypass", STATIC, "code_audit+runtime", "CA-JWT-NONE/NOVERIFY; else live"),
     ("broken access control", "", DYNAMIC, "runtime+agent", "IDOR/priv-esc needs live requests"),
     ("broken authentication", "", DYNAMIC, "runtime+agent", "session/2FA behaviour is live"),
+    # CSRF: code_audit flags protection explicitly disabled/exempted (CA-CSRF);
+    # everything else (token uniqueness, action-specific) is runtime.
+    ("cross-site request forgery", "application-wide", STATIC, "code_audit+runtime", "CA-CSRF disabled/exempt; else live"),
     ("cross-site request forgery", "", DYNAMIC, "runtime", "token behaviour is live"),
     ("client-side injection", "", DYNAMIC, "runtime", "binary planting"),
     # ── Config-ability, DoS, components (dynamic/manual) ──
     ("insufficient security configurability", "", DYNAMIC, "runtime", "policy/2FA behaviour"),
     ("application-level denial-of-service", "", DYNAMIC, "runtime", "load-based"),
     ("using components with known", "", DYNAMIC, "gvm_scan+recon", "needs a live version/vuln DB"),
+    ("external behavior", "csv injection", STATIC, "code_audit", "CA-CSV (untrusted data → spreadsheet cell)"),
     ("external behavior", "", MANUAL, "-", "browser feature behaviour"),
     ("privacy concerns", "", MANUAL, "-", ""),
     ("indicators of compromise", "", MANUAL, "-", ""),

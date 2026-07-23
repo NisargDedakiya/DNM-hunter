@@ -89,6 +89,37 @@ app.use((req, res) => {
 const opts = { origin: true, credentials: true };                    // wildcard + creds
 '''
 
+# CSRF / default creds / GraphQL / PRNG seed / static IV / token-in-URL / CSV.
+_VULN_MISC_PY = '''
+import csv, random
+from flask import request
+
+DB_PASSWORD = "changeme"                     # default credential
+random.seed(42)                              # predictable PRNG seed
+iv = b"0000000000000000"                     # static IV
+graphql = {"introspection": True}            # introspection enabled
+
+@csrf_exempt
+def export():                                # CSRF protection disabled
+    name = request.args.get("name")
+    w = csv.writer(fh)
+    w.writerow([name, "x"])                  # CSV injection (tainted)
+    url = "https://api/cb?access_token=" + tok  # token in URL
+    return url
+'''
+
+# Clean file — none of the new rules should fire (guards against false positives).
+_SAFE_MISC_PY = '''
+import csv, os
+from django.views.decorators.csrf import csrf_exempt   # import only, no decorator
+
+password = os.environ["DB_PASSWORD"]         # from env, not hardcoded
+iv = os.urandom(16)                          # random IV
+config = {"introspection": False}            # disabled
+w = csv.writer(fh)
+w.writerow(["static", "header"])             # constant row, not tainted
+'''
+
 
 class TestDetection(unittest.TestCase):
     def test_python_top_classes(self):
@@ -129,6 +160,27 @@ class TestAuthAndAccessControl(unittest.TestCase):
         got = rules(scan_code('import jwt\njwt.decode(tok, verify=False)\n', "j.py"))
         self.assertIn("CA-JWT-NOVERIFY", got)
         self.assertNotIn("CA-TLSVERIFY", got)
+
+
+class TestMiscMisconfigClasses(unittest.TestCase):
+    def test_new_classes_detected(self):
+        got = rules(scan_code(_VULN_MISC_PY, "misc.py"))
+        for r in ("CA-DEFAULTCRED", "CA-SEED", "CA-IV", "CA-GRAPHQL",
+                  "CA-CSRF", "CA-CSV", "CA-TOKENURL"):
+            self.assertIn(r, got, f"{r} should be detected in the vulnerable misc code")
+
+    def test_csrf_disabled_is_firm(self):
+        f = [x for x in scan_code(_VULN_MISC_PY, "misc.py") if x.rule_id == "CA-CSRF"][0]
+        self.assertEqual(f.confidence, "firm")
+
+    def test_csv_injection_needs_taint(self):
+        f = [x for x in scan_code(_VULN_MISC_PY, "misc.py") if x.rule_id == "CA-CSV"][0]
+        self.assertEqual(f.confidence, "firm")
+
+    def test_no_false_positives_on_safe_misc(self):
+        got = rules(scan_code(_SAFE_MISC_PY, "safe_misc.py"))
+        for r in ("CA-DEFAULTCRED", "CA-IV", "CA-GRAPHQL", "CA-CSRF", "CA-CSV"):
+            self.assertNotIn(r, got, f"{r} must NOT fire on the safe file")
 
     def test_jwt_none_is_high_severity(self):
         f = [x for x in scan_code(_VULN_AUTH_PY, "auth.py") if x.rule_id == "CA-JWT-NONE"][0]
