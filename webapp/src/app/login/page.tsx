@@ -56,7 +56,7 @@ export default function LoginPage() {
       <div className={styles.card}>
         <div className={styles.header}>
           <div className={styles.logoRow}>
-            <Image src="/logo.svg" alt="DNM-Hunter" width={44} height={44} priority />
+            <Image src="/logo_icon.png" alt="DNM-Hunter" width={44} height={44} priority />
             <span className={styles.logoText}>
               <span className={styles.logoAccent}>DNM</span>-HUNTER
             </span>

@@ -118,7 +118,7 @@ export function DisclaimerGate({ children }: DisclaimerGateProps) {
         <div className={styles.card}>
           <Image src="/logo.png" alt="" aria-hidden width={520} height={520} className={styles.eyeBg} />
           <div className={styles.welcomeHeader}>
-            <Image src="/logo.svg" alt="DNM-Hunter" width={40} height={40} style={{ objectFit: 'contain' }} />
+            <Image src="/logo_icon.png" alt="DNM-Hunter" width={40} height={40} style={{ objectFit: 'contain' }} />
             <h1 className={styles.welcomeTitle}>
               Welcome to <span className={styles.logoAccent}>DNM</span>-HUNTER
             </h1>

@@ -107,8 +107,8 @@ async function handleRequest(request: NextRequest, requestId: string): Promise<N
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
-    pathname === '/logo.png' ||
-    pathname === '/logo.svg' ||
+    pathname.startsWith('/logo') ||
+    pathname.startsWith('/emblem') ||
     pathname === '/apple-icon.png' ||
     pathname === '/icon-512.png' ||
     pathname === '/js_logo.png'
@@ -189,5 +189,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|favicon.png|favicon.svg|logo.png|logo.svg|apple-icon.png|icon-512.png|js_logo.png).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon|logo|emblem|apple-icon|icon-512|js_logo|.*\\.(?:png|jpg|jpeg|gif|svg|ico)).*)'],
 }

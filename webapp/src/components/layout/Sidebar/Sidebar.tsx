@@ -86,7 +86,7 @@ export function Sidebar() {
       {/* Brand — sized so the full emblem is always visible */}
       <div className={styles.brand}>
         <Link href="/overview" className={styles.brandLink} title="DNM-Hunter">
-          <Image src="/logo.svg" alt="DNM-Hunter" width={40} height={40} className={styles.brandLogo} priority />
+          <Image src="/logo_icon.png" alt="DNM-Hunter" width={40} height={40} className={styles.brandLogo} priority />
           {!collapsed && (
             <span className={styles.brandText}>
               <span className={styles.brandAccent}>DNM</span>-HUNTER

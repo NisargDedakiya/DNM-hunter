@@ -116,6 +116,8 @@ describe('middleware - static assets', () => {
     '/favicon.ico',
     '/favicon.png',
     '/logo.png',
+    '/logo_icon.png',
+    '/logo_full.png',
     '/js_logo.png',
   ])('allows %s without auth', async (path) => {
     const req = makeRequest(path)
