@@ -143,6 +143,7 @@ _KIND_SCANNER = {
     "llm-owasp": "llm_audit",
     "sast": "code_audit",
     "smart-contract": "contract_audit",
+    "mobile-source": "mobile_audit",
     "secret": "secret_scanner",
 }
 

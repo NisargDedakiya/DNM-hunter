@@ -41,6 +41,7 @@ nh-vrt-coverage = "vrt.coverage:_main"
 nh-owasp-coverage = "vrt.owasp:_main"
 nh-verify-demo = "verify.__main__:main"
 nh-web-attack = "web_attack.__main__:main"
+nh-mobile-audit = "mobile_audit.scanner:_main"
 
 [tool.setuptools]
 # Explicit package list — the suite is a set of cooperating top-level packages.
@@ -58,6 +59,7 @@ packages = [
   "vrt",
   "verify",
   "web_attack",
+  "mobile_audit",
   "iac_scan",
   "iac_scan.rules",
 ]
@@ -85,6 +87,7 @@ include = [
   "report_gen/**/*.py",
   "verify/**/*.py",
   "web_attack/**/*.py",
+  "mobile_audit/**/*.py",
 ]
 
 [tool.ruff.lint]

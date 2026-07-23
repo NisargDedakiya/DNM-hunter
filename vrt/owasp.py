@@ -142,7 +142,77 @@ API_2023: list[OwaspCategory] = [
                   "verification is an integration-design review."),
 ]
 
-ALL: list[OwaspCategory] = WEB_2021 + API_2023
+# ── OWASP Mobile Top 10 (2024) — Android + iOS source ──
+MOBILE_2024: list[OwaspCategory] = [
+    OwaspCategory("M1", "Improper Credential Usage", STATIC,
+                  ["MA-SECRET", "secret_scanner"],
+                  "Hard-coded API keys / passwords / tokens in Android or iOS source."),
+    OwaspCategory("M2", "Inadequate Supply Chain Security", DYNAMIC,
+                  ["iac_scan", "manual"],
+                  "Compromised SDKs/build pipeline — needs dependency/build analysis, not source."),
+    OwaspCategory("M3", "Insecure Authentication/Authorization", MANUAL,
+                  ["manual"],
+                  "Server-side auth/authorization behaviour is a runtime/design review."),
+    OwaspCategory("M4", "Insufficient Input/Output Validation", STATIC,
+                  ["MA-SQLI", "MA-JS-BRIDGE"],
+                  "Concatenated rawQuery/execSQL (SQLi) and WebView JS bridges are source-visible."),
+    OwaspCategory("M5", "Insecure Communication", STATIC,
+                  ["MA-CLEARTEXT", "MA-TRUSTALL", "MA-IOS-ATS", "MA-IOS-PINNING-OFF"],
+                  "Cleartext traffic, disabled TLS/hostname verification, NSAllowsArbitraryLoads."),
+    OwaspCategory("M6", "Inadequate Privacy Controls", MANUAL,
+                  ["manual"],
+                  "PII handling/consent is a data-flow & policy review, not a static rule."),
+    OwaspCategory("M7", "Insufficient Binary Protections", STATIC,
+                  ["binary_audit", "mobile_scan"],
+                  "Obfuscation/anti-tamper/exploit mitigations are checked on the compiled binary."),
+    OwaspCategory("M8", "Security Misconfiguration", STATIC,
+                  ["MA-DEBUGGABLE", "MA-EXPORTED", "MA-BACKUP", "MA-WEBVIEW-FILE",
+                   "MA-IOS-UIWEBVIEW"],
+                  "debuggable/exported/allowBackup, WebView file access, deprecated UIWebView."),
+    OwaspCategory("M9", "Insecure Data Storage", STATIC,
+                  ["MA-WORLD-RW", "MA-EXT-STORAGE", "MA-LOG-SENSITIVE",
+                   "MA-IOS-USERDEFAULTS", "MA-IOS-PASTEBOARD"],
+                  "World-readable prefs, plaintext UserDefaults/prefs, sensitive logs, pasteboard."),
+    OwaspCategory("M10", "Insufficient Cryptography", STATIC,
+                  ["MA-WEAK-HASH", "MA-WEAK-CIPHER", "MA-HARDCODE-KEY", "MA-WEAK-RNG"],
+                  "MD5/SHA1/DES/ECB/RC4, hard-coded keys/IVs and weak RNG are code-visible."),
+]
+
+# ── OWASP LLM Top 10 (2025) — AI application code ──
+LLM_2025: list[OwaspCategory] = [
+    OwaspCategory("LLM01", "Prompt Injection", PARTIAL,
+                  ["LLM-011", "ai_attack_surface"],
+                  "llm_audit flags untrusted input flowing into a prompt; runtime garak/pyrit confirm."),
+    OwaspCategory("LLM02", "Sensitive Information Disclosure", STATIC,
+                  ["LLM-021", "secret_scanner"],
+                  "Secrets/PII placed in prompts or system messages are source-visible."),
+    OwaspCategory("LLM03", "Supply Chain", STATIC,
+                  ["LLM-031", "LLM-032", "LLM-033"],
+                  "Unsafe torch.load / pickle model loading / unpinned model sources."),
+    OwaspCategory("LLM04", "Data and Model Poisoning", STATIC,
+                  ["LLM-041"],
+                  "trust_remote_code=True and untrusted dataset/model loading."),
+    OwaspCategory("LLM05", "Improper Output Handling", STATIC,
+                  ["LLM-051", "CA-XSS", "CA-CMDI"],
+                  "Model output flowing into an exec/eval/HTML sink (RCE/XSS)."),
+    OwaspCategory("LLM06", "Excessive Agency", MANUAL,
+                  ["manual"],
+                  "Over-privileged tool/plugin permissions are a design review."),
+    OwaspCategory("LLM07", "System Prompt Leakage", STATIC,
+                  ["LLM-061"],
+                  "Secrets embedded in the system prompt are visible in source."),
+    OwaspCategory("LLM08", "Vector & Embedding Weaknesses", PARTIAL,
+                  ["LLM-071", "ai_attack_surface"],
+                  "Unauthenticated vector-store access flagged statically; leakage confirmed live."),
+    OwaspCategory("LLM09", "Misinformation", DYNAMIC,
+                  ["ai_attack_surface", "manual"],
+                  "Hallucination/factuality is a runtime model-quality property."),
+    OwaspCategory("LLM10", "Unbounded Consumption", STATIC,
+                  ["LLM-091"],
+                  "Missing token/rate limits on model calls, source-visible as a lead."),
+]
+
+ALL: list[OwaspCategory] = WEB_2021 + API_2023 + MOBILE_2024 + LLM_2025
 
 
 def report() -> dict:
@@ -153,14 +223,27 @@ def report() -> dict:
         "total": len(ALL),
         "web_2021": len(WEB_2021),
         "api_2023": len(API_2023),
+        "mobile_2024": len(MOBILE_2024),
+        "llm_2025": len(LLM_2025),
         "byTier": by_tier,
         # categories with any static/partial coverage
         "withStaticCoverage": sum(1 for c in ALL if c.tier in (STATIC, PARTIAL)),
     }
 
 
+def _section_of(cat: OwaspCategory) -> str:
+    if cat in WEB_2021:
+        return "Web Top 10 (2021)"
+    if cat in API_2023:
+        return "API Security Top 10 (2023)"
+    if cat in MOBILE_2024:
+        return "Mobile Top 10 (2024)"
+    return "LLM Top 10 (2025)"
+
+
 def _main() -> int:
-    ap = argparse.ArgumentParser(description="OWASP Top 10 (Web 2021 + API 2023) coverage map.")
+    ap = argparse.ArgumentParser(
+        description="OWASP coverage map — Web 2021 + API 2023 + Mobile 2024 + LLM 2025.")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--tier", choices=[STATIC, PARTIAL, DYNAMIC, MANUAL],
                     help="list only categories in this coverage tier")
@@ -172,14 +255,14 @@ def _main() -> int:
         return 0
 
     rep = report()
-    print("OWASP coverage — Web Top 10 (2021) + API Security Top 10 (2023)\n")
+    print("OWASP coverage — Web (2021) · API (2023) · Mobile (2024) · LLM (2025)\n")
     section = None
     for c in cats:
-        sec = "Web Top 10 (2021)" if c in WEB_2021 else "API Security Top 10 (2023)"
+        sec = _section_of(c)
         if sec != section:
             print(f"\n── {sec} ──")
             section = sec
-        print(f"  {c.id:5} [{c.tier:7}] {c.title}")
+        print(f"  {c.id:6} [{c.tier:7}] {c.title}")
         print(f"        detectors: {', '.join(c.detectors)}")
     print(f"\nTier totals: {json.dumps(rep['byTier'])}")
     print(f"{rep['withStaticCoverage']}/{rep['total']} categories have static or partial (source-visible) coverage.")

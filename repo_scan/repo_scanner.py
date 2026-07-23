@@ -165,6 +165,26 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
         prev = f"{result.error}; " if result.error else ""
         result.error = f"{prev}contract_audit failed: {type(exc).__name__}: {exc}"
 
+    # 5b) Mobile source SAST (Android + iOS — OWASP Mobile Top 10)
+    try:
+        from mobile_audit import scan_tree as mobile_scan_tree
+        for mf in mobile_scan_tree(path):
+            findings.append(Finding(
+                kind="mobile-source",
+                rule_id=mf.rule_id,
+                title=mf.title,
+                severity=mf.severity,
+                file=mf.file,
+                line=mf.line,
+                detail=f"{mf.detail} [OWASP-Mobile {mf.owasp}; {mf.platform}"
+                       f"{'; ' + mf.cwe if mf.cwe else ''}]",
+                category=mf.platform,
+                confidence=mf.confidence,
+            ))
+    except Exception as exc:
+        prev = f"{result.error}; " if result.error else ""
+        result.error = f"{prev}mobile_audit failed: {type(exc).__name__}: {exc}"
+
     # 6) Value-pattern secret detection
     try:
         from .secret_scanner import scan_secrets
