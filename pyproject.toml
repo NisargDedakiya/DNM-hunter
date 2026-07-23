@@ -39,6 +39,7 @@ nh-web-probe = "web_probe.scanner:_main"
 nh-binary-audit = "binary_audit.elf:_main"
 nh-vrt-coverage = "vrt.coverage:_main"
 nh-owasp-coverage = "vrt.owasp:_main"
+nh-verify-demo = "verify.__main__:main"
 
 [tool.setuptools]
 # Explicit package list — the suite is a set of cooperating top-level packages.
@@ -54,6 +55,7 @@ packages = [
   "web_probe",
   "repo_scan",
   "vrt",
+  "verify",
   "iac_scan",
   "iac_scan.rules",
 ]
@@ -79,6 +81,7 @@ include = [
   "repo_scan/**/*.py",
   "vrt/**/*.py",
   "report_gen/**/*.py",
+  "verify/**/*.py",
 ]
 
 [tool.ruff.lint]
@@ -86,6 +89,7 @@ select = ["E", "F", "W", "I", "UP", "B"]
 ignore = [
   "E501",  # line length is handled by the formatter, not enforced hard
   "B008",  # function calls in argument defaults (argparse patterns)
+  "UP042", # `class X(str, Enum)` is intentional for py3.10 support (StrEnum is 3.11+)
 ]
 
 [tool.ruff.lint.per-file-ignores]
