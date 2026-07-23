@@ -191,7 +191,7 @@ export default function AiAttackSurfacePage() {
         </div>
         <div className={styles.headerActions}>
           <WikiInfoButton
-            target="https://github.com/samugit83/redamon/wiki/AI-Gauntlet"
+            target="https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Gauntlet"
             title="Open the AI Gauntlet wiki"
             size={16}
           />

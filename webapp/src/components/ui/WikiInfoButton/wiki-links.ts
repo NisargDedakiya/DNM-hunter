@@ -1,8 +1,8 @@
 // Centralized map of every webapp section/tool to its wiki page (and optional anchor).
-// Wiki source lives at https://github.com/samugit83/redamon/wiki and locally at
+// Wiki source lives at https://github.com/NisargDedakiya/DNM-hunter/wiki and locally at
 // `nisarghunter.wiki/`. Page filenames there map 1:1 to URLs (without the `.md`).
 
-const WIKI_BASE = 'https://github.com/samugit83/redamon/wiki'
+const WIKI_BASE = 'https://github.com/NisargDedakiya/DNM-hunter/wiki'
 
 /** Build the full wiki URL for a given page (and optional GitHub-slug anchor). */
 export function buildWikiUrl(page: string, anchor?: string): string {

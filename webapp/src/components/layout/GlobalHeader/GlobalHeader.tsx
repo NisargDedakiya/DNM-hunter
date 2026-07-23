@@ -145,7 +145,7 @@ export function GlobalHeader() {
         <ThemeToggle />
 
         <a
-          href="https://github.com/samugit83/redamon/wiki"
+          href="https://github.com/NisargDedakiya/DNM-hunter/wiki"
           target="_blank"
           rel="noopener noreferrer"
           className={styles.iconBtn}

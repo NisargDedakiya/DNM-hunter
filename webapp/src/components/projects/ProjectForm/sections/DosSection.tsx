@@ -16,7 +16,7 @@ export function DosSection({ data, updateField }: DosSectionProps) {
   return (
     <div style={{ padding: 'var(--space-3) var(--space-4)', position: 'relative' }}>
       <div style={{ position: 'absolute', top: 8, right: 16 }}>
-        <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Agent-Skills" title="Open Agent Skills wiki page" />
+        <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills" title="Open Agent Skills wiki page" />
       </div>
       <p className={styles.sectionDescription}>
         Configure availability testing settings. These control test intensity,

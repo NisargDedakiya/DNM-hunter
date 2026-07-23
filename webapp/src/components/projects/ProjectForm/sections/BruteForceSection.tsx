@@ -31,7 +31,7 @@ export function HydraSection({ data, updateField }: HydraSectionProps) {
   return (
     <div style={{ padding: 'var(--space-3) var(--space-4)', position: 'relative' }}>
       <div style={{ position: 'absolute', top: 8, right: 16 }}>
-        <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Project-Settings-Reference#hydra-credential-testing" title="Open Hydra wiki section" />
+        <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Project-Settings-Reference#hydra-credential-testing" title="Open Hydra wiki section" />
       </div>
       <p className={styles.sectionDescription}>
         Configure THC Hydra credential testing settings. Hydra supports 50+ protocols

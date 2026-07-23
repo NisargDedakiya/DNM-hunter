@@ -355,7 +355,7 @@ export function AttackSkillsSection({ data, updateField }: AttackSkillsSectionPr
           <h2 className={styles.sectionTitle}>
             <Swords size={16} />
             User Agent Skills
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Agent-Skills#community-skills" title="Open Community Agent Skills wiki section" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills#community-skills" title="Open Community Agent Skills wiki section" />
           </h2>
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
             <button

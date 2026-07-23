@@ -942,7 +942,7 @@ export default function SettingsPage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <span>LLM Providers</span>
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/AI-Model-Providers" title="Open AI Model Providers wiki page" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Model-Providers" title="Open AI Model Providers wiki page" />
           </h2>
           {!showProviderForm && !editingProvider && (
             <button className="primaryButton" onClick={() => setShowProviderForm(true)}>
@@ -1015,7 +1015,7 @@ export default function SettingsPage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <Swords size={16} /> Agent Skills
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Agent-Skills" title="Open Agent Skills wiki page" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills" title="Open Agent Skills wiki page" />
           </h2>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
@@ -1039,7 +1039,7 @@ export default function SettingsPage() {
         </div>
         <p className={styles.sectionHint}>
           Upload .md files defining custom attack skill workflows. Skills become available as toggles in all project settings.
-          {' '}Browse <a href="https://github.com/samugit83/redamon/wiki/Agent-Skills#community-skills" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>community skills</a> for ready-to-use templates.
+          {' '}Browse <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills#community-skills" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}>community skills</a> for ready-to-use templates.
         </p>
 
         {skillsLoading ? (
@@ -1082,7 +1082,7 @@ export default function SettingsPage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <BookOpen size={16} /> Chat Skills
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Chat-Skills" title="Open Chat Skills wiki page" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Chat-Skills" title="Open Chat Skills wiki page" />
           </h2>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
@@ -1165,7 +1165,7 @@ export default function SettingsPage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>
             Tradecraft Resources
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Tradecraft-Lookup" title="Open Tradecraft Lookup wiki page" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Tradecraft-Lookup" title="Open Tradecraft Lookup wiki page" />
           </h2>
           {!tcShowForm && !tcEditing && (
             <button className="primaryButton" onClick={() => setTcShowForm(true)}>
@@ -1543,7 +1543,7 @@ export default function SettingsPage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <span>Tunneling</span>
-            <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Reverse-Shells" title="Open Reverse Shells wiki page" />
+            <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Reverse-Shells" title="Open Reverse Shells wiki page" />
           </h2>
         </div>
         <p className={styles.sectionHint}>
@@ -1971,7 +1971,7 @@ function SystemSection() {
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           <Info size={16} /> System
-          <WikiInfoButton target="https://github.com/samugit83/redamon/wiki/Troubleshooting" title="Open Troubleshooting wiki page" />
+          <WikiInfoButton target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Troubleshooting" title="Open Troubleshooting wiki page" />
         </h2>
       </div>
 

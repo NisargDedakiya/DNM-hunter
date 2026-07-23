@@ -767,7 +767,7 @@ export function FileSystemDrawer({
       title="Agent Workspace"
       headerActions={
         <WikiInfoButton
-          target="https://github.com/samugit83/redamon/wiki/Agent-Workspace"
+          target="https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Workspace"
           title="Open Agent Workspace wiki page"
         />
       }
