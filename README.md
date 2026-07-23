@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="assets/logo.png" alt="NisargHunter AI Logo" width="120"/>
+  <img src="assets/logo.png" alt="DNM-Hunter Logo" width="120"/>
   <br/>
-  <img src="assets/title.svg" alt="NisargHunter AI" width="340"/>
+  <img src="assets/title.svg" alt="DNM-Hunter" width="340"/>
   <br/>
-  <b><i><big><big>Unmask the hidden before the world does</big></big></i></b>
+  <b><i><big><big>Hunt bugs. Secure future.</big></big></i></b>
 </p>
 <p align="center" style="font-size: 120%;">
   An AI-powered offensive security platform for bug bounty hunters and penetration testers. It combines two complementary engines: an <b>autonomous AI agent pipeline</b> that chains reconnaissance, exploitation, and post-exploitation — then triages findings, writes code fixes, and opens pull requests — and a self-contained, <b>VRT-mapped scanner suite</b> (<code>nh-scan</code>) that audits source code, cloud/IaC, binaries, smart contracts, LLM apps, and live web targets, scoring every finding with CVSS and producing submission-ready reports and SARIF. From first packet to merged patch — and from a raw repository to a client-ready report — with human oversight at every critical step.
@@ -15,13 +15,13 @@
 
 <p align="center">
   <a href="https://github.com/nisargdedakiya/dnm-hunter/stargazers"><img height="24" src="https://img.shields.io/github/stars/nisargdedakiya/dnm-hunter?style=flat&color=2E8B57&label=Stars" alt="GitHub Stars"/></a>
-  <img height="24" src="https://img.shields.io/badge/v5.5.0-release-2E8B57?style=flat" alt="Version 5.5.0"/>
+  <img height="24" src="https://img.shields.io/badge/v5.11.0-release-2E8B57?style=flat" alt="Version 5.11.0"/>
   <img height="24" src="https://img.shields.io/badge/WARNING-SECURITY%20TOOL-B22222?style=flat" alt="Security Tool Warning"/>
   <img height="24" src="https://img.shields.io/badge/LICENSE-MIT-4169A1?style=flat" alt="MIT License"/>
   <img height="24" src="https://img.shields.io/badge/END--TO--END-PIPELINE-A01025?style=flat" alt="End-to-End Pipeline"/>
   <img height="24" src="https://img.shields.io/badge/AI-AUTONOMOUS%20AGENT-6A5ACD?style=flat&logo=openai&logoColor=white" alt="AI Powered"/>
-  <a href="https://github.com/samugit83/redamon/wiki/AI-Gauntlet"><img height="24" src="https://img.shields.io/badge/%F0%9F%86%95%20AI%20GAUNTLET-OFFENSIVE%20AI%20TESTING-FF6B35?style=flat" alt="AI Gauntlet — Offensive AI Testing"/></a>
-  <a href="https://github.com/samugit83/redamon/wiki/Fireteam-Parallel-Specialists"><img height="24" src="https://img.shields.io/badge/%F0%9F%94%A5%20FIRETEAM-PARALLEL%20MULTI--AGENT-7C3AED?style=flat" alt="Fireteam Parallel Multi-Agent"/></a>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Gauntlet"><img height="24" src="https://img.shields.io/badge/%F0%9F%86%95%20AI%20GAUNTLET-OFFENSIVE%20AI%20TESTING-FF6B35?style=flat" alt="AI Gauntlet — Offensive AI Testing"/></a>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/Fireteam-Parallel-Specialists"><img height="24" src="https://img.shields.io/badge/%F0%9F%94%A5%20FIRETEAM-PARALLEL%20MULTI--AGENT-7C3AED?style=flat" alt="Fireteam Parallel Multi-Agent"/></a>
   <img height="24" src="https://img.shields.io/badge/CONFIGURABLE-AUTONOMY-CC7722?style=flat" alt="Configurable Autonomy"/>
   <img height="24" src="https://img.shields.io/badge/Kali-Powered-466A7A?style=flat&logo=kalilinux&logoColor=white" alt="Kali Powered"/>
   <img height="24" src="https://img.shields.io/badge/Docker-Compose-1A7EC2?style=flat&logo=docker&logoColor=white" alt="Docker"/>
@@ -40,13 +40,13 @@
   <img height="24" src="https://img.shields.io/badge/CypherFix-Auto%20Remediation-00B894?style=flat" alt="CypherFix Auto Remediation"/>
   <img height="24" src="https://img.shields.io/badge/AI-PENTEST%20REPORTS-8B5CF6?style=flat" alt="AI Pentest Reports"/>
   <img height="24" src="https://img.shields.io/badge/RoE-Guardrails-3B82F6?style=flat" alt="RoE Guardrails"/>
-  <a href="https://github.com/samugit83/redamon/wiki"><img height="24" src="https://img.shields.io/badge/📖_WIKI-FULL%20DOCUMENTATION-1A73E8?style=flat" alt="Wiki Documentation"/></a>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki"><img height="24" src="https://img.shields.io/badge/📖_WIKI-FULL%20DOCUMENTATION-1A73E8?style=flat" alt="Wiki Documentation"/></a>
 </p>
 
 > **LEGAL DISCLAIMER**: This tool is intended for **authorized security testing**, **educational purposes**, and **research only**. Never use this system to scan, probe, or attack any system you do not own or have explicit written permission to test. Unauthorized access is **illegal** and punishable by law. By using this tool, you accept **full responsibility** for your actions. **[Read Full Disclaimer](DISCLAIMER.md)**
 
 <p align="center">
-  <img src="assets/agent.gif" alt="NisargHunter AI Agent Demo" width="100%"/>
+  <img src="assets/agent.gif" alt="DNM-Hunter Agent Demo" width="100%"/>
 </p>
 <p align="center">
   <a href="https://youtu.be/afViJUit0xE"><img height="24" src="https://img.shields.io/badge/▶_WATCH_DEMO-3_Parallel_Agents-FF0000?style=flat&logo=youtube&logoColor=white" alt="Watch Demo"/></a>
@@ -62,14 +62,14 @@
 <img src="assets/recon-pipeline.gif" alt="Parallel recon pipeline in action" width="100%"/>
 </p>
 <p align="center">
-  <em>NisargHunter AI launches multiple reconnaissance tools in parallel, each feeding results into a shared knowledge graph in real time. Tools spin up, adapt their scope based on live discoveries, and coordinate without manual intervention. The entire attack surface -- subdomains, ports, endpoints, parameters -- materializes in minutes, not hours.</em>
+  <em>DNM-Hunter launches multiple reconnaissance tools in parallel, each feeding results into a shared knowledge graph in real time. Tools spin up, adapt their scope based on live discoveries, and coordinate without manual intervention. The entire attack surface -- subdomains, ports, endpoints, parameters -- materializes in minutes, not hours.</em>
 </p>
 
 <br/>
 
 <h2 align="center">Recon as a Living Knowledge Graph</h2>
 <p align="center">
-<img src="assets/nisarghunter-graph.gif" alt="NisargHunter AI Neo4j attack-surface graph rendered in 2D" width="100%"/>
+<img src="assets/nisarghunter-graph.gif" alt="DNM-Hunter Neo4j attack-surface graph rendered in 2D" width="100%"/>
 </p>
 <p align="center">
   <em>Industry-standard scanners chained so each tool's output feeds the next, then merged into a single Neo4j knowledge graph. Findings are deduplicated, relationships are explicit, and the agent inherits a structured, fully connected attack surface ready to query in natural language.</em>
@@ -81,7 +81,7 @@
 <p align="center">
 <b><samp><big>Reconnaissance ➜ Exploitation ➜ Post-Exploitation ➜ AI Triage ➜ CodeFix Agent ➜ GitHub PR</big></samp></b>
 <br/><br/>
-NisargHunter AI doesn't stop at finding vulnerabilities, it fixes them. The pipeline starts with a 6-phase reconnaissance engine that maps your target's entire attack surface, then hands control to an autonomous AI agent that validates CVE exploitability, tests credential policies, and maps lateral movement paths. Every finding is recorded in a Neo4j knowledge graph. When the offensive phase completes, CypherFix takes over: an AI triage agent correlates hundreds of findings, deduplicates them, and ranks them by exploitability. Then a CodeFix agent clones your repository, navigates the codebase with 11 code-aware tools, implements targeted fixes, and opens a GitHub pull request, ready for review and merge.
+DNM-Hunter doesn't stop at finding vulnerabilities, it fixes them. The pipeline starts with a 6-phase reconnaissance engine that maps your target's entire attack surface, then hands control to an autonomous AI agent that validates CVE exploitability, tests credential policies, and maps lateral movement paths. Every finding is recorded in a Neo4j knowledge graph. When the offensive phase completes, CypherFix takes over: an AI triage agent correlates hundreds of findings, deduplicates them, and ranks them by exploitability. Then a CodeFix agent clones your repository, navigates the codebase with 11 code-aware tools, implements targeted fixes, and opens a GitHub pull request, ready for review and merge.
 </p>
 
 <p align="center">
@@ -92,29 +92,21 @@ NisargHunter AI doesn't stop at finding vulnerabilities, it fixes them. The pipe
 
 ## Roadmap & Community Contributions
 
-We maintain a public **[Project Board](https://github.com/users/samugit83/projects/1)** with upcoming features open for community contributions. Pick a task and submit a PR!
+We maintain a public **[Project Board](https://github.com/users/NisargDedakiya/projects/1)** with upcoming features open for community contributions. Pick a task and submit a PR!
 
 
 > **Want to contribute?** See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started.
 
-### Maintainers
+### Maintainer
 
-<table>
-<tr>
-<td align="center" valign="top" width="50%">
-<img src="assets/samuele.png" alt="Samuele Giampieri" width="120"/><br/>
-<b>Samuele Giampieri</b>: Creator, Maintainer & AI Platform Architect<br/><br/>
-<small>AI Platform Architect & Full-Stack Lead with 15+ years of freelancing experience and more than 30 projects shipped to production, including enterprise-scale AI agentic systems. AWS-certified (DevOps Engineer, ML Specialty) and IBM-certified AI Engineer. Designs end-to-end ML solutions spanning deep learning, NLP, Computer Vision, and AI Agent systems with LangChain/LangGraph.</small><br/><br/>
-<a href="https://www.linkedin.com/in/samuele-giampieri-b1b67597/">LinkedIn</a> · <a href="https://github.com/samugit83">GitHub</a> · <a href="https://www.devergolabs.com/">Devergo Labs</a>
-</td>
-<td align="center" valign="top" width="50%">
-<img src="assets/ritesh.png" alt="Ritesh Gohil" width="120"/><br/>
-<b>Ritesh Gohil</b>: Maintainer & Lead Security Researcher<br/><br/>
-<small>Cyber Security Engineer at Workday with over 7 years of experience in Web, API, Mobile, Network, and Cloud penetration testing. Published 11 CVEs in MITRE, with security acknowledgements from Google (4×) and Apple (6×). Secured 200+ web and mobile applications and contributed to Exploit Database, Google Hacking Database, and the AWS Community. Holds AWS Security Specialty, eWPTXv2, eCPPTv2, CRTP, and CEH certifications with expertise in red teaming, cloud security, CVE research, and security architecture review.</small><br/><br/>
-<a href="https://www.linkedin.com/in/riteshgohil25/">LinkedIn</a> · <a href="https://github.com/L4stPL4Y3R">GitHub</a>
-</td>
-</tr>
-</table>
+**DNM-Hunter** is developed and maintained by **[Nisarg Dedakiya](https://github.com/NisargDedakiya)**.
+
+### Credits
+
+DNM-Hunter is built on the open-source **[RedAmon](https://github.com/samugit83/redamon)** project. Full credit to its original authors for the foundational agent + recon architecture:
+
+- **Samuele Giampieri** — creator & AI platform architect · [GitHub](https://github.com/samugit83) · [Devergo Labs](https://www.devergolabs.com/)
+- **Ritesh Gohil** — lead security researcher · [GitHub](https://github.com/L4stPL4Y3R)
 
 ---
 
@@ -197,15 +189,15 @@ Open **http://localhost:3000/settings** (gear icon in the header) to configure e
 - **API Keys** -- Tavily, Shodan, SerpAPI, NVD, Vulners, URLScan, and threat intelligence keys (Censys, FOFA, OTX, Netlas, VirusTotal, ZoomEye, CriminalIP) to enable extended agent capabilities (web search, OSINT, CVE lookups, passive threat intel). **Uncover multi-engine search** keys (Quake, Hunter, PublicWWW, HunterHow, Google, Onyphe, Driftnet) expand target discovery across 13 search engines -- shared keys (Shodan, Censys, FOFA, etc.) are automatically reused. Supports **key rotation** -- configure multiple keys per tool with automatic round-robin rotation to avoid rate limits.
 - **Tunneling** -- configure ngrok or chisel for reverse shell tunneling. Changes apply immediately without container restarts.
 
-All settings are stored per-user in the database. See the **[AI Model Providers](https://github.com/samugit83/redamon/wiki/AI-Model-Providers)** wiki page for detailed setup instructions.
+All settings are stored per-user in the database. See the **[AI Model Providers](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Model-Providers)** wiki page for detailed setup instructions.
 
 ### 4. Open the Webapp
 
 Go to **http://localhost:3000** -- create a project, configure your target, and start scanning.
 
-> For a detailed walkthrough of every feature, check the **[Wiki](https://github.com/samugit83/redamon/wiki)**.
+> For a detailed walkthrough of every feature, check the **[Wiki](https://github.com/NisargDedakiya/DNM-hunter/wiki)**.
 >
-> Having issues? See the **[Troubleshooting](readmes/TROUBLESHOOTING.md)** guide or the **[Wiki Troubleshooting](https://github.com/samugit83/redamon/wiki/Troubleshooting)** page.
+> Having issues? See the **[Troubleshooting](readmes/TROUBLESHOOTING.md)** guide or the **[Wiki Troubleshooting](https://github.com/NisargDedakiya/DNM-hunter/wiki/Troubleshooting)** page.
 
 ### Management Commands
 
@@ -321,7 +313,7 @@ The agent's `web_search` tool includes a local **Knowledge Base** -- a RAG pipel
 ./nisarghunter.sh install --kbase
 ```
 
-On first install with `--kbase`, NisargHunter AI detects your hardware (GPU / CPU / API) and offers a quick-start profile. The choice is persisted, so subsequent `update` / `up` commands respect it without re-passing the flag.
+On first install with `--kbase`, DNM-Hunter detects your hardware (GPU / CPU / API) and offers a quick-start profile. The choice is persisted, so subsequent `update` / `up` commands respect it without re-passing the flag.
 
 **Speed up ingestion with API embeddings:** By default, embeddings run locally on CPU/GPU. On CPU-only machines, large datasets (ExploitDB, NVD) can take hours. You can offload embedding to an external API by creating a `.env` file from the template:
 
@@ -360,13 +352,13 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 ./nisarghunter.sh kb rebuild lite        # Wipe and rebuild from scratch
 ```
 
-> For full technical documentation -- query pipeline, data sources, ingestion profiles, scoring, security model -- see the **[Knowledge Base Technical Reference](readmes/README.KBASE.md)** or the **[Wiki: Knowledge Base & Web Search](https://github.com/samugit83/redamon/wiki/Knowledge-Base-Web-Search)**.
+> For full technical documentation -- query pipeline, data sources, ingestion profiles, scoring, security model -- see the **[Knowledge Base Technical Reference](readmes/README.KBASE.md)** or the **[Wiki: Knowledge Base & Web Search](https://github.com/NisargDedakiya/DNM-hunter/wiki/Knowledge-Base-Web-Search)**.
 
 ---
 
 ## Table of Contents
 
-- [Full Wiki Documentation](https://github.com/samugit83/redamon/wiki)
+- [Full Wiki Documentation](https://github.com/NisargDedakiya/DNM-hunter/wiki)
 - [Overview](#overview)
 - [Offline Scanner Suite (VRT-Mapped SAST/DAST)](#offline-scanner-suite--vrt-mapped-sastdast--reporting)
 - [Feature Highlights](#feature-highlights)
@@ -374,7 +366,7 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 - [Components](#components)
 - [Documentation](#documentation)
 - [Troubleshooting](#troubleshooting)
-- [NisargHunter AI HackLab](#nisarghunter-hacklab)
+- [DNM-Hunter HackLab](#nisarghunter-hacklab)
 - [Community Showcase](#community-showcase)
 - [Legal](#legal)
 
@@ -382,7 +374,7 @@ KB_EMBEDDING_API_MODEL=nomic-embed-text
 
 ## Overview
 
-NisargHunter AI is a modular, containerized offensive security platform for bug bounty hunters and penetration testers. It chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end pipeline — and pairs it with a dependency-light **offline scanner suite** that maps every finding to the Bugcrowd VRT, scores it with CVSS, and turns it into a submission-ready report or SARIF. The heavy tooling runs inside Docker (no tools installed on your host) and every component communicates through well-defined APIs, so each layer can evolve independently; the scanner suite runs anywhere Python does.
+DNM-Hunter is a modular, containerized offensive security platform for bug bounty hunters and penetration testers. It chains automated reconnaissance, AI-driven exploitation, and graph-powered intelligence into a single, end-to-end pipeline — and pairs it with a dependency-light **offline scanner suite** that maps every finding to the Bugcrowd VRT, scores it with CVSS, and turns it into a submission-ready report or SARIF. The heavy tooling runs inside Docker (no tools installed on your host) and every component communicates through well-defined APIs, so each layer can evolve independently; the scanner suite runs anywhere Python does.
 
 The platform is built around seven pillars:
 
@@ -400,7 +392,7 @@ The platform is built around seven pillars:
 
 ## Offline Scanner Suite — VRT-Mapped SAST/DAST + Reporting
 
-Beyond the live agent pipeline, NisargHunter AI ships a **dependency-light scanner suite** you can run against a repo checkout or a URL in seconds — no Docker, no API keys, standard-library core. Every finding is mapped to a canonical **[Bugcrowd VRT](https://bugcrowd.com/vulnerability-rating-taxonomy)** id, scored with **CVSS v3.1**, and can be rendered as a professional report or **SARIF 2.1.0** for GitHub code scanning.
+Beyond the live agent pipeline, DNM-Hunter ships a **dependency-light scanner suite** you can run against a repo checkout or a URL in seconds — no Docker, no API keys, standard-library core. Every finding is mapped to a canonical **[Bugcrowd VRT](https://bugcrowd.com/vulnerability-rating-taxonomy)** id, scored with **CVSS v3.1**, and can be rendered as a professional report or **SARIF 2.1.0** for GitHub code scanning.
 
 ```bash
 pip install -e .                                  # installs the `nh-scan` CLI
@@ -446,10 +438,10 @@ A fully automated, end-to-end **external attack-surface mapper** running inside 
 
 Everything runs on a **fan-out / fan-in** architecture: each phase fires as many tools in parallel as the work allows, then converges before the next phase begins. **40+ industry tools** integrate into one coordinated workflow, wildcard DNS poisoning is filtered out automatically with puredns, and **stealth mode** keeps the entire pipeline running on passive sources only when active probing is off-limits. Findings stream into the **Neo4j knowledge graph** on a background thread so the scan never blocks on database writes, and the raw JSON is preserved for download. The detailed tool-by-tool breakdown is in the matrix below.
 
-> **[Wiki: Running Reconnaissance](https://github.com/samugit83/redamon/wiki/Running-Reconnaissance)** | **[Technical: README.RECON.md](readmes/README.RECON.md)**
+> **[Wiki: Running Reconnaissance](https://github.com/NisargDedakiya/DNM-hunter/wiki/Running-Reconnaissance)** | **[Technical: README.RECON.md](readmes/README.RECON.md)**
 
 <p align="center">
-  <img src="assets/recon.gif" alt="NisargHunter AI Reconnaissance Pipeline" width="100%"/>
+  <img src="assets/recon.gif" alt="DNM-Hunter Reconnaissance Pipeline" width="100%"/>
 </p>
 
 #### Recon Pipeline Tool Matrix
@@ -493,7 +485,7 @@ Everything runs on a **fan-out / fan-in** architecture: each phase fires as many
 | **GraphQL Security** | **GraphQL Security Testing** | Endpoint discovery, introspection test, schema extraction, sensitive-field detection, graphql-cop (12 misconfig checks: alias/batch/directive DoS, GraphiQL, trace mode, GET/POST CSRF, field suggestions) | Active / Passive | Parallel with Nuclei + Subdomain Takeover + VHost & SNI + Web Cache Poisoning (GROUP 6 Phase A) |
 | **Subdomain Takeover** | **Subdomain Takeover Detection** | Subjack (Apache-2.0 DNS-first fingerprints) + Nuclei takeover templates (`http/takeovers/` + `dns/`) + BadDNS (AGPL-3.0 isolated sidecar: CNAME, NS, MX, TXT, SPF, DMARC, wildcard, NSEC, references, zonetransfer). Cross-tool dedup, 12+ auto-exploitable providers, confidence-scored `confirmed` / `likely` / `manual_review` verdicts | Active / Passive | Parallel with Nuclei + GraphQL Scan + VHost & SNI + Web Cache Poisoning (GROUP 6 Phase A) |
 | **VHost & SNI Enumeration** | **Hidden Virtual Host Discovery** | Curl-only dual-layer probing: L7 Host-header overrides + L4 TLS SNI swaps via `--resolve`, baseline-comparison anomaly detection, 4-tier severity ladder (`high` for L7/L4 routing inconsistency, `medium` for internal-keyword matches, `low`/`info` for status/size deltas), 2,471-entry default wordlist + custom + graph-derived candidates, discovery feedback loop into httpx | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + Web Cache Poisoning (GROUP 6 Phase A) |
-| **Web Cache Poisoning** | **Web Cache Poisoning & Deception** | Two-engine detection: WCVS (Hackmanit, Docker-in-Docker) breadth sweep across 10+ technique classes (unkeyed-header poisoning, parameter cloaking, path/cache-key normalization, cache-key injection, web cache deception) then a NisargHunterAI-native 5-phase confirmation (cache oracle with silent-cache frozen-Date fallback, isolated cache-buster, fingerprint-gated framework packs for Next.js/Nuxt/Remix, baseline→poison→clean persistence check, reflected + non-reflective differential detection). Confidence-scored `Confirmed`/`Strong`/`Tentative` tiers, min-confidence gate; benign `.invalid` canaries + isolated cache buckets so the real cache is never poisoned. Disabled by default | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + VHost & SNI (GROUP 6 Phase A) |
+| **Web Cache Poisoning** | **Web Cache Poisoning & Deception** | Two-engine detection: WCVS (Hackmanit, Docker-in-Docker) breadth sweep across 10+ technique classes (unkeyed-header poisoning, parameter cloaking, path/cache-key normalization, cache-key injection, web cache deception) then a DNM-HunterAI-native 5-phase confirmation (cache oracle with silent-cache frozen-Date fallback, isolated cache-buster, fingerprint-gated framework packs for Next.js/Nuxt/Remix, baseline→poison→clean persistence check, reflected + non-reflective differential detection). Confidence-scored `Confirmed`/`Strong`/`Tentative` tiers, min-confidence gate; benign `.invalid` canaries + isolated cache buckets so the real cache is never poisoned. Disabled by default | Active | Parallel with Nuclei + GraphQL Scan + Subdomain Takeover + VHost & SNI (GROUP 6 Phase A) |
 | **Security Checks** | **Security Checks** | WAF bypass, direct IP access, TLS expiry, missing headers, cache-control | Active | Parallel workers |
 | **CVE & MITRE** | **CVE Enrichment** | NVD API, Vulners API | Passive | Sequential |
 | | **MITRE Enrichment** | CWE / CAPEC mapping | Passive | Sequential |
@@ -504,13 +496,13 @@ Everything runs on a **fan-out / fan-in** architecture: each phase fires as many
 
 Run **any single tool** from the pipeline independently without re-running the entire scan. Up to **12 partial recons can run in parallel** per project, each with independent logs, stop controls, and status badges visible in both the Graph toolbar and Project Settings header. Each tool section has a play button that opens a modal where you can review existing graph data, add custom targets (subdomains, IPs, ports, or URLs), and launch the tool in isolation. Results are merged back into the Neo4j graph using `MERGE` operations -- duplicates are updated, not recreated. The tool runs with all project settings (timeouts, wordlists, API keys, proxy) applied automatically. All pipeline tools support partial recon.
 
-> **[Wiki: Recon Pipeline Workflow -- Partial Recon](https://github.com/samugit83/redamon/wiki/Recon-Pipeline-Workflow#partial-recon)**
+> **[Wiki: Recon Pipeline Workflow -- Partial Recon](https://github.com/NisargDedakiya/DNM-hunter/wiki/Recon-Pipeline-Workflow#partial-recon)**
 
 #### AI in Pipeline
 
 Optional **LLM-augmented decision points** wired inside the recon pipeline where static look-ups historically drift -- **Nuclei** prunes its tag list to the detected tech stack, the **WAF classifier** catches header-stripped Cloudflare/AWS WAF/Imperva, and many others across FFuf, Nuclei false-positive filtering, and subdomain-takeover disambiguation. Each hook is a **cascade fallback** after the static path with a deterministic safe fallback, so an LLM outage cannot break a scan. One master toggle in the Target tab governs them all.
 
-> **[Wiki: AI in Pipeline](https://github.com/samugit83/redamon/wiki/Recon-Pipeline-Workflow#ai-in-pipeline)**
+> **[Wiki: AI in Pipeline](https://github.com/NisargDedakiya/DNM-hunter/wiki/Recon-Pipeline-Workflow#ai-in-pipeline)**
 
 ### AI Gauntlet: Offensive AI/LLM Testing
 
@@ -518,22 +510,22 @@ Where the recon pipeline **finds** the AI surface, the **AI Gauntlet attacks it*
 
 It is **deterministic** (seeds, fixed bounds, pinned tool versions) and runs with **zero external egress**: every judge / grader / embedding call is forced to a local Ollama model, so no payload or transcript ever leaves your machine. Off by default and RoE-gated, with live phase-by-phase progress, and findings surfaced in the Red Zone **AI Gauntlet Vulnerabilities** table and the pentest report.
 
-> **[Wiki: AI Gauntlet](https://github.com/samugit83/redamon/wiki/AI-Gauntlet)** | **[Technical: AI_GAUNTLET_TECH_DOC.md](readmes/AI_GAUNTLET_TECH_DOC.md)**
+> **[Wiki: AI Gauntlet](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Gauntlet)** | **[Technical: AI_GAUNTLET_TECH_DOC.md](readmes/AI_GAUNTLET_TECH_DOC.md)**
 
 ### GVM Vulnerability Scanner
 
 **GVM/OpenVAS** performs deep network-level vulnerability assessment with 170,000+ NVTs, probing services at the protocol layer for misconfigurations, outdated software, default credentials, and known CVEs. Complements Nuclei's web-layer findings. Seven pre-configured scan profiles from quick host discovery (~2 min) to exhaustive deep scanning (~8 hours). Findings are stored as Vulnerability nodes in Neo4j alongside the recon graph.
 
-> **[Wiki: GVM Vulnerability Scanning](https://github.com/samugit83/redamon/wiki/GVM-Vulnerability-Scanning)** | **[Technical: README.GVM.md](readmes/README.GVM.md)**
+> **[Wiki: GVM Vulnerability Scanning](https://github.com/NisargDedakiya/DNM-hunter/wiki/GVM-Vulnerability-Scanning)** | **[Technical: README.GVM.md](readmes/README.GVM.md)**
 
 ### AI Agent Orchestrator
 
 A **LangGraph-based autonomous agent** implementing the ReAct pattern. It progresses through three phases: **Informational** (intelligence gathering, graph queries, Shodan, Google dorking), **Exploitation** (Metasploit, Hydra credential testing, social engineering simulation), and **Post-Exploitation** (enumeration, lateral movement). The agent executes 14 security tools via MCP servers inside a Kali sandbox, supports parallel tool execution via **Wave Runner**, and provides real-time chat interaction with guidance, stop/resume, and approval workflows. **Deep Think** mode enables structured strategic analysis before acting.
 
-> **[Wiki: AI Agent Guide](https://github.com/samugit83/redamon/wiki/AI-Agent-Guide)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md)**
+> **[Wiki: AI Agent Guide](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Agent-Guide)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md)**
 
 <p align="center">
-  <img src="assets/exploit.gif" alt="NisargHunter AI Exploitation Demo" width="100%"/>
+  <img src="assets/exploit.gif" alt="DNM-Hunter Exploitation Demo" width="100%"/>
 </p>
 
 #### Agent Tool Arsenal
@@ -595,7 +587,7 @@ A **LangGraph-based autonomous agent** implementing the ReAct pattern. It progre
 | | **job_cancel** | Cancel a running job, status flips to `cancelled`, no-op on terminal jobs | All | -- (in-process) |
 | | **job_list** | List background jobs for the project, filter by `active=true` / `false` / omit for all | All | -- (in-process) |
 
-<sub>All MCP tools run inside a Kali Linux sandbox container. **Workspace FS** and **Background Jobs** tools run **in-process inside the agent container** and operate exclusively on the per-project workspace at `/workspace/<projectId>/` -- path validation rejects every traversal trick (project-id injection, symlink escape, zip-slip, tar-slip). See **[Agent Workspace wiki page](https://github.com/samugit83/redamon/wiki/Agent-Workspace)** for the full reference. Tools marked as dangerous require manual confirmation before execution. Stealth mode restricts active tools to passive-only or single-target operations. **Note:** WPScan is licensed under the [WPScan Public Source License](https://github.com/wpscanteam/wpscan/blob/master/LICENSE) (not MIT). Free for pentesting assessments and personal use; commercial use may require a separate license from [wpscan.com](https://wpscan.com).</sub>
+<sub>All MCP tools run inside a Kali Linux sandbox container. **Workspace FS** and **Background Jobs** tools run **in-process inside the agent container** and operate exclusively on the per-project workspace at `/workspace/<projectId>/` -- path validation rejects every traversal trick (project-id injection, symlink escape, zip-slip, tar-slip). See **[Agent Workspace wiki page](https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Workspace)** for the full reference. Tools marked as dangerous require manual confirmation before execution. Stealth mode restricts active tools to passive-only or single-target operations. **Note:** WPScan is licensed under the [WPScan Public Source License](https://github.com/wpscanteam/wpscan/blob/master/LICENSE) (not MIT). Free for pentesting assessments and personal use; commercial use may require a separate license from [wpscan.com](https://wpscan.com).</sub>
 
 #### MCP Tool Plugins (extending the agent's tool arsenal)
 
@@ -603,11 +595,11 @@ Beyond the 5 built-in MCP servers above, you can plug **any Model-Context-Protoc
 
 Two paths: pick one of **39 prefilled Quick-Add presets** (OSINT, threat-intel, cloud, web-app scanners, reporting, reverse engineering; categories tagged on every card), or click **Add MCP** for a manual config. Three transports supported: `stdio`, `sse`, `streamable_http`. The orange **Discover and add new tools** button runs a live `list_tools()` against the draft, returns within 30 seconds, and auto-imports each discovered tool with its name, description, and a JSON-Schema-derived `args_format` (types, enums, defaults, min/max, per-property descriptions). Save → tools auto-appear in every project's Tool Matrix and in the agent's system prompt within ~1 second. No agent restart, no `prisma db push`.
 
-> **Full operator manual** (every form field, all 39 presets, the auth flow, the live discovery workflow, validation rules, troubleshooting, and the storage / security model): **[MCP Tool Plugins wiki page](https://github.com/samugit83/redamon/wiki/MCP-Tool-Plugins)**.
+> **Full operator manual** (every form field, all 39 presets, the auth flow, the live discovery workflow, validation rules, troubleshooting, and the storage / security model): **[MCP Tool Plugins wiki page](https://github.com/NisargDedakiya/DNM-hunter/wiki/MCP-Tool-Plugins)**.
 
 ### Agent Workspace: Per-Project Filesystem, Background Jobs, Auto-Offload
 
-> **Watch the demo:** [NisargHunter AI Agent Workspace: AI Runs 4 Parallel Pentests and Writes Its Own Report (YouTube)](https://youtu.be/dkgIk78T7Hw)
+> **Watch the demo:** [DNM-Hunter Agent Workspace: AI Runs 4 Parallel Pentests and Writes Its Own Report (YouTube)](https://youtu.be/dkgIk78T7Hw)
 
 Every project gets a persistent `/workspace/<projectId>/` directory that the agent, the kali-sandbox, and you (through the **FileSystem Drawer** in the Red Zone) all see at the same time. Four purpose-built folders are auto-created and protected from rename/delete: `notes/` for the agent's scratch work and draft reports, `tool-outputs/` for auto-offloaded huge outputs, `jobs/` for background-job logs, and `uploads/` for files you drop in for the agent to read. The agent is taught the layout on every think step via a `WORKSPACE_LAYOUT_BLOCK`, and when you drop files into `uploads/` the block surfaces them under a `CHECK THESE NOW` directive so the agent reads them before continuing whatever else it was doing.
 
@@ -615,75 +607,75 @@ The agent gets **24 filesystem tools** (`fs_read`, `fs_write`, `fs_edit`, `fs_mu
 
 Path validation rejects every traversal trick (project-id injection, symlink escape, zip-slip, tar-slip, protected-folder bypass via normalization) and is server-enforced. Jobs survive agent restart via on-disk metadata: orphan running jobs flip to `interrupted` on boot so the UI never shows a forever-spinning row.
 
-> **Full operator manual** (every drawer feature, all 29 workspace tools, the auto-offload policy map, the four protected folders, fireteam coordination patterns via `fs_diff vs_last_read`, and the path-validation safety model): **[Agent Workspace wiki page](https://github.com/samugit83/redamon/wiki/Agent-Workspace)**.
+> **Full operator manual** (every drawer feature, all 29 workspace tools, the auto-offload policy map, the four protected folders, fireteam coordination patterns via `fs_diff vs_last_read`, and the path-validation safety model): **[Agent Workspace wiki page](https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Workspace)**.
 
 ### Fireteam: Parallel Specialist Sub-Agents
 
-The agent's most powerful execution mode. When an objective decomposes into **independent investigation angles** (auth surface, route map, header policy; or 5 candidate CVEs to triage in parallel), the root agent fans out into N **specialist sub-agents** that work concurrently inside the same backend, each running its own multi-step ReAct loop with a focused mission. This is NisargHunter AI's implementation of the **Scatter-Gather ReAct (SG-ReAct)** architectural pattern: a root agent that decides when to fan out, a bounded fireteam of specialists that work in parallel, and a fan-in step that merges their findings back into a single consolidated worldview.
+The agent's most powerful execution mode. When an objective decomposes into **independent investigation angles** (auth surface, route map, header policy; or 5 candidate CVEs to triage in parallel), the root agent fans out into N **specialist sub-agents** that work concurrently inside the same backend, each running its own multi-step ReAct loop with a focused mission. This is DNM-Hunter's implementation of the **Scatter-Gather ReAct (SG-ReAct)** architectural pattern: a root agent that decides when to fan out, a bounded fireteam of specialists that work in parallel, and a fan-in step that merges their findings back into a single consolidated worldview.
 
 Every safety guarantee that applies to the root agent also applies to every member: hard guardrails, soft guardrails, phase gating, Rules of Engagement, and dangerous-tool confirmations (handled **per-member, in parallel**; N members can each be awaiting your approval on their own panel simultaneously without serializing). Recursion is forbidden (a member cannot itself deploy a fireteam) and every wave has a hard cap on members, an iteration budget per member, and a wall-clock timeout. The result is wall-clock parallelism without coordination chaos, predictable termination, and an audit trail where every action is attributable to the specialist that produced it.
 
-> **[Wiki: Fireteam (Parallel Specialists)](https://github.com/samugit83/redamon/wiki/Fireteam-Parallel-Specialists)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md#fireteam--parallel-specialist-sub-agents)**
+> **[Wiki: Fireteam (Parallel Specialists)](https://github.com/NisargDedakiya/DNM-hunter/wiki/Fireteam-Parallel-Specialists)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md#fireteam--parallel-specialist-sub-agents)**
 
 ### AI Model Providers
 
 Supports **5 providers** and **400+ models**: OpenAI (GPT-5.2, GPT-5, GPT-4.1), Anthropic (Claude Opus 4.6, Sonnet 4.5), OpenRouter (300+ models), AWS Bedrock, and any **OpenAI-compatible endpoint** (Ollama, vLLM, LM Studio, Groq, etc.). Models are dynamically fetched, no hardcoded lists.
 
-> **[Wiki: AI Model Providers](https://github.com/samugit83/redamon/wiki/AI-Model-Providers)**
+> **[Wiki: AI Model Providers](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Model-Providers)**
 
 ### Attack Surface Graph
 
 A **Neo4j knowledge graph** with 17 node types and 20+ relationship types, the single source of truth for the target's attack surface. The agent queries it before every decision via natural language → Cypher translation.
 
-> **[Wiki: Attack Surface Graph](https://github.com/samugit83/redamon/wiki/Attack-Surface-Graph)** | **[Technical: GRAPH.SCHEMA.md](readmes/GRAPH.SCHEMA.md)**
+> **[Wiki: Attack Surface Graph](https://github.com/NisargDedakiya/DNM-hunter/wiki/Attack-Surface-Graph)** | **[Technical: GRAPH.SCHEMA.md](readmes/GRAPH.SCHEMA.md)**
 
 ### EvoGraph: Attack Chain Evolution
 
 A persistent, evolutionary graph tracking everything the AI agent does: tool executions, discoveries, failures, and strategic decisions. Structured chain context replaces flat execution traces, improving agent efficiency by 25%+. Cross-session memory means the agent never starts from zero.
 
-> **[Wiki: EvoGraph](https://github.com/samugit83/redamon/wiki/EvoGraph-Attack-Chain-Evolution)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md#evograph--evolutive-attack-chain-graph)**
+> **[Wiki: EvoGraph](https://github.com/NisargDedakiya/DNM-hunter/wiki/EvoGraph-Attack-Chain-Evolution)** | **[Technical: README.AGENTIC_SYSTEM.md](readmes/README.AGENTIC_SYSTEM.md#evograph--evolutive-attack-chain-graph)**
 
 ### Multi-Session Parallel Attack Chains
 
 Launch **multiple concurrent agent sessions** against the same project. Each session creates its own AttackChain in EvoGraph. New sessions automatically load findings and failure lessons from all prior sessions, avoiding redundant work.
 
-> **[Wiki: AI Agent Guide](https://github.com/samugit83/redamon/wiki/AI-Agent-Guide)**
+> **[Wiki: AI Agent Guide](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Agent-Guide)**
 
 ### Reverse Shells
 
 Unified view of active sessions: meterpreter, reverse/bind shells, and listeners. Built-in terminal with a **Command Whisperer** that translates plain English into shell commands.
 
-> **[Wiki: Reverse Shells](https://github.com/samugit83/redamon/wiki/Reverse-Shells)**
+> **[Wiki: Reverse Shells](https://github.com/NisargDedakiya/DNM-hunter/wiki/Reverse-Shells)**
 
-### NisargHunter AI Terminal
+### DNM-Hunter Terminal
 
 Full interactive **PTY shell access** to the Kali sandbox container directly from the graph page via **xterm.js**. Access all pre-installed pentesting tools (Metasploit, Nmap, Nuclei, Hydra, sqlmap) without leaving the browser. Features dark terminal theme, connection status indicator, auto-reconnect with exponential backoff, fullscreen mode, and browser-side keepalive.
 
-> **[Wiki: The Graph Dashboard](https://github.com/samugit83/redamon/wiki/The-Graph-Dashboard#redamon-terminal)**
+> **[Wiki: The Graph Dashboard](https://github.com/NisargDedakiya/DNM-hunter/wiki/The-Graph-Dashboard#redamon-terminal)**
 
 ### CypherFix: Automated Vulnerability Remediation
 
 Two-agent pipeline: a **Triage Agent** runs 9 hardcoded Cypher queries then uses an LLM to correlate, deduplicate, and prioritize findings. A **CodeFix Agent** clones the target repo, explores the codebase with 11 tools, implements fixes, and opens a GitHub PR, replicating Claude Code's agentic design. Because the cloned repo is untrusted, its **build/test commands run in an isolated, secret-free sandbox container** (not in the agent), and the GitHub token never enters it.
 
-> **[Wiki: CypherFix](https://github.com/samugit83/redamon/wiki/CypherFix-Automated-Remediation)** | **[Technical: README.CYPHERFIX_AGENTS.md](readmes/README.CYPHERFIX_AGENTS.md)**
+> **[Wiki: CypherFix](https://github.com/NisargDedakiya/DNM-hunter/wiki/CypherFix-Automated-Remediation)** | **[Technical: README.CYPHERFIX_AGENTS.md](readmes/README.CYPHERFIX_AGENTS.md)**
 
 ### Agent Skills
 
-An **LLM-powered Intent Router** classifies user requests into agent skills: CVE (MSF), SQL Injection, XSS, SSRF, RCE, Path Traversal / LFI / RFI, Credential Testing, Social Engineering, Availability Testing, or custom user-defined skills uploaded as Markdown files. Ready-to-use **[community skills](agentic/community-skills/)** ship for API testing, XSS, SQLi, XXE, BFLA, SSTI, IDOR / BOLA, insecure deserialization, mass assignment, subdomain takeover, and insecure file uploads -- download the `.md` file and upload it via **Global Settings > Agent Skills** to activate it for your user. You can also [contribute your own](https://github.com/samugit83/redamon/wiki/Agent-Skills#share-your-skills-with-the-community) by opening a PR.
+An **LLM-powered Intent Router** classifies user requests into agent skills: CVE (MSF), SQL Injection, XSS, SSRF, RCE, Path Traversal / LFI / RFI, Credential Testing, Social Engineering, Availability Testing, or custom user-defined skills uploaded as Markdown files. Ready-to-use **[community skills](agentic/community-skills/)** ship for API testing, XSS, SQLi, XXE, BFLA, SSTI, IDOR / BOLA, insecure deserialization, mass assignment, subdomain takeover, and insecure file uploads -- download the `.md` file and upload it via **Global Settings > Agent Skills** to activate it for your user. You can also [contribute your own](https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills#share-your-skills-with-the-community) by opening a PR.
 
-> **[Wiki: Agent Skills](https://github.com/samugit83/redamon/wiki/Agent-Skills)** | **[Community Skills](agentic/community-skills/)**
+> **[Wiki: Agent Skills](https://github.com/NisargDedakiya/DNM-hunter/wiki/Agent-Skills)** | **[Community Skills](agentic/community-skills/)**
 
 ### Chat Skills
 
-**On-demand reference injection** via `/skill` command in the agent chat. Chat Skills are tactical reference docs -- tool playbooks, vulnerability guides, framework-specific notes -- that you inject into the agent's context exactly when you need them. Type `/skill ssrf` to load SSRF expertise, or click the skill picker button for a browsable list. **46 reference skills** ship with NisargHunter AI covering vulnerabilities (JWT, OAuth/OIDC, CSRF, race conditions, business logic, prototype pollution, ReDoS, 2FA bypass, LDAP/XPath injection, web cache poisoning, CORS, host header injection, clickjacking, CRLF, and more), tooling (sqlmap, nuclei, ffuf, nmap, httpx, naabu, katana, subfinder, semgrep), protocols (GraphQL, WebSocket, SOAP/WS-Security, SAML), technologies (Firebase, Supabase), frameworks (Next.js, FastAPI, NestJS), Active Directory (kill chain, Kerberoasting/ASREPRoast, AD-CS ESC1-15, BloodHound path-to-DA), cloud (AWS, Azure, GCP), and post-exploitation (Docker escape, Linux / Windows privesc). Unlike Agent Skills (which drive classification and phase-aware workflows), Chat Skills are supplementary context that persists until you change or remove them.
+**On-demand reference injection** via `/skill` command in the agent chat. Chat Skills are tactical reference docs -- tool playbooks, vulnerability guides, framework-specific notes -- that you inject into the agent's context exactly when you need them. Type `/skill ssrf` to load SSRF expertise, or click the skill picker button for a browsable list. **46 reference skills** ship with DNM-Hunter covering vulnerabilities (JWT, OAuth/OIDC, CSRF, race conditions, business logic, prototype pollution, ReDoS, 2FA bypass, LDAP/XPath injection, web cache poisoning, CORS, host header injection, clickjacking, CRLF, and more), tooling (sqlmap, nuclei, ffuf, nmap, httpx, naabu, katana, subfinder, semgrep), protocols (GraphQL, WebSocket, SOAP/WS-Security, SAML), technologies (Firebase, Supabase), frameworks (Next.js, FastAPI, NestJS), Active Directory (kill chain, Kerberoasting/ASREPRoast, AD-CS ESC1-15, BloodHound path-to-DA), cloud (AWS, Azure, GCP), and post-exploitation (Docker escape, Linux / Windows privesc). Unlike Agent Skills (which drive classification and phase-aware workflows), Chat Skills are supplementary context that persists until you change or remove them.
 
-> **[Wiki: Chat Skills](https://github.com/samugit83/redamon/wiki/Chat-Skills)** | **[Community Chat Skills](agentic/skills/)**
+> **[Wiki: Chat Skills](https://github.com/NisargDedakiya/DNM-hunter/wiki/Chat-Skills)** | **[Community Chat Skills](agentic/skills/)**
 
 ### GitHub Secret Hunter
 
 Scans GitHub repositories, gists, and commit history for exposed secrets using **40+ regex patterns** and Shannon entropy analysis.
 
-> **[Wiki: GitHub Secret Hunting](https://github.com/samugit83/redamon/wiki/GitHub-Secret-Hunting)**
+> **[Wiki: GitHub Secret Hunting](https://github.com/NisargDedakiya/DNM-hunter/wiki/GitHub-Secret-Hunting)**
 
 ### TruffleHog Deep Secret Scanner
 
@@ -693,51 +685,51 @@ Scans GitHub repositories for leaked credentials using **700+ detectors** with a
 
 **500+ configurable parameters** across 16 tabs controlling every tool's behavior, from scan modules to agent approval gates. Managed through the webapp UI.
 
-> **[Wiki: Project Settings Reference](https://github.com/samugit83/redamon/wiki/Project-Settings-Reference)**
+> **[Wiki: Project Settings Reference](https://github.com/NisargDedakiya/DNM-hunter/wiki/Project-Settings-Reference)**
 
 <p align="center">
-  <img src="assets/settings.gif" alt="NisargHunter AI Project Settings" width="100%"/>
+  <img src="assets/settings.gif" alt="DNM-Hunter Project Settings" width="100%"/>
 </p>
 
 ### Rules of Engagement (RoE)
 
 Upload a RoE document (PDF, TXT, MD, DOCX) to auto-configure project settings and enforce engagement constraints. Enforcement at both the recon pipeline (excluded hosts, rate limits, time windows) and AI agent (prompt injection, severity phase cap, tool restrictions) layers.
 
-> **[Wiki: Rules of Engagement](https://github.com/samugit83/redamon/wiki/Rules-of-Engagement)**
+> **[Wiki: Rules of Engagement](https://github.com/NisargDedakiya/DNM-hunter/wiki/Rules-of-Engagement)**
 
 ### Insights Dashboard
 
 30+ interactive charts across 4 sections: attack chains & exploits, attack surface, vulnerabilities & CVE intelligence, and graph overview. All data pulled live from Neo4j and PostgreSQL.
 
-> **[Wiki: Insights Dashboard](https://github.com/samugit83/redamon/wiki/Insights-Dashboard)**
+> **[Wiki: Insights Dashboard](https://github.com/NisargDedakiya/DNM-hunter/wiki/Insights-Dashboard)**
 
 <p align="center">
-  <img src="assets/insights.gif" alt="NisargHunter AI Insights Dashboard" width="100%"/>
+  <img src="assets/insights.gif" alt="DNM-Hunter Insights Dashboard" width="100%"/>
 </p>
 
 ### Target Guardrail
 
 LLM-based guardrail preventing targeting of unauthorized domains: blocks government sites, major tech companies, financial institutions, and social media platforms. Operates at both project creation and agent initialization. Government, military, educational, and international organization domains (`.gov`, `.mil`, `.edu`, `.int`) are permanently blocked by a deterministic hard guardrail that cannot be disabled.
 
-> **[Wiki: Creating a Project](https://github.com/samugit83/redamon/wiki/Creating-a-Project)**
+> **[Wiki: Creating a Project](https://github.com/NisargDedakiya/DNM-hunter/wiki/Creating-a-Project)**
 
 ### Tool Confirmation
 
 Per-tool human-in-the-loop gate for dangerous operations. When enabled, the agent pauses before executing high-impact tools (Nmap, Nuclei, Metasploit, Hydra, Kali shell, code execution) and presents an inline **Allow / Deny** prompt in the chat timeline. Supports both single-tool and parallel-wave (plan) confirmation modes. Users can approve, reject, or modify tool arguments before execution proceeds. Disabled via the `Require Tool Confirmation` toggle in Project Settings.
 
-> **[Wiki: Pentest Agent (Tool Confirmation)](https://github.com/samugit83/redamon/wiki/Pentest-Agent#tool-confirmation-gate)**
+> **[Wiki: Pentest Agent (Tool Confirmation)](https://github.com/NisargDedakiya/DNM-hunter/wiki/Pentest-Agent#tool-confirmation-gate)**
 
 ### Pentest Reports
 
 Professional, client-ready HTML reports with 11 sections. When an AI model is configured, 6 sections receive **LLM-generated narratives** including executive summary, risk analysis, and prioritized remediation triage. **[View example report](https://htmlpreview.github.io/?https://raw.githubusercontent.com/wiki/nisargdedakiya/dnm-hunter/docs/Pentest%20Report%20%E2%80%94%20devergolabs.com.html)**.
 
-> **[Wiki: Pentest Reports](https://github.com/samugit83/redamon/wiki/Pentest-Reports)**
+> **[Wiki: Pentest Reports](https://github.com/NisargDedakiya/DNM-hunter/wiki/Pentest-Reports)**
 
 ### Data Export & Import
 
 Full project backup and restore through the web interface: settings, conversations, graph data, recon/GVM/GitHub hunt results as a portable ZIP archive.
 
-> **[Wiki: Data Export & Import](https://github.com/samugit83/redamon/wiki/Data-Export-and-Import)**
+> **[Wiki: Data Export & Import](https://github.com/NisargDedakiya/DNM-hunter/wiki/Data-Export-and-Import)**
 
 ---
 
@@ -864,8 +856,8 @@ flowchart TB
 
 | Resource | Link |
 |----------|------|
-| **Full Wiki** (user guide) | **[github.com/samugit83/redamon/wiki](https://github.com/samugit83/redamon/wiki)** |
-| AI-Assisted Development | **[Wiki: Ship Perfect PRs with AI](https://github.com/samugit83/redamon/wiki/AI-Assisted-Development)** |
+| **Full Wiki** (user guide) | **[github.com/NisargDedakiya/DNM-hunter/wiki](https://github.com/NisargDedakiya/DNM-hunter/wiki)** |
+| AI-Assisted Development | **[Wiki: Ship Perfect PRs with AI](https://github.com/NisargDedakiya/DNM-hunter/wiki/AI-Assisted-Development)** |
 | Developer Guide | [readmes/README.DEV.md](readmes/README.DEV.md) |
 | Scanner Suite Architecture | [docs/SECURITY_MODULES.md](docs/SECURITY_MODULES.md) |
 | Architecture Diagrams | [readmes/ARCHITECTURE.md](readmes/ARCHITECTURE.md) |
@@ -880,25 +872,25 @@ flowchart TB
 
 ## Troubleshooting
 
-NisargHunter AI is fully Dockerized and runs on any OS with Docker Compose v2+. For OS-specific fixes (Linux, Windows, macOS), see **[Troubleshooting Guide](readmes/TROUBLESHOOTING.md)** or the **[Wiki](https://github.com/samugit83/redamon/wiki/Troubleshooting)**.
+DNM-Hunter is fully Dockerized and runs on any OS with Docker Compose v2+. For OS-specific fixes (Linux, Windows, macOS), see **[Troubleshooting Guide](readmes/TROUBLESHOOTING.md)** or the **[Wiki](https://github.com/NisargDedakiya/DNM-hunter/wiki/Troubleshooting)**.
 
 ---
 
-## NisargHunter AI HackLab
+## DNM-Hunter HackLab
 
 <table>
 <tr>
 <td width="280" align="center">
-  <a href="https://github.com/samugit83/redamon/wiki/RedAmon-HackLab">
-    <img src="assets/hacklab.png" alt="NisargHunter AI HackLab" width="260"/>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/HackLab">
+    <img src="assets/hacklab.png" alt="DNM-Hunter HackLab" width="260"/>
   </a>
 </td>
 <td>
-  <h3>Want to see NisargHunter AI think like a real pentester?</h3>
+  <h3>Want to see DNM-Hunter think like a real pentester?</h3>
   <p>Explore real-time live attack sessions -- every step, every pivot, every exploit -- across 15 vulnerability categories on a live target. Full session logs, decoded walkthroughs, and video recordings showing the agent autonomously compromising a multi-service server from scratch.</p>
-  <a href="https://github.com/samugit83/redamon/wiki/RedAmon-HackLab"><b>Explore the HackLab &rarr;</b></a>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/HackLab"><b>Explore the HackLab &rarr;</b></a>
   &nbsp;&nbsp;|&nbsp;&nbsp;
-  <a href="https://github.com/samugit83/redamon/wiki/RedAmon-HackLab#community-sessions"><b>Submit your own session &rarr;</b></a>
+  <a href="https://github.com/NisargDedakiya/DNM-hunter/wiki/HackLab#community-sessions"><b>Submit your own session &rarr;</b></a>
   <br/><sub>Got an amazing agent session on your own target? Share it with the community -- session log + YouTube video.</sub>
 </td>
 </tr>
@@ -908,30 +900,30 @@ NisargHunter AI is fully Dockerized and runs on any OS with Docker Compose v2+. 
 
 ## Community Showcase
 
-Videos, writeups, and real-world experiences from security professionals using NisargHunter AI in the field. Want to be featured? See the [Content Creator](CONTRIBUTING.md#content-creator) track in CONTRIBUTING.md.
+Videos, writeups, and real-world experiences from security professionals using DNM-Hunter in the field. Want to be featured? See the [Content Creator](CONTRIBUTING.md#content-creator) track in CONTRIBUTING.md.
 
 ### Videos
 
 | Title | Link |
 |-------|------|
-| NisargHunter AI v2.2.0, Social Engineering Test: Payload Delivery to Shell Access | [Watch](https://youtu.be/kVjV9K_eks4) |
+| DNM-Hunter v2.2.0, Social Engineering Test: Payload Delivery to Shell Access | [Watch](https://youtu.be/kVjV9K_eks4) |
 | AI Agent CVE Validation: Beyond Standard Tooling | [Watch](https://youtu.be/rypmP1SJon8) |
-| NisargHunter AI 2.0, From 0 to 1000 GitHub Stars in 10 Days: Multi-Agent Parallel Attacks | [Watch](https://youtu.be/afViJUit0xE) |
+| DNM-Hunter 2.0, From 0 to 1000 GitHub Stars in 10 Days: Multi-Agent Parallel Attacks | [Watch](https://youtu.be/afViJUit0xE) |
 | Build an Autonomous AI Red Team Agent from Scratch: LangGraph + Metasploit + Neo4j Full Tutorial | [Watch](https://youtu.be/mO5CCkYlY94) |
 
 ### Real-World Case Studies
 
 | Who | What | Link |
 |-----|------|------|
-| Nipun Dinudaya | Deployed NisargHunter AI on a company website, identified a critical SQL injection vulnerability that could have caused significant data exposure | [Read on LinkedIn](https://www.linkedin.com/posts/nipun-dinudaya-6159b32bb_nisarghunter-cybersecurity-penetrationtesting-ugcPost-7431233870253166592-aLvb) |
-| Venkata Bhargav CH S | Used NisargHunter AI during an internship at Ascent e-Digit Solutions: hands-on reconnaissance, DNS analysis, and attack surface mapping | [Read on LinkedIn](https://www.linkedin.com/posts/venkata-bhargav-cybersecurity_cybersecurity-ethicalhacking-redteam-share-7434940660803182592-e9En) |
+| Nipun Dinudaya | Deployed DNM-Hunter on a company website, identified a critical SQL injection vulnerability that could have caused significant data exposure | [Read on LinkedIn](https://www.linkedin.com/posts/nipun-dinudaya-6159b32bb_nisarghunter-cybersecurity-penetrationtesting-ugcPost-7431233870253166592-aLvb) |
+| Venkata Bhargav CH S | Used DNM-Hunter during an internship at Ascent e-Digit Solutions: hands-on reconnaissance, DNS analysis, and attack surface mapping | [Read on LinkedIn](https://www.linkedin.com/posts/venkata-bhargav-cybersecurity_cybersecurity-ethicalhacking-redteam-share-7434940660803182592-e9En) |
 
 ### Community Guides
 
 | Who | What | Link |
 |-----|------|------|
-| MrGood | Mastering NisargHunter AI: A Comprehensive Guide to Installation on Kali Linux, addressing Kali-specific Docker challenges and security posture | [Read on Medium](https://cyberaccoon.medium.com/mastering-nisarghunter-a-comprehensive-guide-to-installation-on-kali-linux-ea544e6f5b9f) |
-| Bogdan Caraman | How to Install NisargHunter AI on Debian 13 (Trixie) with OpenRouter, step-by-step guide with Docker setup, static IP, and systemd automation | [Read on Blog](https://blog.bogdancaraman.com/install-nisarghunter-debian-13-openrouter/) |
+| MrGood | Mastering DNM-Hunter: A Comprehensive Guide to Installation on Kali Linux, addressing Kali-specific Docker challenges and security posture | [Read on Medium](https://cyberaccoon.medium.com/mastering-nisarghunter-a-comprehensive-guide-to-installation-on-kali-linux-ea544e6f5b9f) |
+| Bogdan Caraman | How to Install DNM-Hunter on Debian 13 (Trixie) with OpenRouter, step-by-step guide with Docker setup, static IP, and systemd automation | [Read on Blog](https://blog.bogdancaraman.com/install-nisarghunter-debian-13-openrouter/) |
 
 ---
 
@@ -941,29 +933,29 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 
 ---
 
-## Maintainers
+## Maintainer
 
-**Samuele Giampieri**: creator, maintainer & AI platform architect · [LinkedIn](https://www.linkedin.com/in/samuele-giampieri-b1b67597/) · [GitHub](https://github.com/samugit83) · [Devergo Labs](https://www.devergolabs.com/)
+**DNM-Hunter** is maintained by **[Nisarg Dedakiya](https://github.com/NisargDedakiya)**.
 
-**Ritesh Gohil**: maintainer & lead security researcher · [LinkedIn](https://www.linkedin.com/in/riteshgohil25/) · [GitHub](https://github.com/L4stPL4Y3R)
+Built on the open-source **[RedAmon](https://github.com/samugit83/redamon)** project by **Samuele Giampieri** ([GitHub](https://github.com/samugit83)) and **Ritesh Gohil** ([GitHub](https://github.com/L4stPL4Y3R)) — full credit to the original authors.
 
 ---
 
 ## Contact
 
-For questions, feedback, or collaboration inquiries: **devergo.sam@gmail.com**
+For questions, feedback, or collaboration inquiries, open an issue on the **[DNM-Hunter repository](https://github.com/NisargDedakiya/DNM-hunter/issues)**.
 
 ---
 
 ## Legal
 
-> **LOCAL USE ONLY**: NisargHunter AI is designed to run on a **local machine** and has **not** been hardened for server or cloud deployment. It lacks the security controls required for a production environment exposed to the internet (e.g. authentication hardening, rate limiting, TLS enforcement, input sanitization across all surfaces). **Do not deploy NisargHunter AI on a public-facing server.** Running it outside a trusted local network is entirely at your own risk.
+> **LOCAL USE ONLY**: DNM-Hunter is designed to run on a **local machine** and has **not** been hardened for server or cloud deployment. It lacks the security controls required for a production environment exposed to the internet (e.g. authentication hardening, rate limiting, TLS enforcement, input sanitization across all surfaces). **Do not deploy DNM-Hunter on a public-facing server.** Running it outside a trusted local network is entirely at your own risk.
 
 This project is released under the [MIT License](LICENSE).
 
-NisargHunter AI integrates several third-party tools under their own licenses (MIT, Apache-2.0, BSD, GPL-2.0/3.0, AGPL-3.0, LGPL, and the WPScan Public Source License). Source code for all AGPL-licensed components is available at their upstream repositories. The full inventory and license obligations are documented in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
+DNM-Hunter integrates several third-party tools under their own licenses (MIT, Apache-2.0, BSD, GPL-2.0/3.0, AGPL-3.0, LGPL, and the WPScan Public Source License). Source code for all AGPL-licensed components is available at their upstream repositories. The full inventory and license obligations are documented in [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md).
 
-> **Commercial use note**: The Kali sandbox image bundles **WPScan**, which is governed by the WPScan Public Source License. WPScan restricts commercial use (SaaS, paid product offerings, value-added services) without a separate license from the WPScan team. Pentesting engagements and personal use are permitted. If you intend to use NisargHunter AI in a commercial product or service, review [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md) before distribution.
+> **Commercial use note**: The Kali sandbox image bundles **WPScan**, which is governed by the WPScan Public Source License. WPScan restricts commercial use (SaaS, paid product offerings, value-added services) without a separate license from the WPScan team. Pentesting engagements and personal use are permitted. If you intend to use DNM-Hunter in a commercial product or service, review [THIRD-PARTY-LICENSES.md](THIRD-PARTY-LICENSES.md) before distribution.
 
 See [DISCLAIMER.md](DISCLAIMER.md) for full terms of use, acceptable use policy, and legal compliance requirements.
 
@@ -972,4 +964,3 @@ See [DISCLAIMER.md](DISCLAIMER.md) for full terms of use, acceptable use policy,
 <p align="center">
   <strong>Use responsibly. Test ethically. Defend better.</strong>
 </p>
-# DNM-hunter
