@@ -45,8 +45,11 @@ class VerificationEngine:
         if vc == VulnClass.BOOLEAN_SQLI:
             return [self.boolean]
         if vc == VulnClass.BLIND_CMDI:
-            # OOB is stronger than timing for command injection when available.
-            return ([self.oast] if self.oast else []) + [self.timing]
+            # Confirm command injection with the `sleep` timing probe. OAST is
+            # NOT used here: a `curl http://<oast>` payload injected at a param
+            # that is actually an SSRF sink would cross-trigger a callback and be
+            # misread as command execution. OAST stays reserved for SSRF/RCE.
+            return [self.timing]
         if vc == VulnClass.REFLECTED_XSS:
             return [self.reflection]
         if vc in (VulnClass.SSRF, VulnClass.BLIND_RCE):

@@ -40,6 +40,7 @@ nh-binary-audit = "binary_audit.elf:_main"
 nh-vrt-coverage = "vrt.coverage:_main"
 nh-owasp-coverage = "vrt.owasp:_main"
 nh-verify-demo = "verify.__main__:main"
+nh-web-attack = "web_attack.__main__:main"
 
 [tool.setuptools]
 # Explicit package list — the suite is a set of cooperating top-level packages.
@@ -56,6 +57,7 @@ packages = [
   "repo_scan",
   "vrt",
   "verify",
+  "web_attack",
   "iac_scan",
   "iac_scan.rules",
 ]
@@ -82,6 +84,7 @@ include = [
   "vrt/**/*.py",
   "report_gen/**/*.py",
   "verify/**/*.py",
+  "web_attack/**/*.py",
 ]
 
 [tool.ruff.lint]
