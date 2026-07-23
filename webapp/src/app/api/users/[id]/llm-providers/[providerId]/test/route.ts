@@ -44,12 +44,26 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Proxy to agent test endpoint
-    const agentResp = await fetch(`${AGENT_API_URL}/llm-provider/test`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config),
-    })
+    // Proxy to agent test endpoint. The agent is what actually calls the AI
+    // provider, so a network failure here means the agent is unreachable — not
+    // that the API key is wrong. Translate the cryptic "fetch failed" into an
+    // actionable message.
+    let agentResp: Response
+    try {
+      agentResp = await fetch(`${AGENT_API_URL}/llm-provider/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      })
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Could not reach the AI agent service at ${AGENT_API_URL}. The agent is what validates provider keys and discovers models — make sure its container is running and healthy (check "docker compose ps" / "./nisarghunter.sh status"). This is not a problem with your API key.`,
+        },
+        { status: 502 }
+      )
+    }
 
     const result = await agentResp.json()
     return NextResponse.json(result, { status: agentResp.status })
