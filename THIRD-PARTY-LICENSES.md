@@ -1,8 +1,8 @@
 # Third-Party Licenses
 
-RedAmon integrates, bundles, or dynamically invokes the following third-party open-source software. Each component is governed by its own license. **The authors of RedAmon do not own, maintain, or provide warranty for any of these tools.** This file documents all third-party components, their licenses, and where to obtain their source code.
+DNM-Hunter integrates, bundles, or dynamically invokes the following third-party open-source software. Each component is governed by its own license. **The authors of DNM-Hunter do not own, maintain, or provide warranty for any of these tools.** This file documents all third-party components, their licenses, and where to obtain their source code.
 
-> **AGPL-3.0 Notice**: Several tools bundled in RedAmon's Docker images are licensed under the GNU Affero General Public License v3.0. Under AGPL-3.0, the complete corresponding source code for these tools must be made available to any user who interacts with them. Source code for all AGPL-licensed components is available at their respective repositories listed below.
+> **AGPL-3.0 Notice**: Several tools bundled in DNM-Hunter's Docker images are licensed under the GNU Affero General Public License v3.0. Under AGPL-3.0, the complete corresponding source code for these tools must be made available to any user who interacts with them. Source code for all AGPL-licensed components is available at their respective repositories listed below.
 
 ---
 
@@ -55,7 +55,7 @@ These are AD reconnaissance and abuse primitives installed in the Kali sandbox c
 
 | Tool | Purpose | License | Source Repository | How Used |
 |------|---------|---------|-------------------|----------|
-| **BloodHound (Python collector)** | Active Directory relationship collector | MIT | https://github.com/dirkjanm/BloodHound.py | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` (CLI use only; no Python imports in RedAmon source) |
+| **BloodHound (Python collector)** | Active Directory relationship collector | MIT | https://github.com/dirkjanm/BloodHound.py | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` (CLI use only; no Python imports in DNM-Hunter source) |
 | **certipy-ad** | AD Certificate Services exploitation (ESC1-ESC13) | MIT | https://github.com/ly4k/Certipy | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
 | **ldapdomaindump** | LDAP enumeration (users, groups, password policies) | MIT | https://github.com/dirkjanm/ldapdomaindump | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
 | **bloodyAD** | Live AD abuse primitives (password reset, group add, SPN set) | MIT | https://github.com/CravateRouge/bloodyAD | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
@@ -85,13 +85,13 @@ These SDKs are installed in the Kali sandbox container and used by cloud-enumera
 
 ## Privilege Escalation Helpers (Staged Binaries)
 
-These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and served by the agent to a foothold host (HTTP, SMB, or upload primitive). They are **not** linked against RedAmon code; they are unmodified upstream artifacts staged for delivery.
+These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and served by the agent to a foothold host (HTTP, SMB, or upload primitive). They are **not** linked against DNM-Hunter code; they are unmodified upstream artifacts staged for delivery.
 
 | Tool | Purpose | License | Source Repository | How Used |
 |------|---------|---------|-------------------|----------|
-| **PEASS-ng (linpeas / winPEAS)** | Linux + Windows privesc auditors | GPL-2.0 | https://github.com/peass-ng/PEASS-ng | Binaries downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/{linux,windows}/` (unmodified upstream artifact, served to foothold hosts; not linked against RedAmon) |
+| **PEASS-ng (linpeas / winPEAS)** | Linux + Windows privesc auditors | GPL-2.0 | https://github.com/peass-ng/PEASS-ng | Binaries downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/{linux,windows}/` (unmodified upstream artifact, served to foothold hosts; not linked against DNM-Hunter) |
 | **LinEnum** | Linux enumeration helper script | MIT | https://github.com/rebootuser/LinEnum | Script downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/linux/` |
-| **pspy** | Real-time process snooper (no root needed) | GPL-3.0 | https://github.com/DominicBreuker/pspy | Binary downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/linux/` (unmodified upstream artifact, served to foothold hosts; not linked against RedAmon) |
+| **pspy** | Real-time process snooper (no root needed) | GPL-3.0 | https://github.com/DominicBreuker/pspy | Binary downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/linux/` (unmodified upstream artifact, served to foothold hosts; not linked against DNM-Hunter) |
 | **deepce** | Docker container escape primitive scanner | Apache-2.0 | https://github.com/stealthcopter/deepce | Script downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/linux/` |
 | **PowerUp.ps1 (PowerSploit)** | Windows local privilege escalation toolkit | BSD-3-Clause | https://github.com/PowerShellMafia/PowerSploit | Script downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/windows/` |
 | **PrivescCheck.ps1** | Windows privilege escalation audit script | BSD-3-Clause | https://github.com/itm4n/PrivescCheck | Script downloaded in `mcp/kali-sandbox/Dockerfile`, staged in `/opt/tools/windows/` |
@@ -105,14 +105,14 @@ These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and
 | **Nmap** | Network scanning and service detection | NPSL (Nmap Public Source License) | https://github.com/nmap/nmap | Installed via `apt-get` in `mcp/kali-sandbox/Dockerfile` |
 | **Masscan** | Asynchronous TCP port scanner | AGPL-3.0 | https://github.com/robertdavidgraham/masscan | Built from source in `recon/Dockerfile`; also installed via `apt-get` in `mcp/kali-sandbox/Dockerfile` |
 | **Amass** | In-depth subdomain enumeration | Apache-2.0 | https://github.com/owasp-amass/amass | Pulled as Docker image `caffix/amass:latest` at runtime |
-| **Knockpy** | Subdomain enumeration via wordlist | GPL-3.0 | https://github.com/guelfoweb/knock | Installed via `pip` in `recon/Dockerfile`. **Invoked as a CLI subprocess only** (`knockpy -d ...` in `recon/main_recon_modules/domain_recon.py`); never imported into RedAmon source, so its GPL scope does not extend to RedAmon's code (mere aggregation). |
+| **Knockpy** | Subdomain enumeration via wordlist | GPL-3.0 | https://github.com/guelfoweb/knock | Installed via `pip` in `recon/Dockerfile`. **Invoked as a CLI subprocess only** (`knockpy -d ...` in `recon/main_recon_modules/domain_recon.py`); never imported into DNM-Hunter source, so its GPL scope does not extend to DNM-Hunter's code (mere aggregation). |
 | **puredns** | DNS wildcard filtering and resolution | GPL-3.0 | https://github.com/d3mondev/puredns | Pulled as Docker image `frost19k/puredns:latest` at runtime |
 | **Hakrawler** | Web crawling and link discovery | MIT | https://github.com/hakluke/hakrawler | Pulled as Docker image `jauderho/hakrawler:latest` at runtime |
 | **GAU (GetAllUrls)** | Passive URL discovery from web archives | MIT | https://github.com/lc/gau | Pulled as Docker image `sxcurity/gau:latest` at runtime |
 | **Kiterunner** | API endpoint discovery | AGPL-3.0 | https://github.com/assetnote/kiterunner | Binary downloaded from GitHub releases at runtime |
 | **jsluice** | JavaScript file analysis for endpoints and secrets | MIT | https://github.com/BishopFox/jsluice | Built from source via `go install` in `recon/Dockerfile` (multi-stage) |
 | **ffuf** | Web fuzzer (directories, parameters, vhosts) | MIT | https://github.com/ffuf/ffuf | Built from source in `recon/Dockerfile`; also installed via `go install` in `mcp/kali-sandbox/Dockerfile` |
-| **Arjun** | HTTP hidden parameter discovery | AGPL-3.0 | https://github.com/s0md3v/Arjun | Installed via `pip` in `recon/requirements.txt`. **Invoked as a CLI subprocess only** (`shutil.which('arjun')` + `subprocess(['arjun', ...])` in `recon/helpers/resource_enum/arjun_helpers.py`); never imported into RedAmon source, so its AGPL scope does not extend to RedAmon's code (mere aggregation). |
+| **Arjun** | HTTP hidden parameter discovery | AGPL-3.0 | https://github.com/s0md3v/Arjun | Installed via `pip` in `recon/requirements.txt`. **Invoked as a CLI subprocess only** (`shutil.which('arjun')` + `subprocess(['arjun', ...])` in `recon/helpers/resource_enum/arjun_helpers.py`); never imported into DNM-Hunter source, so its AGPL scope does not extend to DNM-Hunter's code (mere aggregation). |
 | **ParamSpider** | URL parameter mining from web archives | MIT | https://github.com/devanshbatham/ParamSpider | Installed via `pip` (git) in `recon/requirements.txt` |
 | **TruffleHog** | Credential and secret scanning | AGPL-3.0 | https://github.com/trufflesecurity/trufflehog | Pulled as Docker image `trufflesecurity/trufflehog:latest` at runtime; also installed as binary in `trufflehog_scan/Dockerfile` |
 | **gitleaks** | Git repository secret scanner (API keys, passwords, tokens) | MIT | https://github.com/gitleaks/gitleaks | Installed via `go install` in `mcp/kali-sandbox/Dockerfile` |
@@ -122,7 +122,7 @@ These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and
 | **testssl.sh** | SSL/TLS configuration auditing | GPL-2.0 | https://github.com/drwetter/testssl.sh | Installed via `apt-get` in `mcp/kali-sandbox/Dockerfile` |
 | **CeWL** | Custom wordlist generator from target websites | CC-BY-SA-2.0 UK (with GPL-3.0+ alternative offered by upstream) | https://github.com/digininja/CeWL | Installed via `apt-get` in `mcp/kali-sandbox/Dockerfile` |
 | **Subjack** | Subdomain takeover detection (CNAME/NS/MX/SPF + stale A records) | Apache-2.0 | https://github.com/haccer/subjack | Built from source via `go install` in `recon/Dockerfile` (multi-stage); invoked as native binary inside the recon container |
-| **BadDNS** | Deep DNS takeover detection (CNAME/NS/MX/TXT/SPF/DMARC/MTA-STS/wildcard/NSEC/references/zonetransfer modules) | **AGPL-3.0** | https://github.com/blacklanternsecurity/baddns | **Isolated in its own Docker image `redamon-baddns:latest`** (built from `baddns_scan/Dockerfile` via `pip install baddns`). RedAmon never imports from this package. The recon container spawns the sidecar via `docker run --rm` and receives results as NDJSON on stdout. The process + filesystem boundary preserves the AGPL-3.0 license scope. Upstream source code is available at the linked repository. |
+| **BadDNS** | Deep DNS takeover detection (CNAME/NS/MX/TXT/SPF/DMARC/MTA-STS/wildcard/NSEC/references/zonetransfer modules) | **AGPL-3.0** | https://github.com/blacklanternsecurity/baddns | **Isolated in its own Docker image `nisarghunter-baddns:latest`** (built from `baddns_scan/Dockerfile` via `pip install baddns`). DNM-Hunter never imports from this package. The recon container spawns the sidecar via `docker run --rm` and receives results as NDJSON on stdout. The process + filesystem boundary preserves the AGPL-3.0 license scope. Upstream source code is available at the linked repository. |
 
 ---
 
@@ -139,8 +139,8 @@ These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and
 | **Playwright** | Browser automation (Chromium) for web recon | Apache-2.0 | https://github.com/microsoft/playwright-python | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
 | **zeep** | Python SOAP client (WS-Security / XSW probing in the SOAP Chat Skill) | MIT | https://github.com/mvantellingen/python-zeep | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
 | **python3-saml** | SAML toolkit (XSW / Comment Injection / Golden SAML construction in the SAML Chat Skill) | MIT | https://github.com/SAML-Toolkits/python3-saml | Installed via `pip` in `mcp/kali-sandbox/Dockerfile` |
-| **OWASP ZAP (Zed Attack Proxy)** | Browser-driven (headless Firefox) Ajax Spider for resource enumeration of JS-heavy SPAs | Apache-2.0 | https://github.com/zaproxy/zaproxy | Pulled as Docker image `ghcr.io/zaproxy/zaproxy:stable` at runtime by the recon container (`recon/helpers/resource_enum/zap_ajax_spider_helpers.py`); run with `--net=host` via the ZAP Automation Framework. RedAmon never imports from ZAP; results are parsed from an exported artifact (process + filesystem boundary). |
-| **Web Cache Vulnerability Scanner (WCVS)** | Web cache poisoning & deception scanning (header/parameter cache-key probing) for the cache-poisoning recon module | Apache-2.0 | https://github.com/Hackmanit/Web-Cache-Vulnerability-Scanner | Go binary built from source into the local image `redamon-wcvs:latest` (`wcvs/Dockerfile`); run as a separate `docker run` subprocess from the recon container (`recon/cache_scan/wcvs_runner.py`). RedAmon never links WCVS code; output is parsed from JSON (process boundary, mere aggregation). |
+| **OWASP ZAP (Zed Attack Proxy)** | Browser-driven (headless Firefox) Ajax Spider for resource enumeration of JS-heavy SPAs | Apache-2.0 | https://github.com/zaproxy/zaproxy | Pulled as Docker image `ghcr.io/zaproxy/zaproxy:stable` at runtime by the recon container (`recon/helpers/resource_enum/zap_ajax_spider_helpers.py`); run with `--net=host` via the ZAP Automation Framework. DNM-Hunter never imports from ZAP; results are parsed from an exported artifact (process + filesystem boundary). |
+| **Web Cache Vulnerability Scanner (WCVS)** | Web cache poisoning & deception scanning (header/parameter cache-key probing) for the cache-poisoning recon module | Apache-2.0 | https://github.com/Hackmanit/Web-Cache-Vulnerability-Scanner | Go binary built from source into the local image `nisarghunter-wcvs:latest` (`wcvs/Dockerfile`); run as a separate `docker run` subprocess from the recon container (`recon/cache_scan/wcvs_runner.py`). DNM-Hunter never links WCVS code; output is parsed from JSON (process boundary, mere aggregation). |
 
 ---
 
@@ -160,7 +160,7 @@ These scripts and binaries are downloaded into `/opt/tools/{linux,windows}/` and
 
 ## AI Gauntlet (Offensive AI/LLM Testing)
 
-These red-team tools power the **AI Gauntlet** (RedAmon v5.0.0), the offensive AI/LLM testing module. garak, PyRIT, and Giskard are installed in **isolated per-tool Python virtualenvs** inside the `ai_attack_surface_scan` Docker image; promptfoo is installed as a Node.js CLI. Each is invoked as a **separate subprocess** by the scan container (mere aggregation). All four are permissively licensed (Apache-2.0 / MIT). Grading is performed by a local model served via Ollama, with zero external egress.
+These red-team tools power the **AI Gauntlet** (DNM-Hunter v5.0.0), the offensive AI/LLM testing module. garak, PyRIT, and Giskard are installed in **isolated per-tool Python virtualenvs** inside the `ai_attack_surface_scan` Docker image; promptfoo is installed as a Node.js CLI. Each is invoked as a **separate subprocess** by the scan container (mere aggregation). All four are permissively licensed (Apache-2.0 / MIT). Grading is performed by a local model served via Ollama, with zero external egress.
 
 | Tool | Purpose | License | Source Repository | How Used |
 |------|---------|---------|-------------------|----------|
@@ -173,7 +173,7 @@ These red-team tools power the **AI Gauntlet** (RedAmon v5.0.0), the offensive A
 
 ### Judge model & red-team datasets (fetched at runtime)
 
-The judge/grader model and promptfoo's dataset plugins are **downloaded at scan time** (Ollama model pull / HuggingFace), not bundled in the RedAmon image. They are not redistributed by RedAmon; each is governed by its own upstream terms.
+The judge/grader model and promptfoo's dataset plugins are **downloaded at scan time** (Ollama model pull / HuggingFace), not bundled in the DNM-Hunter image. They are not redistributed by DNM-Hunter; each is governed by its own upstream terms.
 
 | Resource | Purpose | License | Source | Notes |
 |----------|---------|---------|--------|-------|
@@ -234,7 +234,7 @@ The judge/grader model and promptfoo's dataset plugins are **downloaded at scan 
 
 ## Web Frameworks & Application Stack
 
-These are libraries and frameworks used to build RedAmon's own web application, API servers, and agent system.
+These are libraries and frameworks used to build DNM-Hunter's own web application, API servers, and agent system.
 
 | Library | Purpose | License | Source Repository | How Used |
 |---------|---------|---------|-------------------|----------|
@@ -329,7 +329,7 @@ These are libraries and frameworks used to build RedAmon's own web application, 
 | **bcryptjs** | Pure-JS bcrypt password hashing | MIT | https://github.com/dcodeIO/bcrypt.js | `webapp/package.json` |
 | **Zod** | TypeScript-first schema validation | MIT | https://github.com/colinhacks/zod | `webapp/package.json` |
 | **Archiver** | Streaming archive generation (ZIP) | MIT | https://github.com/archiverjs/node-archiver | `webapp/package.json` |
-| **JSZip** | ZIP file creation and reading | MIT (dual-licensed MIT/GPL-3.0; used by RedAmon under MIT) | https://github.com/Stuk/jszip | `webapp/package.json` |
+| **JSZip** | ZIP file creation and reading | MIT (dual-licensed MIT/GPL-3.0; used by DNM-Hunter under MIT) | https://github.com/Stuk/jszip | `webapp/package.json` |
 | **SheetJS (xlsx)** | Spreadsheet parser and writer | Apache-2.0 | https://github.com/SheetJS/sheetjs | `webapp/package.json` |
 | **pdf-parse** | PDF text extraction | MIT | https://gitlab.com/nicola.zanon/pdf-parse | `webapp/package.json` |
 | **Mammoth** | DOCX to HTML/Markdown converter | BSD-2-Clause | https://github.com/mwilliamson/mammoth.js | `webapp/package.json` |
@@ -378,19 +378,19 @@ The agent container (`agentic/Dockerfile`) bundles multiple language runtimes fo
 
 ## AGPL-3.0 Source Code Availability
 
-In compliance with the AGPL-3.0 license, the complete corresponding source code for all AGPL-licensed components is available at the repositories listed above. If you have received a RedAmon Docker image containing any of these tools and cannot access their source code at the listed repositories, please contact the maintainers at devergo.sam@gmail.com and we will provide the source code.
+In compliance with the AGPL-3.0 license, the complete corresponding source code for all AGPL-licensed components is available at the repositories listed above. If you have received a DNM-Hunter Docker image containing any of these tools and cannot access their source code at the listed repositories, please open an issue on the DNM-Hunter repository at https://github.com/NisargDedakiya/DNM-hunter/issues and the corresponding source code will be provided.
 
 ## License Compatibility Note
 
-RedAmon's own source code is released under the **MIT License**.
+DNM-Hunter's own source code is released under the **MIT License**.
 
 ### Separate-process tools (CLI / Docker containers)
 
-The majority of third-party tools are invoked as **separate processes** via CLI commands, Docker containers, or network APIs. Under the GPL, AGPL, and related copyleft licenses this constitutes "mere aggregation" (GPL v3 sec. 5, AGPL v3 sec. 5) and does **not** require RedAmon's own source code to adopt a copyleft license. Any modifications made to those tools themselves must still comply with their respective licenses.
+The majority of third-party tools are invoked as **separate processes** via CLI commands, Docker containers, or network APIs. Under the GPL, AGPL, and related copyleft licenses this constitutes "mere aggregation" (GPL v3 sec. 5, AGPL v3 sec. 5) and does **not** require DNM-Hunter's own source code to adopt a copyleft license. Any modifications made to those tools themselves must still comply with their respective licenses.
 
 ### GPL-3.0 libraries linked at the Python import level
 
-The following GPL-3.0-licensed Python libraries are **imported directly** into RedAmon source code. Under the GPL-3.0, the resulting combined work in each container must be distributed under GPL-3.0-compatible terms:
+The following GPL-3.0-licensed Python libraries are **imported directly** into DNM-Hunter source code. Under the GPL-3.0, the resulting combined work in each container must be distributed under GPL-3.0-compatible terms:
 
 | Library | License | Container | Source files affected |
 |---------|---------|-----------|----------------------|
@@ -399,16 +399,16 @@ The following GPL-3.0-licensed Python libraries are **imported directly** into R
 
 Accordingly, **the Python source files listed above are dual-licensed MIT AND GPL-3.0**. You may use, copy, and distribute them under either license. When they are combined with the GPL-3.0 libraries they import, the combined executable is governed by the GPL-3.0.
 
-All other RedAmon source code (the webapp, the agent, the recon orchestrator, MCP servers, shell scripts, Dockerfiles, and configuration) remains under the MIT License only.
+All other DNM-Hunter source code (the webapp, the agent, the recon orchestrator, MCP servers, shell scripts, Dockerfiles, and configuration) remains under the MIT License only.
 
 ### LGPL libraries
 
-Several LGPL-licensed libraries (PyGithub, Paramiko, psycopg, ldap3, Proxychains4) are used via standard Python imports or dynamic linking. The LGPL explicitly permits this without requiring the calling code to adopt LGPL or GPL terms, provided the libraries can be replaced or re-linked by the end user. Since RedAmon installs these via standard `pip` (user-replaceable), this condition is satisfied.
+Several LGPL-licensed libraries (PyGithub, Paramiko, psycopg, ldap3, Proxychains4) are used via standard Python imports or dynamic linking. The LGPL explicitly permits this without requiring the calling code to adopt LGPL or GPL terms, provided the libraries can be replaced or re-linked by the end user. Since DNM-Hunter installs these via standard `pip` (user-replaceable), this condition is satisfied.
 
 ### AGPL network-interaction obligation
 
-AGPL-3.0 extends the GPL-3.0 copyleft to users who interact with the software **over a network**. Several tools in RedAmon (GVM/OpenVAS, Nuclei, Naabu, Katana, HTTPx, Subfinder, DNSx, Masscan, TruffleHog, Hydra, Kiterunner, Arjun) are AGPL-3.0. RedAmon does not modify any of these tools. Their unmodified source code is available at the repositories listed in this document. If you modify any AGPL-3.0 component and make it available over a network, you must offer the corresponding source code to users of that network service.
+AGPL-3.0 extends the GPL-3.0 copyleft to users who interact with the software **over a network**. Several tools in DNM-Hunter (GVM/OpenVAS, Nuclei, Naabu, Katana, HTTPx, Subfinder, DNSx, Masscan, TruffleHog, Hydra, Kiterunner, Arjun) are AGPL-3.0. DNM-Hunter does not modify any of these tools. Their unmodified source code is available at the repositories listed in this document. If you modify any AGPL-3.0 component and make it available over a network, you must offer the corresponding source code to users of that network service.
 
 ---
 
-*Last updated: June 2026*
+*Last updated: July 2026*
