@@ -99,9 +99,9 @@ _SPECIFIC: list[tuple] = [
     # ── Server Security Misconfiguration (mostly dynamic, some static) ──
     ("server security misconfiguration", "server-side request forgery", STATIC, "code_audit", "CA-SSRF"),
     ("server security misconfiguration", "path traversal", STATIC, "code_audit", "CA-LFI"),
-    ("server security misconfiguration", "unsafe cross-origin", STATIC, "code_audit", "CORS in code"),
+    ("server security misconfiguration", "unsafe cross-origin", STATIC, "code_audit", "CA-CORS reflected/wildcard+creds"),
     ("server security misconfiguration", "missing secure or httponly", STATIC, "code_audit", "CA-COOKIE"),
-    ("server security misconfiguration", "unsafe file upload", DYNAMIC, "runtime", ""),
+    ("server security misconfiguration", "unsafe file upload", STATIC, "code_audit", "CA-UPLOAD (user filename→disk); confirm live"),
     ("server security misconfiguration", "misconfigured dns", DYNAMIC, "baddns_scan", "subdomain takeover"),
     ("server security misconfiguration", "lack of security headers", DYNAMIC, "web_probe", "header presence probed live"),
     ("server security misconfiguration", "clickjacking", DYNAMIC, "web_probe", "X-Frame-Options/CSP probed live"),
@@ -112,7 +112,12 @@ _SPECIFIC: list[tuple] = [
     ("server security misconfiguration", "", DYNAMIC, "web_probe+wcvs", "headers/TLS/portals live"),
     # ── Network ──
     ("network security misconfiguration", "", DYNAMIC, "gvm_scan", "network service scan"),
-    # ── Access control / auth / CSRF (dynamic) ──
+    # ── Access control / auth / CSRF ──
+    # IDOR: code_audit gives a heuristic static lead (user id → object lookup);
+    # runtime confirms whether an authorization check is actually missing.
+    ("broken access control", "insecure direct object", STATIC, "code_audit+runtime", "CA-IDOR heuristic; confirm authz live"),
+    # JWT auth bypass (none-alg / signature not verified) is firm from source.
+    ("broken authentication", "authentication bypass", STATIC, "code_audit+runtime", "CA-JWT-NONE/NOVERIFY; else live"),
     ("broken access control", "", DYNAMIC, "runtime+agent", "IDOR/priv-esc needs live requests"),
     ("broken authentication", "", DYNAMIC, "runtime+agent", "session/2FA behaviour is live"),
     ("cross-site request forgery", "", DYNAMIC, "runtime", "token behaviour is live"),

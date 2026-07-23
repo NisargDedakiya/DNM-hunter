@@ -58,6 +58,9 @@ def to_sarif(result, tool_name: str = "NisargHunter AI", tool_version: str = "1.
         }
         if f.vrt:
             res["properties"]["vrt"] = f.vrt
+        conf = getattr(f, "confidence", "")
+        if conf:
+            res["properties"]["confidence"] = conf
         if f.file:
             region = {}
             if f.line is not None and f.line > 0:

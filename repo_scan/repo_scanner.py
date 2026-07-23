@@ -36,6 +36,10 @@ class Finding:
     line: int | None
     detail: str
     category: str = ""
+    # Static-evidence confidence: "firm" (likely exploitable — input reaches a
+    # sink / definitive misconfig), "tentative" (context-dependent, verify), or
+    # "heuristic" (a lead needing manual review, e.g. IDOR authorization).
+    confidence: str = "firm"
 
 
 @dataclass
@@ -137,6 +141,7 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
                 line=c.line,
                 detail=f"{c.detail} [VRT {c.vrt}{'; ' + c.cwe if c.cwe else ''}]",
                 category="webapp",
+                confidence=c.confidence,
             ))
     except Exception as exc:
         prev = f"{result.error}; " if result.error else ""

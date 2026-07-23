@@ -36,6 +36,8 @@ class SuiteFinding:
     detail: str
     category: str = ""
     vrt: str = ""         # canonical Bugcrowd VRT id when known
+    # Static-evidence confidence in exploitability: firm | tentative | heuristic.
+    confidence: str = "firm"
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -88,6 +90,7 @@ def scan(target: str | Path) -> SuiteResult:
                 detail=f.detail,
                 category=f.category,
                 vrt=_extract_vrt(f.detail),
+                confidence=getattr(f, "confidence", "firm"),
             ))
     except Exception as exc:
         result.errors.append(f"repo_scan failed: {type(exc).__name__}: {exc}")

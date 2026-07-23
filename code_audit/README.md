@@ -24,11 +24,22 @@ JavaScript/TypeScript, with language-agnostic crypto rules.
 | CA-CIPHER | `cryptographic_weakness.broken_cryptography` | high | DES/3DES/RC4/ECB |
 | CA-RANDOM | `cryptographic_weakness.insufficient_entropy` | medium | Insecure RNG for a secret |
 | CA-RSAKEY | `cryptographic_weakness.insecure_key_generation` | medium | Undersized asymmetric key |
+| CA-UPLOAD | `unrestricted_file_upload.arbitrary_file_upload` | high | User-controlled filename/path written to disk |
+| CA-IDOR | `broken_access_control.idor` | medium | User id → object lookup (heuristic lead) |
+| CA-JWT-NONE | `broken_authentication_and_session_management.jwt_signature_not_verified` | high | JWT `none` algorithm accepted |
+| CA-JWT-NOVERIFY | `broken_authentication_and_session_management.jwt_signature_not_verified` | high | JWT signature verification disabled |
+| CA-JWT-SECRET | `broken_authentication_and_session_management.weak_jwt_secret` | medium | Hard-coded JWT signing secret |
+| CA-CORS | `server_security_misconfiguration.cors_misconfiguration` | medium | Reflected origin, or wildcard + credentials |
 | CA-DEBUG | `sensitive_data_exposure.debug_page` | medium | Debug mode on |
 | CA-TLSVERIFY | `insecure_data_transport.tls_verify_disabled` | medium | TLS verification disabled |
 | CA-HTTP | `insecure_data_transport.cleartext` | low | Cleartext HTTP |
 | CA-COOKIE | `server_security_misconfiguration.cookie_flags` | low | Missing Secure/HttpOnly |
 | CA-WEBSTORE | `insecure_data_storage.web_storage_token` | low | Token in localStorage |
+
+Together these cover the classes hunters ask about most: **SQL injection, XSS,
+IDOR, SSRF, authentication/JWT problems, file-upload flaws, and API/CORS
+misconfiguration.** Command injection, LFI/path traversal, SSTI, XXE, insecure
+deserialization and the crypto classes round out the server-side set.
 
 ## Precision
 
@@ -41,6 +52,25 @@ JavaScript/TypeScript, with language-agnostic crypto rules.
   flagged.
 - **No literals.** `eval("2+2")`, `open("/etc/config.json")`, `hashlib.sha256(...)`
   do not fire.
+
+## Confidence — how exploitable does it look?
+
+Every finding carries a `confidence` field so triage can start with the leads
+most likely to be real. It is a **static-evidence** signal, not a runtime proof:
+
+| confidence | meaning | examples |
+|------------|---------|----------|
+| `firm` | User input provably reaches a dangerous sink with no sanitiser, or a definitive misconfiguration. Likely exploitable. | tainted SQLi/RCE/SSRF sink, JWT `none`/verify-off |
+| `tentative` | A risky pattern whose exploitability depends on surrounding context — verify. | hard-coded secret, weak cipher, permissive CORS |
+| `heuristic` | A lead that needs manual review; static analysis can't see the missing check. | IDOR (authorization/ownership is invisible to SAST) |
+
+This is how the scanner answers *"is the finding actually exploitable?"* from
+source alone. It raises confidence via taint (input → sink, unsanitised) and
+flags definitive misconfigurations as `firm`, but it does **not** execute the
+target. True runtime confirmation — sending the payload and observing the
+response — is the job of the dynamic scanner (`web_probe`) or a manual PoC. The
+`confidence` value flows through `repo_scan` and the `scanner_suite`
+orchestrator into the SARIF output (`properties.confidence`).
 
 ## Honest scope
 

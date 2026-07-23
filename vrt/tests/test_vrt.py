@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from vrt import classify, coverage_report, load, lookup
-from vrt.coverage import DYNAMIC, OUT, STATIC
+from vrt.coverage import OUT, STATIC
 
 
 class TestTaxonomy(unittest.TestCase):
@@ -44,9 +44,16 @@ class TestCoverage(unittest.TestCase):
         self.assertTrue(autos)
         self.assertTrue(all(classify(e).method == OUT for e in autos))
 
-    def test_access_control_is_dynamic(self):
+    def test_idor_has_static_lead_plus_runtime(self):
+        # IDOR now gets a heuristic static lead from code_audit (CA-IDOR: a
+        # user-controlled id flowing into an object lookup). Static analysis
+        # can't see the authorization check, so runtime still confirms it —
+        # the detector string reflects that hybrid.
         e = lookup("Broken Access Control (BAC)", "Insecure Direct Object References (IDOR)")
-        self.assertEqual(classify(e).method, DYNAMIC)
+        cov = classify(e)
+        self.assertEqual(cov.method, STATIC)
+        self.assertIn("code_audit", cov.detector)
+        self.assertIn("runtime", cov.detector)
 
     def test_report_totals_add_up(self):
         rep = coverage_report()

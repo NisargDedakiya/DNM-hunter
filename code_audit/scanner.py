@@ -64,6 +64,14 @@ class CodeFinding:
     line: int
     detail: str
     cwe: str = ""
+    # How exploitable this looks, purely from static evidence (the scanner does
+    # not execute the target). "firm" = user input provably reaches a dangerous
+    # sink with no sanitiser, or a definitive misconfiguration → likely
+    # exploitable. "tentative" = a risky pattern whose exploitability depends on
+    # context → verify. "heuristic" = a lead that requires manual review (e.g.
+    # authorization/ownership for IDOR). True runtime confirmation is the job of
+    # the dynamic scanner (web_probe) or a manual PoC.
+    confidence: str = "firm"
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -103,6 +111,19 @@ _TAINT_SINKS = [
     ("server_side_injection.http_response_manipulation", "CA-CRLF", MED, "CWE-113",
      "HTTP header/response built from untrusted input (response splitting / CRLF)",
      re.compile(r"\b(set_header|setHeader|add_header|response\.headers\[|res\.set|res\.header|writeHead|Location:)\b", re.IGNORECASE)),
+    # File upload — a user-controlled filename/path reaches a file-write sink
+    # (arbitrary upload / path traversal). model.save() with no args won't fire.
+    ("unrestricted_file_upload.arbitrary_file_upload", "CA-UPLOAD", HIGH, "CWE-434",
+     "User-controlled filename/path written to disk (unrestricted file upload / path traversal)",
+     # No leading \b: `.save` must match after `]`/`)` too (e.g.
+     # request.files["f"].save(...)), where a word boundary would fail.
+     re.compile(r"(\.save|writeFileSync|writeFile|createWriteStream|move_uploaded_file|copyfileobj|shutil\.copy(?:file)?|os\.rename)\s*\(", re.IGNORECASE)),
+    # IDOR (heuristic) — a user-controlled identifier flows into an object
+    # lookup. Static analysis cannot see the authorization/ownership check, so
+    # this is a lead to review, not a confirmed bug.
+    ("broken_access_control.idor", "CA-IDOR", MED, "CWE-639",
+     "User-controlled object identifier used in a data lookup (possible IDOR)",
+     re.compile(r"\b(objects\.get|objects\.filter|get_object_or_404|get_or_404|findById|findByPk|\.findOne|\.find_one|\.query\.get|prisma\.\w+\.(?:findUnique|findFirst))\s*\(", re.IGNORECASE)),
 ]
 
 # ── Context-free rules (no taint needed): (vrt, rule, sev, cwe, title, regex, langs) ──
@@ -148,7 +169,29 @@ _STATIC_RULES = [
     ("insecure_data_transport.tls_verify_disabled", "CA-TLSVERIFY", MED, "CWE-295",
      "TLS certificate verification disabled",
      re.compile(r"(verify\s*=\s*False|rejectUnauthorized\s*:\s*false|CURLOPT_SSL_VERIFYPEER.{0,10}(0|false)|ssl\._create_unverified_context|InsecureSkipVerify\s*:\s*true|check_hostname\s*=\s*False)", re.IGNORECASE)),
+    # JWT: 'none' algorithm accepted — signature is not verified (auth bypass)
+    ("broken_authentication_and_session_management.jwt_signature_not_verified", "CA-JWT-NONE", HIGH, "CWE-347",
+     "JWT 'none' algorithm accepted — signature not verified (authentication bypass)",
+     re.compile(r"(algorithms?\s*[:=]\s*\[?\s*['\"]none['\"]|['\"]alg['\"]\s*:\s*['\"]none['\"])", re.IGNORECASE)),
+    # JWT: signature verification explicitly disabled (auth bypass)
+    ("broken_authentication_and_session_management.jwt_signature_not_verified", "CA-JWT-NOVERIFY", HIGH, "CWE-347",
+     "JWT signature verification disabled (authentication bypass)",
+     re.compile(r"(jwt\.decode\s*\([^)]*verify\s*=\s*False|verify_signature['\"]?\s*[:=]\s*(?:False|false)|jwt\.decode\s*\([^)]*['\"]verify['\"]\s*:\s*(?:false|False))", re.IGNORECASE)),
+    # JWT: hard-coded signing secret in source
+    ("broken_authentication_and_session_management.weak_jwt_secret", "CA-JWT-SECRET", MED, "CWE-321",
+     "Hard-coded JWT signing secret in source",
+     re.compile(r"(jwt\.encode\s*\([^)]*,\s*['\"][^'\"]{3,}['\"]|jwt\.sign\s*\([^)]*,\s*['\"][^'\"]{3,}['\"]|(?:jwt_secret|jwtsecret|secretorkey|jwt_signing_key)\s*[:=]\s*['\"][^'\"]{4,}['\"])", re.IGNORECASE)),
+    # CORS: reflected origin, or wildcard origin together with credentials
+    ("server_security_misconfiguration.cors_misconfiguration", "CA-CORS", MED, "CWE-942",
+     "Permissive CORS — reflected origin, or wildcard origin with credentials",
+     re.compile(r"(Access-Control-Allow-Origin['\"]?\s*[:,][^;\n]*\b(?:req|request|origin)\b|origin\s*:\s*(?:true|['\"]\*['\"])[^)}\n]*credentials\s*:\s*true|credentials\s*:\s*true[^)}\n]*origin\s*:\s*(?:true|['\"]\*['\"]))", re.IGNORECASE)),
 ]
+
+# Static rules whose match is a definitive misconfiguration (not context-
+# dependent) — treated as firm rather than tentative.
+_FIRM_STATIC = {"CA-JWT-NONE", "CA-JWT-NOVERIFY"}
+# Taint sinks that are only a lead, needing manual authorization/logic review.
+_HEURISTIC_SINKS = {"CA-IDOR"}
 
 
 # Sinks where the *query string itself* is assembled from input — flagging must
@@ -189,8 +232,8 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
     lines = text.splitlines()
     is_py = file.endswith(".py")
 
-    def add(vrt, rule, sev, title, i, detail, cwe=""):
-        findings.append(CodeFinding(vrt, rule, sev, title, file, i, detail, cwe))
+    def add(vrt, rule, sev, title, i, detail, cwe="", confidence="firm"):
+        findings.append(CodeFinding(vrt, rule, sev, title, file, i, detail, cwe, confidence))
 
     # ── Light intra-file taint with transitive propagation ──
     # `tainted`    : vars carrying user-controlled data (directly or derived).
@@ -236,14 +279,28 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
                 # value sinks: dangerous whenever attacker data reaches the argument
                 hit = bool(_USER_INPUT.search(arg_region)) or _refs(arg_region, tainted)
             if hit:
-                add(vrt, rule, sev, title, i,
+                heuristic = rule in _HEURISTIC_SINKS
+                detail = (
+                    f"{title}. A user-controlled identifier reaches this lookup — confirm "
+                    f"an ownership/authorization check exists (heuristic; verify before reporting)."
+                    if heuristic else
                     f"{title}. Untrusted data reaches this sink — use parameterisation / "
-                    f"safe APIs / validation & output encoding.", cwe)
+                    f"safe APIs / validation & output encoding."
+                )
+                add(vrt, rule, sev, title, i, detail, cwe,
+                    confidence="heuristic" if heuristic else "firm")
 
         # context-free static rules
+        jwt_verify_line = bool(re.search(r"jwt\.(?:decode|verify)", line, re.IGNORECASE))
         for vrt, rule, sev, cwe, title, rx in _STATIC_RULES:
+            # `verify=False` inside jwt.decode(...) is a JWT signature bypass
+            # (CA-JWT-NOVERIFY), not a TLS-verification issue — don't double-fire
+            # the TLS rule and mislabel it.
+            if rule == "CA-TLSVERIFY" and jwt_verify_line:
+                continue
             if rx.search(line):
-                add(vrt, rule, sev, title, i, f"{title}.", cwe)
+                add(vrt, rule, sev, title, i, f"{title}.", cwe,
+                    confidence="firm" if rule in _FIRM_STATIC else "tentative")
 
     return findings
 
@@ -274,9 +331,12 @@ def _main() -> int:
     if args.json:
         print(json.dumps([f.to_dict() for f in findings], indent=2))
         return 0
-    for f in sorted(findings, key=lambda x: x.severity):
-        print(f"  [{f.severity:8}] {f.rule_id:12} {f.file}:{f.line}  {f.title}")
-    print(f"\n{len(findings)} findings")
+    for f in sorted(findings, key=lambda x: (x.severity, x.confidence)):
+        print(f"  [{f.severity:8}] {f.confidence:9} {f.rule_id:12} {f.file}:{f.line}  {f.title}")
+    firm = sum(1 for f in findings if f.confidence == "firm")
+    tentative = sum(1 for f in findings if f.confidence == "tentative")
+    heuristic = sum(1 for f in findings if f.confidence == "heuristic")
+    print(f"\n{len(findings)} findings  ({firm} firm, {tentative} tentative, {heuristic} heuristic)")
     return 0
 
 
