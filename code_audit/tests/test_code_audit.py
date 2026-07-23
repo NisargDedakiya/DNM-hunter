@@ -182,6 +182,55 @@ class TestMiscMisconfigClasses(unittest.TestCase):
         for r in ("CA-DEFAULTCRED", "CA-IV", "CA-GRAPHQL", "CA-CSRF", "CA-CSV"):
             self.assertNotIn(r, got, f"{r} must NOT fire on the safe file")
 
+
+class TestOwaspApiClasses(unittest.TestCase):
+    """NoSQL injection, mass assignment/BOPLA, plaintext password, exposed docs."""
+
+    _VULN_JS = '''
+app.get("/u", (req, res) => {
+  db.collection("u").find({ name: req.query.name });   // NoSQL operator injection
+  db.eval("$where: this.x == '" + req.query.x + "'");  // $where server-side JS
+  const user = new User(req.body);                      // mass assignment
+  Object.assign(profile, req.body);                     // mass assignment
+});
+app.use("/api-docs", require("swagger-ui-express").serve);  // exposed swagger
+'''
+    _VULN_PY = '''
+from flask import request
+def register():
+    user.password = request.form["pw"]     # plaintext password store
+    if password == request.form["pw"]:     # plaintext compare
+        pass
+    User(**request.json)                    # mass assignment
+'''
+    _SAFE_JS = '''
+db.collection("u").find({ name: "constant" });     // constant, safe
+const arr = [1,2,3].find(x => x === userId);        // Array.find, not Mongo
+const user = new User({ id: 1, name: "bob" });      // literal, not req.body
+'''
+    _SAFE_PY = '''
+import bcrypt
+from flask import request
+user.password = bcrypt.hashpw(request.form["pw"].encode(), bcrypt.gensalt())
+'''
+
+    def test_nosql_and_massassign_and_swagger(self):
+        got = rules(scan_code(self._VULN_JS, "api.js"))
+        for r in ("CA-NOSQL", "CA-MASSASSIGN", "CA-SWAGGER"):
+            self.assertIn(r, got, f"{r} should fire on the vulnerable JS")
+
+    def test_plaintext_password_and_kwargs_massassign(self):
+        got = rules(scan_code(self._VULN_PY, "api.py"))
+        self.assertIn("CA-PLAINTEXTPW", got)
+        self.assertIn("CA-MASSASSIGN", got)
+
+    def test_no_false_positives(self):
+        js = rules(scan_code(self._SAFE_JS, "safe_api.js"))
+        for r in ("CA-NOSQL", "CA-MASSASSIGN"):
+            self.assertNotIn(r, js, f"{r} must not fire on safe JS")
+        py = rules(scan_code(self._SAFE_PY, "safe_api.py"))
+        self.assertNotIn("CA-PLAINTEXTPW", py)
+
     def test_jwt_none_is_high_severity(self):
         f = [x for x in scan_code(_VULN_AUTH_PY, "auth.py") if x.rule_id == "CA-JWT-NONE"][0]
         self.assertEqual(f.severity, "high")

@@ -9,6 +9,7 @@ JavaScript/TypeScript, with language-agnostic crypto rules.
 | Rule | VRT | Sev | Class |
 |------|-----|-----|-------|
 | CA-SQLI | `server_side_injection.sql_injection` | critical | SQL injection (string-built query) |
+| CA-NOSQL | `server_side_injection.nosql_injection` | high | NoSQL / operator injection (`$where`, request object as query) |
 | CA-CMDI | `server_side_injection.rce` | critical | OS command injection |
 | CA-EVAL | `server_side_injection.rce` | critical | Code-eval sink (`eval`/`exec`/`Function`) |
 | CA-DESERIAL | `server_side_injection.rce` | high | Insecure deserialization (pickle/yaml/marshal) |
@@ -37,6 +38,9 @@ JavaScript/TypeScript, with language-agnostic crypto rules.
 | CA-SEED | `cryptographic_weakness.insufficient_entropy` | medium | Predictable PRNG seed |
 | CA-IV | `cryptographic_weakness.insufficient_entropy` | medium | Hard-coded / static IV or nonce |
 | CA-TOKENURL | `sensitive_data_exposure.sensitive_token_in_url` | low | Secret/token placed in a URL query string |
+| CA-MASSASSIGN | `broken_access_control.mass_assignment` | medium | Whole request object bound to a model (BOPLA) |
+| CA-PLAINTEXTPW | `sensitive_data_exposure.cleartext_storage_of_password` | medium | Password stored/compared without hashing |
+| CA-SWAGGER | `server_security_misconfiguration.api_documentation_exposed` | low | Swagger/OpenAPI/ReDoc explorer exposed |
 | CA-DEBUG | `sensitive_data_exposure.debug_page` | medium | Debug mode on |
 | CA-TLSVERIFY | `insecure_data_transport.tls_verify_disabled` | medium | TLS verification disabled |
 | CA-HTTP | `insecure_data_transport.cleartext` | low | Cleartext HTTP |
@@ -74,6 +78,41 @@ of which tier owns each of the ~400 VRT rows lives in `vrt/coverage.py`
   flagged.
 - **No literals.** `eval("2+2")`, `open("/etc/config.json")`, `hashlib.sha256(...)`
   do not fire.
+
+## OWASP Top 10 mapping
+
+The suite carries a first-class OWASP coverage map — the **OWASP Top 10 for Web
+Applications (2021)** and the **OWASP API Security Top 10 (2023)** — in
+`vrt/owasp.py`, queryable with `python -m vrt.owasp` (or `nh-owasp-coverage`).
+Each category is honestly tagged by the *tier* that owns it:
+
+| Tier | Meaning |
+|------|---------|
+| `static` | decidable from source — the CA-* rules are listed |
+| `partial` | code_audit surfaces a lead; runtime confirms (e.g. IDOR/BOLA) |
+| `dynamic` | only decidable against a live target (`web_probe`/`gvm_scan`) |
+| `manual` | business-logic / process review; no scanner decides it |
+
+Where each `code_audit` rule lands:
+
+- **A01 Broken Access Control / API1 BOLA / API5 BFLA** → `CA-IDOR`,
+  `CA-MASSASSIGN` (partial — leads; runtime proves the missing check)
+- **A02 Cryptographic Failures** → `CA-HASH`, `CA-CIPHER`, `CA-RSAKEY`,
+  `CA-SEED`, `CA-IV`, `CA-HTTP`, `CA-TLSVERIFY`, `CA-JWT-SECRET`, `CA-PLAINTEXTPW`
+- **A03 Injection** → `CA-SQLI`, `CA-NOSQL`, `CA-CMDI`, `CA-EVAL`, `CA-LDAP`,
+  `CA-XXE`, `CA-SSTI`, `CA-CRLF`, `CA-XSS`
+- **A05 / API8 Security Misconfiguration** → `CA-DEBUG`, `CA-CORS`, `CA-COOKIE`,
+  `CA-DEFAULTCRED`, `CA-GRAPHQL`, `CA-SWAGGER`, `CA-CSRF`
+- **A07 / API2 Auth Failures** → `CA-JWT-NONE`, `CA-JWT-NOVERIFY`, `CA-JWT-SECRET`
+- **A08 Integrity Failures** → `CA-DESERIAL` (+ `iac_scan` for CI/CD)
+- **A10 / API7 SSRF** → `CA-SSRF`, `CA-REDIR`
+- **API3 BOPLA** → `CA-MASSASSIGN`
+
+`A04 Insecure Design`, `A06 Vulnerable Components`, `A09 Logging`, `API4/6/9/10`
+are **not** source-decidable — they are business-logic, live-target, or
+dependency-database problems owned by other tiers or by manual testing. The map
+says so plainly rather than pretending otherwise (13/20 categories have static
+or partial source coverage).
 
 ## Confidence — how exploitable does it look?
 

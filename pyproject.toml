@@ -38,6 +38,7 @@ nh-llm-audit = "llm_audit.__main__:main"
 nh-web-probe = "web_probe.scanner:_main"
 nh-binary-audit = "binary_audit.elf:_main"
 nh-vrt-coverage = "vrt.coverage:_main"
+nh-owasp-coverage = "vrt.owasp:_main"
 
 [tool.setuptools]
 # Explicit package list — the suite is a set of cooperating top-level packages.

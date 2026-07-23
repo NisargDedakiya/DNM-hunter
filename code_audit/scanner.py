@@ -215,6 +215,25 @@ _STATIC_RULES = [
     ("sensitive_data_exposure.sensitive_token_in_url", "CA-TOKENURL", LOW, "CWE-598",
      "Sensitive token/secret placed in a URL query string",
      re.compile(r"[?&](?:access_token|api_?key|token|password|secret|session|auth)=['\"]?\s*[+`$]", re.IGNORECASE)),
+    # NoSQL (MongoDB) injection — server-side JS ($where/$function) built from a
+    # string, or a raw request object used directly as a query (operator injection).
+    ("server_side_injection.nosql_injection", "CA-NOSQL", HIGH, "CWE-943",
+     "NoSQL query built from untrusted input (server-side JS / operator injection)",
+     re.compile(r"(\$where['\"]?\s*[:=]|\$function['\"]?\s*[:=]|\bmapReduce\s*\(|\.(?:find|findOne|find_one|updateOne|updateMany|deleteOne|deleteMany|remove|aggregate)\s*\(\s*\{[^}]*\b(?:req|request)\.(?:body|query|params|json|form|args|GET|POST))", re.IGNORECASE)),
+    # Mass assignment / BOPLA — a whole request object is spread into a model,
+    # letting a client set fields it shouldn't (e.g. isAdmin).
+    ("broken_access_control.mass_assignment", "CA-MASSASSIGN", MED, "CWE-915",
+     "Whole request object bound to a model (mass assignment / BOPLA)",
+     re.compile(r"(\*\*(?:request|req)\.(?:json|form|data|body|POST|GET|args)|Object\.assign\s*\([^,]+,\s*req\.body|\.(?:create|update|updateOne|findByIdAndUpdate|findOneAndUpdate|save|insertMany|bulkCreate)\s*\(\s*req\.(?:body|query|params)|new\s+[A-Z]\w*\s*\(\s*req\.(?:body|query)\s*\)|\{\s*\.\.\.\s*req\.body\s*\})", re.IGNORECASE)),
+    # Plaintext / unhashed password handling — a raw request password assigned to
+    # a password field with no hashing on the line, or a plaintext comparison.
+    ("sensitive_data_exposure.cleartext_storage_of_password", "CA-PLAINTEXTPW", MED, "CWE-256",
+     "Password stored/compared in cleartext (no hashing)",
+     re.compile(r"(\.password\s*=\s*(?:request|req)\.[a-z]|\bpassword\s*==\s*(?:request|req|input)\b|password\s*=\s*request\.(?:form|args|json|POST|values)\b)", re.IGNORECASE)),
+    # Exposed API documentation / interactive explorer (schema & endpoint disclosure)
+    ("server_security_misconfiguration.api_documentation_exposed", "CA-SWAGGER", LOW, "CWE-200",
+     "API documentation / explorer exposed (Swagger / OpenAPI / ReDoc)",
+     re.compile(r"(swagger-ui-express|SwaggerModule\.setup|swagger_ui_bundle|['\"]/api-docs['\"]|['\"]/swagger['\"]|\bredoc\b|springdoc|flask_swagger|apispec)", re.IGNORECASE)),
 ]
 
 # Static rules whose match is a definitive misconfiguration (not context-
