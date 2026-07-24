@@ -5,6 +5,7 @@
 
   Usage (from this folder, in PowerShell):
       .\starthunt.ps1              start everything (installs on first run)
+      .\starthunt.ps1 lite         lean, fast start: scanner + web app only (no AI/recon)
       .\starthunt.ps1 dev          dev mode (hot-reload)
       .\starthunt.ps1 stop         stop the stack (data kept)
       .\starthunt.ps1 status       what's running
@@ -26,6 +27,12 @@ Set-Location -Path $PSScriptRoot
 # Core always-on services (matches nisarghunter.sh CORE_SERVICES). We list them
 # explicitly so a plain "compose up" does NOT also start the heavy GVM stack.
 $CORE = @('postgres', 'neo4j', 'docker-broker', 'recon-orchestrator', 'kali-sandbox', 'agent', 'webapp')
+# Lean set: just what the scanner + web app need (postgres + neo4j + webapp). Skips
+# the heavy AI/recon containers (agent ~3G, kali, recon-orchestrator, docker-broker),
+# so it starts far faster and leaves the machine responsive. All URL/repo scans,
+# reports and the bug-hunter cockpit work; only Red Zone / CypherFix (which need the
+# agent) are unavailable — run a full `.\starthunt.ps1` when you want those.
+$LITE = @('postgres', 'neo4j', 'webapp')
 $WEBAPP_PORT = if ($env:WEBAPP_PORT) { $env:WEBAPP_PORT } else { '3000' }
 $AGENT_PORT  = if ($env:AGENT_PORT)  { $env:AGENT_PORT }  else { '8090' }
 $EnvFile = Join-Path $PSScriptRoot '.env'
@@ -143,12 +150,13 @@ function Print-Ready {
   Write-Host ""
 }
 
-function Compose-Up([switch]$Build, [string[]]$Files) {
+function Compose-Up([switch]$Build, [string[]]$Files, [string[]]$Services) {
+  $svc = if ($Services) { $Services } else { $CORE }
   $a = @('compose')
   foreach ($f in $Files) { $a += @('-f', $f) }
   $a += @('up', '-d')
   if ($Build) { $a += '--build' }
-  $a += $CORE
+  $a += $svc
   & docker @a
 }
 
@@ -171,12 +179,14 @@ function Git-Pull {
   } else { Ok "Updated to the latest code." }
 }
 
-function Start-Stack([switch]$Build) {
+function Start-Stack([switch]$Build, [string[]]$Services) {
   Ensure-Env; Ensure-AuthSecrets; Ensure-DbSecrets
+  $lean = $Services -and ($Services.Count -lt $CORE.Count)
   $first = -not @(& docker ps -a --filter 'name=nisarghunter-' -q 2>$null)
-  if ($first) { Info "First run — building images and starting the full stack (this can take a while)…" }
-  else        { Info "Starting the full stack…" }
-  Compose-Up -Build:$Build
+  if ($lean)      { Info "Starting the lean stack (postgres + neo4j + webapp — skips the heavy AI/recon containers)…" }
+  elseif ($first) { Info "First run — building images and starting the full stack (this can take a while)…" }
+  else            { Info "Starting the full stack…" }
+  Compose-Up -Build:$Build -Services $Services
   if ($LASTEXITCODE -ne 0) { Die "docker compose failed — see the output above." }
   if (Wait-Web) { Ensure-Admin; Print-Ready }
   else { Warn "Web app didn't answer yet — it may still be building. Check: .\starthunt.ps1 logs webapp"; Print-Ready }
@@ -184,6 +194,7 @@ function Start-Stack([switch]$Build) {
 
 switch ($Command.ToLower()) {
   { $_ -in @('up', 'start', '') } { Banner; Preflight; Start-Stack }
+  { $_ -in @('lite', 'lean', 'scan') } { Banner; Preflight; Start-Stack -Services $LITE }
   'dev' {
     Banner; Preflight; Ensure-Env; Ensure-AuthSecrets; Ensure-DbSecrets
     Info "Starting in dev mode (hot-reload)…"

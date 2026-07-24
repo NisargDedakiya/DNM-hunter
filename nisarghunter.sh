@@ -13,6 +13,10 @@ LEGACY_SKIPKBASE_FLAG_FILE="$SCRIPT_DIR/.skipkbase"
 
 # Service lists
 CORE_SERVICES="postgres neo4j docker-broker recon-orchestrator kali-sandbox agent webapp"
+# Lean set: just the scanner + web app (postgres + neo4j + webapp). Skips the heavy
+# AI/recon containers so it starts fast and stays light. All scans/reports work;
+# only Red Zone / CypherFix (which need the agent) require the full CORE_SERVICES.
+LITE_SERVICES="postgres neo4j webapp"
 # Build-only images run on demand (NOT long-running services). All live under the
 # compose `tools` profile and the nisarghunter-* tag namespace. ai-attack-surface is the
 # AI Attack Surface scanner (garak/pyrit/giskard/promptfoo). wcvs is the Web Cache
@@ -1421,6 +1425,14 @@ cmd_up_dev() {
     fi
 }
 
+cmd_lite() {
+    # Lean start: scanner + web app only. Reuses cmd_up's setup but pins the
+    # service list to LITE_SERVICES (and forces the non-GVM branch).
+    _UP_SERVICES="$LITE_SERVICES"
+    info "Lean mode: starting the scanner + web app only (no AI/recon containers)."
+    cmd_up
+}
+
 cmd_up() {
     _migrate_legacy_kbase_flag
     _kb_export_env
@@ -1449,11 +1461,13 @@ cmd_up() {
         pull_gvm_images
     fi
 
-    if [[ "$gvm_mode" == "true" ]]; then
+    # `_UP_SERVICES` (set by cmd_lite) forces an explicit lean service list and
+    # always takes the non-GVM branch.
+    if [[ "$gvm_mode" == "true" && -z "${_UP_SERVICES:-}" ]]; then
         docker compose up -d
     else
         # shellcheck disable=SC2086
-        docker compose up -d $CORE_SERVICES
+        docker compose up -d ${_UP_SERVICES:-$CORE_SERVICES}
     fi
 
     # Show "ready" banner before the KB prompt so the user knows the app
@@ -1861,6 +1875,7 @@ case "${1:-help}" in
             cmd_up
         fi
         ;;
+    lite|lean|scan) cmd_lite ;;
     down)    cmd_down ;;
     clean)   cmd_clean ;;
     purge)   cmd_purge ;;

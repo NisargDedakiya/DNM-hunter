@@ -48,16 +48,20 @@ services:
     container_name: nisarghunter-neo4j
     # Memory governor (Part 4): container hard cap MUST exceed heap + pagecache or
     # the JVM is OOM-killed. nisarghunter.sh export_resource_caps sizes these to the
-    # host; the defaults keep heap+pagecache (3G) well inside the 4.5G limit.
-    mem_limit: ${NEO4J_MEM:-4608m}
+    # host. Defaults are tuned for LOCAL single-user use: Neo4j pre-allocates
+    # heap_initial, so a 2G heap wasted ~2G of RAM on an empty graph and made the
+    # whole stack sluggish on laptops. 1G heap + 512M pagecache is ample for a
+    # local knowledge graph and frees ~1.5G of real memory; raise NEO4J_HEAP /
+    # NEO4J_PAGECACHE / NEO4J_MEM in .env if you build a very large graph.
+    mem_limit: ${NEO4J_MEM:-2560m}
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-changeme123}
       NEO4J_PLUGINS: '["apoc"]'
       NEO4J_dbms_security_procedures_unrestricted: apoc.*
       NEO4J_dbms_security_procedures_allowlist: apoc.*
-      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP:-2g}
-      NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP:-2g}
-      NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE:-1g}
+      NEO4J_server_memory_heap_max__size: ${NEO4J_HEAP:-1g}
+      NEO4J_server_memory_heap_initial__size: ${NEO4J_HEAP:-1g}
+      NEO4J_server_memory_pagecache_size: ${NEO4J_PAGECACHE:-512m}
     ports:
       # Loopback-only: the agent/webapp reach Neo4j over the internal `nisarghunter`
       # bridge (neo4j:7687); host publish is debug-only. Prevents LAN/remote reach

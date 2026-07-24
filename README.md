@@ -120,9 +120,16 @@ prints the URL. On **Windows** use `.\starthunt.ps1` (PowerShell) or `starthunt`
 
 ```bash
 ./starthunt          # start everything          ./starthunt stop     # stop (data kept)
-./starthunt dev      # dev mode (hot-reload)      ./starthunt status   # what's running
-./starthunt logs     # tail logs                  ./starthunt update   # pull + rebuild
+./starthunt lite     # lean: scanner + web only   ./starthunt status   # what's running
+./starthunt dev      # dev mode (hot-reload)      ./starthunt update   # pull + rebuild
+./starthunt logs     # tail logs
 ```
+
+> **Low on RAM?** `./starthunt lite` (Windows: `.\starthunt.ps1 lite`) starts only
+> PostgreSQL + Neo4j + the web app — every scan, report and the bug-hunter cockpit
+> work, but it skips the heavy AI/recon containers (~5–6 GB), so it starts far
+> faster and keeps the machine responsive. Run the full `./starthunt` when you want
+> the Red Zone agent / CypherFix.
 
 Prefer the raw orchestrator? `./nisarghunter.sh install | up | status | stop | update`
 does the same. Add `--gvm` for OpenVAS or `--kbase` for the local AI knowledge base.
