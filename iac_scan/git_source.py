@@ -1,30 +1,45 @@
 """Shallow-clone GitHub repositories for offline IaC static analysis."""
+import json
 import logging
 import subprocess
 import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
-
-import requests
 
 logger = logging.getLogger(__name__)
 
 
 def list_org_repos(org: str, token: str) -> list[str]:
-    """List non-archived repo full_names for a GitHub org via the REST API."""
+    """List non-archived repo full_names for a GitHub org via the REST API.
+
+    Uses the stdlib urllib so the scanner suite stays dependency-free (it ships
+    with `dependencies = []` and runs inside the webapp's dependency-light image).
+    """
     repos: list[str] = []
     page = 1
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "dnm-hunter-iac-scan",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     while True:
-        resp = requests.get(
-            f"https://api.github.com/orgs/{org}/repos",
-            params={"per_page": 100, "page": page, "type": "sources"},
+        query = urllib.parse.urlencode({"per_page": 100, "page": page, "type": "sources"})
+        req = urllib.request.Request(
+            f"https://api.github.com/orgs/{org}/repos?{query}",
             headers=headers,
-            timeout=30,
         )
-        if resp.status_code != 200:
-            logger.warning(f"Failed to list repos for org {org}: HTTP {resp.status_code}")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                batch = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            logger.warning(f"Failed to list repos for org {org}: HTTP {e.code}")
             break
-        batch = resp.json()
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to list repos for org {org}: {e}")
+            break
         if not batch:
             break
         repos.extend(r["full_name"] for r in batch if not r.get("archived"))

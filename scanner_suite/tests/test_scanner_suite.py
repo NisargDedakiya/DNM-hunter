@@ -99,5 +99,34 @@ class TestSarif(unittest.TestCase):
             self.assertIn(r["ruleId"], rule_ids)
 
 
+class TestRemoteRepoDetection(unittest.TestCase):
+    """nh-scan routes a GitHub URL / owner-repo shorthand through a clone."""
+
+    def test_git_urls_are_remote(self):
+        from scanner_suite.__main__ import _is_remote_repo
+        for url in (
+            "https://github.com/octocat/Hello-World",
+            "http://github.com/octocat/Hello-World",
+            "https://github.com/octocat/Hello-World.git",
+            "git@github.com:octocat/Hello-World.git",
+            "ssh://git@github.com/octocat/Hello-World.git",
+        ):
+            self.assertTrue(_is_remote_repo(url), url)
+
+    def test_owner_repo_shorthand_is_remote(self):
+        from scanner_suite.__main__ import _is_remote_repo
+        self.assertTrue(_is_remote_repo("octocat/Hello-World"))
+        self.assertTrue(_is_remote_repo("my-org/my.repo"))
+
+    def test_local_paths_are_not_remote(self):
+        from scanner_suite.__main__ import _is_remote_repo
+        # a real on-disk directory always wins, even if it looks like owner/repo
+        with tempfile.TemporaryDirectory() as d:
+            self.assertFalse(_is_remote_repo(d))
+        # non-slug local-ish strings are not remote
+        self.assertFalse(_is_remote_repo("just-a-name"))
+        self.assertFalse(_is_remote_repo("a/b/c"))  # three segments, not owner/repo
+
+
 if __name__ == "__main__":
     unittest.main()

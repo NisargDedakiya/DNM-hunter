@@ -3,9 +3,9 @@ IaC Scan Project Settings - Fetch DevOps/IaC scan configuration from webapp API.
 
 Mirrors the pattern from trufflehog_scan/project_settings.py.
 """
-import os
 import logging
-from typing import Any, Optional
+import os
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +17,22 @@ DEFAULT_IAC_SETTINGS: dict[str, Any] = {
 }
 
 
-def fetch_iac_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
-    import requests
+def _get_json(url: str, headers: dict[str, str]) -> Any:
+    """GET a URL and parse JSON using only the stdlib (keeps the suite dep-free)."""
+    import json
+    import urllib.request
 
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def fetch_iac_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     url = f"{webapp_url.rstrip('/')}/api/projects/{project_id}"
     logger.info(f"Fetching IaC scan settings from {url}")
 
     _internal_headers = {"X-Internal-Key": os.environ.get("INTERNAL_API_KEY", "")}
-    response = requests.get(url, timeout=30, headers=_internal_headers)
-    response.raise_for_status()
-    project = response.json()
+    project = _get_json(url, _internal_headers)
 
     settings = DEFAULT_IAC_SETTINGS.copy()
 
@@ -34,9 +40,7 @@ def fetch_iac_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     if user_id:
         try:
             user_settings_url = f"{webapp_url.rstrip('/')}/api/users/{user_id}/settings?internal=true"
-            user_resp = requests.get(user_settings_url, timeout=30, headers=_internal_headers)
-            user_resp.raise_for_status()
-            user_settings = user_resp.json()
+            user_settings = _get_json(user_settings_url, _internal_headers)
             settings['GITHUB_ACCESS_TOKEN'] = user_settings.get('githubAccessToken', DEFAULT_IAC_SETTINGS['GITHUB_ACCESS_TOKEN'])
         except Exception as e:
             logger.warning(f"Failed to fetch user settings for GitHub token: {e}")
@@ -49,8 +53,8 @@ def fetch_iac_settings(project_id: str, webapp_url: str) -> dict[str, Any]:
     return settings
 
 
-_settings: Optional[dict[str, Any]] = None
-_current_project_id: Optional[str] = None
+_settings: dict[str, Any] | None = None
+_current_project_id: str | None = None
 
 
 def get_settings() -> dict[str, Any]:
@@ -91,7 +95,7 @@ def get_setting(key: str, default: Any = None) -> Any:
     return get_settings().get(key, default)
 
 
-def reload_settings(project_id: Optional[str] = None) -> dict[str, Any]:
+def reload_settings(project_id: str | None = None) -> dict[str, Any]:
     global _settings, _current_project_id
     if project_id:
         _current_project_id = None
