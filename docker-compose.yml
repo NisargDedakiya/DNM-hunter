@@ -868,17 +868,34 @@ networks:
 # Volumes
 # =============================================================================
 
+  # Explicit volume names (nisarghunter_*) so persistent data — user accounts in
+  # postgres, the knowledge graph in neo4j, reports/evidence/uploads — survives
+  # regardless of which folder the stack is launched from. Without a fixed name,
+  # Compose prefixes volumes with the project (the directory basename), so a
+  # re-downloaded ZIP (…-main), a re-clone, or a moved/renamed folder would point
+  # at brand-new EMPTY volumes — which is why data "disappeared" and you had to
+  # register again after a rebuild. (kb_data already did this; the rest now match.)
 volumes:
   postgres_data:
+    name: nisarghunter_postgres_data
   neo4j_data:
+    name: nisarghunter_neo4j_data
   report_data:
+    name: nisarghunter_report_data
   evidence_data:
+    name: nisarghunter_evidence_data
   js_recon_uploads:
+    name: nisarghunter_js_recon_uploads
   js_recon_custom:
+    name: nisarghunter_js_recon_custom
   mobile_scan_uploads:
+    name: nisarghunter_mobile_scan_uploads
   neo4j_logs:
+    name: nisarghunter_neo4j_logs
   neo4j_import:
+    name: nisarghunter_neo4j_import
   neo4j_plugins:
+    name: nisarghunter_neo4j_plugins
   kb_data:
     name: nisarghunter_kb_data
   tradecraft_cache:

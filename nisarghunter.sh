@@ -507,11 +507,13 @@ ensure_auth_secrets() {
     fi
 }
 
-# Compose project name (used to resolve the data-volume names). Must match
-# docker compose's own derivation or ensure_db_secrets would mis-detect a fresh
-# vs existing install and could regenerate a password against a live DB.
-# Precedence mirrors compose: exported COMPOSE_PROJECT_NAME, then the same var in
-# .env, then the sanitised working-directory basename.
+# Prefix used to resolve the data-volume names for the fresh-vs-existing check in
+# ensure_db_secrets. The persistent volumes are pinned to nisarghunter_* in
+# docker-compose.yml (volumes: … name: nisarghunter_postgres_data, …), so this is
+# a fixed "nisarghunter" — NOT the working-directory basename, which is what made
+# the data appear to vanish (and passwords risk regenerating) when the stack was
+# launched from a differently-named folder. An explicit COMPOSE_PROJECT_NAME still
+# wins for anyone deliberately running a second, isolated stack.
 compose_project_name() {
     if [ -n "${COMPOSE_PROJECT_NAME:-}" ]; then
         echo "$COMPOSE_PROJECT_NAME"
@@ -526,7 +528,7 @@ compose_project_name() {
             return
         fi
     fi
-    basename "$SCRIPT_DIR" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9_-'
+    echo "nisarghunter"
 }
 
 # True (0) if the named docker volume for THIS project already exists.
