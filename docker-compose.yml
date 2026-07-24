@@ -755,7 +755,10 @@ services:
 
   webapp:
     build:
-      context: ./webapp
+      # Repo-root context so the image can also install the Python scanner suite
+      # (nh-web-probe / nh-web-attack / nh-scan) the in-app scan runner spawns.
+      context: .
+      dockerfile: webapp/Dockerfile
       args:
         NISARGHUNTER_VERSION: "${NISARGHUNTER_VERSION:-0.0.0}"
     container_name: nisarghunter-webapp

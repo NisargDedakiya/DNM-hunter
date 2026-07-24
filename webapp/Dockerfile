@@ -10,8 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma
+# NOTE: build context is the REPO ROOT (see docker-compose.yml), so webapp files
+# are addressed as webapp/… and the Python scanner packages are available too.
+COPY webapp/package.json webapp/package-lock.json* ./
+COPY webapp/prisma ./prisma
 RUN npm ci --no-audit --no-fund && npm cache clean --force
 
 # Stage 2: Builder
@@ -19,7 +21,7 @@ FROM node:22-slim AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY . ./
+COPY webapp/ ./
 
 ARG NISARGHUNTER_VERSION=0.0.0
 ENV NEXT_PUBLIC_NISARGHUNTER_VERSION=$NISARGHUNTER_VERSION
@@ -40,7 +42,39 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssl ca-certificates wget \
+        python3 python3-pip git \
+    && ln -sf /usr/bin/python3 /usr/local/bin/python \
     && rm -rf /var/lib/apt/lists/*
+
+# Install the Python scanner suite so the in-app scan runner can spawn its CLIs
+# (nh-web-probe / nh-web-attack / nh-scan / nh-mobile-audit …). The suite is
+# stdlib-only (no PyPI runtime deps), installed with the runner's own Debian
+# python3 so console-script shebangs + import paths stay consistent. git is
+# needed for `nh-scan <github-url>` repo scans. The optional IaC parsers
+# (python-hcl2, pyyaml) are best-effort so Terraform/YAML repo scans work too.
+COPY pyproject.toml README.md /opt/scanner-src/
+COPY scanner_suite  /opt/scanner-src/scanner_suite
+COPY report_gen     /opt/scanner-src/report_gen
+COPY code_audit     /opt/scanner-src/code_audit
+COPY contract_audit /opt/scanner-src/contract_audit
+COPY llm_audit      /opt/scanner-src/llm_audit
+COPY os_audit       /opt/scanner-src/os_audit
+COPY binary_audit   /opt/scanner-src/binary_audit
+COPY deep_binary    /opt/scanner-src/deep_binary
+COPY web_probe      /opt/scanner-src/web_probe
+COPY web_attack     /opt/scanner-src/web_attack
+COPY verify         /opt/scanner-src/verify
+COPY vrt            /opt/scanner-src/vrt
+COPY vuln_kb        /opt/scanner-src/vuln_kb
+COPY mobile_audit   /opt/scanner-src/mobile_audit
+COPY repo_scan      /opt/scanner-src/repo_scan
+COPY iac_scan       /opt/scanner-src/iac_scan
+RUN python3 -m pip install --no-cache-dir --break-system-packages /opt/scanner-src \
+    && (python3 -m pip install --no-cache-dir --break-system-packages python-hcl2 pyyaml || true) \
+    && rm -rf /opt/scanner-src \
+    && python3 -c "import web_probe, web_attack, verify, scanner_suite" \
+    && nh-web-probe --help >/dev/null \
+    && echo "scanner suite installed OK (nh-web-probe on PATH)"
 
 RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 --gid nodejs --no-create-home nextjs
