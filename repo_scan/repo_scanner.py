@@ -196,8 +196,10 @@ def scan_tree(path: str | Path, repo_label: str = "") -> RepoScanResult:
                 severity=s.severity,
                 file=s.file,
                 line=s.line,
-                detail=f"{s.name} detected ({s.confidence} confidence): {s.redacted}",
+                detail=f"{s.name} detected ({s.confidence} confidence): {s.redacted}"
+                       + (f" — {s.note}" if s.note else ""),
                 category=s.category,
+                confidence="tentative" if s.note else "firm",
             ))
     except Exception as exc:
         prev = f"{result.error}; " if result.error else ""

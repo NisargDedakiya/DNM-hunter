@@ -453,7 +453,9 @@ def _scan_php_xss(lines: list[str], file: str, sanitizers: set[str]) -> list[Cod
             title = f"{label} XSS — {src_word} echoed without output encoding"
             verify = (" Manual verification required: confirm the stored value can contain "
                       "markup and that no write-path encodes it." if source != "request" else "")
-            detail = (f"{title}. {_CTX_HINT[ctx]}{verify} [VRT {vrt}; CWE-79]")
+            # No VRT/CWE suffix here — the finding carries them as fields, and the
+            # repo/report layer appends them (avoids a doubled "[VRT …] [VRT …]").
+            detail = f"{title}. {_CTX_HINT[ctx]}{verify}"
             out.append(CodeFinding(vrt, "CA-XSS", sev, title, file, i, detail,
                                    "CWE-79", conf))
     return out

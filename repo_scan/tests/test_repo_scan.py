@@ -78,6 +78,58 @@ class TestSecretScanner(unittest.TestCase):
         self.assertNotEqual(redact(_AWS_KEY), _AWS_KEY)
 
 
+class TestSecretFalsePositiveReduction(unittest.TestCase):
+    """The reviewer's Priority-1/2/7 accuracy work: suppress lockfiles, doc/CDN
+    URLs, log-message 'secrets', and downgrade doc/example/demo files."""
+
+    def test_lockfiles_are_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            # a base64 integrity hash starting 6L... matched the reCAPTCHA rule
+            (root / "package-lock.json").write_text(
+                '"integrity": "sha512-Zz+aZ6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+ml=="\n')
+            (root / "pnpm-lock.yaml").write_text('integrity: sha512-6LvYkZqtUQGJPZjYl53ypCaUw==\n')
+            self.assertEqual(scan_secrets(root), [], "dependency lockfiles must be skipped")
+
+    def test_staging_url_substring_not_matched(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "cfg.js").write_text(
+                'a = "https://developer.mozilla.org/en-US/docs/Web"\n'
+                'b = "https://staging.acmecorp-internal.io/api"\n')
+            names = {(f.name, f.line) for f in scan_secrets(root)}
+            self.assertNotIn(("Internal/Staging URL", 1), names)   # "dev" in "developer"
+            self.assertIn(("Internal/Staging URL", 2), names)      # real staging host
+
+    def test_log_message_not_a_generic_secret(self):
+        # line-scoped matching: a pattern can't span lines to grab a log string
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "auth.js").write_text(
+                "try {\n} catch (err) {\n  console.error('Error verifying password:', err)\n}\n")
+            self.assertFalse(any(f.name == "Generic Secret" for f in scan_secrets(root)))
+
+    def test_doc_and_demo_files_are_downgraded(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "README.md").write_text(f"Example config: KEY={_STRIPE_KEY}\n")
+            (root / "demo.service.js").write_text(f"export const K = '{_STRIPE_KEY}'\n")
+            found = {Path(f.file).name: f for f in scan_secrets(root)}
+            # still surfaced, but as info with a context note (not medium/high)
+            for name in ("README.md", "demo.service.js"):
+                self.assertIn(name, found)
+                self.assertEqual(found[name].severity, "info")
+                self.assertTrue(found[name].note)
+
+    def test_real_secret_in_source_still_high(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "config.js").write_text(f"const k = '{_AWS_KEY}'\n")
+            aws = [f for f in scan_secrets(root) if f.name == "AWS Access Key ID"]
+            self.assertTrue(aws)
+            self.assertNotEqual(aws[0].severity, "info")   # real code path → not downgraded
+
+
 class TestRepoScanIntegration(unittest.TestCase):
     def test_scan_tree_returns_misconfig_and_secrets(self):
         with tempfile.TemporaryDirectory() as d:

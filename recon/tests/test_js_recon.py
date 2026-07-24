@@ -480,8 +480,15 @@ class TestFalsePositiveFilters(unittest.TestCase):
         self.assertTrue(any(f['name'] == 'Email Address' for f in findings))
 
     def test_staging_url_whitelist(self):
-        _, filtered = _scan_full('https://developer.mozilla.org/testing-internal-api')
+        # a genuinely staging-labelled URL on a known public docs host is filtered
+        _, filtered = _scan_full('https://test.docs.microsoft.com/api')
         self.assertGreaterEqual(filtered['url_whitelist'], 1)
+
+    def test_public_docs_url_not_flagged_as_staging(self):
+        # improved regex: a keyword that is only a substring of a host label
+        # (developer → "dev") no longer matches, so MDN is never a staging finding
+        findings = _scan('https://developer.mozilla.org/testing-internal-api')
+        self.assertFalse(any(f['name'] == 'Internal/Staging URL' for f in findings))
 
     def test_staging_url_real_kept(self):
         findings = _scan('https://staging.internal-app.com')

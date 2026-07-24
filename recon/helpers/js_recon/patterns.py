@@ -289,7 +289,9 @@ _RAW_PATTERNS = [
     ("GCP Storage", r"https?://storage\.googleapis\.com/([a-zA-Z0-9._-]+)", "medium", "high", "infrastructure", None),
     ("GCP gs:// URL", r"gs://([a-zA-Z0-9._-]+)", "medium", "high", "infrastructure", None),
     ("Azure Blob Storage", r"https?://([a-zA-Z0-9]+)\.blob\.core\.windows\.net", "medium", "high", "infrastructure", None),
-    ("Internal/Staging URL", r"https?://[a-zA-Z0-9.-]*(staging|internal|dev|test|local|admin)[a-zA-Z0-9.-]*\.[a-zA-Z]{2,}", "low", "low", "infrastructure", None),
+    # Keyword must be a whole host label (bounded by //, ., or -), not a substring —
+    # otherwise "developer.mozilla.org" matches via "dev", "latest.x" via "test", etc.
+    ("Internal/Staging URL", r"https?://[a-zA-Z0-9.-]*?(?<![a-zA-Z])(staging|internal|dev|test|local|admin|uat|qa|preprod|sandbox)(?![a-zA-Z])[a-zA-Z0-9.-]*\.[a-zA-Z]{2,}", "low", "low", "infrastructure", None),
     ("Localhost with Port", r"(?:localhost|127\.0\.0\.1):\d{2,5}", "low", "medium", "infrastructure", None),
 
     # ========== LOW / INFO ==========
