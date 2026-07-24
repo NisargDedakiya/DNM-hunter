@@ -269,9 +269,9 @@ _PHP_SINKS = [
     ("server_side_injection.rce", "CA-EVAL", CRIT, "CWE-95",
      "Untrusted input passed to a code-evaluation sink (RCE)",
      re.compile(r"\b(eval|assert|create_function)\s*\(", re.IGNORECASE)),
-    ("cross_site_scripting.reflected", "CA-XSS", HIGH, "CWE-79",
-     "Untrusted input echoed to the page without output encoding (cross-site scripting)",
-     re.compile(r"\b(echo|print|printf|print_r|vprintf|fpassthru)\b", re.IGNORECASE)),
+    # NOTE: PHP echo/print XSS is handled by the dedicated, taint-source-classified
+    # + context-aware pass below (_scan_php_xss), not by this coarse sink — that
+    # avoids the variable-name/substring collisions a bare `echo` matcher causes.
     ("server_side_injection.file_inclusion_local", "CA-LFI", HIGH, "CWE-98",
      "File path built from untrusted input (local file inclusion / path traversal)",
      re.compile(r"\b(include|include_once|require|require_once|fopen|file_get_contents|readfile|highlight_file|show_source)\b", re.IGNORECASE)),
@@ -279,6 +279,183 @@ _PHP_SINKS = [
      "Outbound request to an untrusted URL (server-side request forgery)",
      re.compile(r"\b(curl_exec|curl_init|file_get_contents|fsockopen|get_headers)\s*\(", re.IGNORECASE)),
 ]
+
+
+# ── PHP XSS: taint-source classification + context-aware output analysis ─────
+# The reviewer's six asks live here: (1) taint tracking, (2) source
+# classification, (3) context-aware encoding, (4) sanitiser recognition,
+# (5) confidence scoring, (6) reflected/stored/potential typing. A dedicated
+# pass (rather than a coarse `echo` matcher) because XSS verdict quality hinges
+# on *where the data came from* and *what context it lands in*.
+
+# request-controlled sources → reflected-XSS candidates.
+_PHP_REQUEST_SRC = re.compile(
+    r"\$_(?:GET|POST|REQUEST|COOKIE|FILES)\b"
+    r"|\$_SERVER\s*\[\s*['\"](?:QUERY_STRING|REQUEST_URI|PATH_INFO|HTTP_[A-Z_]+|PHP_SELF)"
+    r"|php://input|apache_request_headers|getallheaders", re.IGNORECASE)
+# values read back out of persistent storage → stored-XSS candidates.
+_PHP_DB_SRC = re.compile(
+    r"->\s*fetch(?:All|Column|Object)?\s*\(|->\s*query\s*\("
+    r"|\bmysqli?_fetch_\w+\s*\(|\bpg_fetch_\w+\s*\(", re.IGNORECASE)
+_PHP_SESSION_SRC = re.compile(r"\$_SESSION\b")
+# casts / checks that make a value non-markup → safe to echo.
+_PHP_INT_SAFE = re.compile(
+    r"\bintval\s*\(|\(\s*int\s*\)|\bfloatval\s*\(|\(\s*float\s*\)|\bctype_digit\s*\(", re.IGNORECASE)
+_PHP_VARREF = re.compile(r"\$([A-Za-z_]\w*)")
+# echo / print / printf / short-echo tag — the HTML output sinks.
+_PHP_ECHO = re.compile(r"<\?=|\b(?:echo|print|printf|vprintf)\b", re.IGNORECASE)
+
+# built-in output encoders, by the context they make safe.
+_PHP_SANI_HTML = ("htmlspecialchars", "htmlentities", "strip_tags", "filter_var", "filter_input")
+_PHP_SANI_URL = ("urlencode", "rawurlencode")
+_PHP_SANI_JS = ("json_encode",)
+_DANGER = {"request": 3, "session": 2, "db": 1, "safe": 0}
+
+
+def collect_php_sanitizers(texts: list[str]) -> set[str]:
+    """Names of project-defined functions that wrap a built-in HTML encoder —
+    e.g. `function sanitize($d){ return htmlspecialchars(strip_tags(trim($d))); }`.
+    Recognising these (reviewer ask #4) stops the tool calling escaped output XSS."""
+    names: set[str] = set()
+    func_re = re.compile(r"function\s+([A-Za-z_]\w*)\s*\([^)]*\)\s*\{", re.IGNORECASE)
+    body_sani = re.compile(r"htmlspecialchars|htmlentities|strip_tags|filter_var", re.IGNORECASE)
+    for text in texts:
+        for m in func_re.finditer(text):
+            body = text[m.end():m.end() + 400]
+            if body_sani.search(body):
+                names.add(m.group(1))
+    return names
+
+
+def _php_expr_class(expr: str, cls: dict[str, str]) -> str | None:
+    """Source class of a PHP expression: request | session | db | (inherited) | None."""
+    if _PHP_REQUEST_SRC.search(expr):
+        return "request"
+    if _PHP_SESSION_SRC.search(expr):
+        return "session"
+    if _PHP_DB_SRC.search(expr):
+        return "db"
+    best = None
+    for v in _PHP_VARREF.findall(expr):
+        c = cls.get(v)
+        if c and c != "safe" and (best is None or _DANGER[c] > _DANGER[best]):
+            best = c
+    return best
+
+
+def _classify_php_sources(lines: list[str], sanitizers: set[str]) -> dict[str, str]:
+    """Per-file symbol table: {varname → most-dangerous source class seen}."""
+    cls: dict[str, str] = {}
+    sani = re.compile(
+        r"\b(" + "|".join(re.escape(s) for s in
+                          (*_PHP_SANI_HTML, *_PHP_SANI_URL, *_PHP_SANI_JS, *sanitizers)) + r")\s*\(")
+    fe_re = re.compile(
+        r"foreach\s*\(\s*(.+?)\s+as\s+(?:\$[A-Za-z_]\w*\s*=>\s*)?\$([A-Za-z_]\w*)\s*\)")
+
+    def bump(var: str, newc: str | None) -> bool:
+        if not newc:
+            return False
+        if _DANGER.get(newc, 0) > _DANGER.get(cls.get(var, "safe"), -1) or var not in cls:
+            if cls.get(var) != newc:
+                cls[var] = newc
+                return True
+        return False
+
+    for _ in range(6):  # fixpoint — order-independent
+        changed = False
+        for raw in lines:
+            fe = fe_re.search(raw)
+            if fe:
+                changed |= bump(fe.group(2), _php_expr_class(fe.group(1), cls))
+                continue
+            m = _ASSIGN_RE.match(raw)
+            if not m:
+                continue
+            var, rhs = m.group(1), m.group(2)
+            if _PHP_INT_SAFE.search(rhs) or sani.search(rhs):
+                changed |= bump(var, "safe")
+            else:
+                changed |= bump(var, _php_expr_class(rhs, cls))
+        if not changed:
+            break
+    return cls
+
+
+def _php_output_context(before: str) -> str:
+    """Where the echoed value lands, from the HTML to the left of the echo tag:
+    js | url | attribute | html."""
+    if re.search(r"<script\b[^>]*>[^<]*$", before, re.IGNORECASE) \
+            or re.search(r"\bon\w+\s*=\s*(['\"])[^'\"]*$", before, re.IGNORECASE):
+        return "js"
+    if re.search(r"=\s*(['\"])[^'\"]*$", before):  # inside an attribute value
+        if re.search(r"\b(?:href|src|action|formaction|data-\w+|location)\s*=\s*(['\"])[^'\"]*$",
+                     before, re.IGNORECASE):
+            return "url"
+        return "attribute"
+    return "html"
+
+
+def _echo_sanitised(expr: str, ctx: str, sanitizers: set[str]) -> bool:
+    """True if the echoed expression is wrapped by an encoder appropriate to ctx."""
+    if _PHP_INT_SAFE.search(expr):
+        return True
+    ok = {"html": (*_PHP_SANI_HTML, *sanitizers),
+          "attribute": (*_PHP_SANI_HTML, *sanitizers),
+          "url": (*_PHP_SANI_URL, *_PHP_SANI_HTML),
+          "js": _PHP_SANI_JS}[ctx]
+    return any(re.search(r"\b" + re.escape(s) + r"\s*\(", expr) for s in ok)
+
+
+_PHP_XSS_META = {
+    # source class → (vrt, severity, confidence, type-label)
+    "request": ("cross_site_scripting.reflected", HIGH, "firm", "Reflected"),
+    "session": ("cross_site_scripting.stored", MED, "tentative", "Potential stored"),
+    "db":      ("cross_site_scripting.stored", LOW, "heuristic", "Potential stored"),
+}
+_CTX_HINT = {
+    "html": "HTML body context — HTML-encode with htmlspecialchars(…, ENT_QUOTES).",
+    "attribute": "HTML attribute context — encode with htmlspecialchars(…, ENT_QUOTES) "
+                 "so quotes can't break out of the attribute.",
+    "url": "URL context — validate the scheme and urlencode() the value; an attacker "
+           "value could inject javascript: or extra parameters.",
+    "js": "JavaScript context — htmlspecialchars is NOT enough here; emit the value "
+          "with json_encode() inside the script.",
+}
+
+
+def _scan_php_xss(lines: list[str], file: str, sanitizers: set[str]) -> list[CodeFinding]:
+    """Context-aware, source-classified PHP XSS detection (reviewer asks #1–#6)."""
+    cls = _classify_php_sources(lines, sanitizers)
+    out: list[CodeFinding] = []
+    seen: set[int] = set()
+    for i, raw in enumerate(lines, 1):
+        for em in _PHP_ECHO.finditer(raw):
+            after = raw[em.end():]
+            expr = re.split(r";|\?>", after, maxsplit=1)[0]  # the echoed expression
+            if not expr.strip():
+                continue
+            # (2) classify the source of the echoed data — inline $_GET/$_SESSION/
+            # ->fetch() as well as previously-classified variables.
+            source = _php_expr_class(expr, cls)
+            if source in (None, "safe"):
+                continue  # constant / int / already-safe → not XSS (kills the FPs)
+            # (3) context + (4) sanitiser recognition
+            ctx = _php_output_context(raw[:em.start()])
+            if _echo_sanitised(expr, ctx, sanitizers):
+                continue
+            if i in seen:  # one XSS finding per line is enough
+                continue
+            seen.add(i)
+            vrt, sev, conf, label = _PHP_XSS_META[source]
+            src_word = {"request": "untrusted request input", "session": "a session value",
+                        "db": "a database value"}[source]
+            title = f"{label} XSS — {src_word} echoed without output encoding"
+            verify = (" Manual verification required: confirm the stored value can contain "
+                      "markup and that no write-path encodes it." if source != "request" else "")
+            detail = (f"{title}. {_CTX_HINT[ctx]}{verify} [VRT {vrt}; CWE-79]")
+            out.append(CodeFinding(vrt, "CA-XSS", sev, title, file, i, detail,
+                                   "CWE-79", conf))
+    return out
 
 
 def _refs(text: str, vars_: set[str]) -> bool:
@@ -310,13 +487,20 @@ def _looks_literal_only(arg_region: str) -> bool:
     return bool(re.match(r"\s*\(\s*(?:[rbf]?['\"][^'\"]*['\"]|\d+)\s*[,)]", arg_region))
 
 
-def scan_code(text: str, file: str) -> list[CodeFinding]:
+def scan_code(text: str, file: str, php_sanitizers: set[str] | None = None) -> list[CodeFinding]:
     findings: list[CodeFinding] = []
     lines = text.splitlines()
     is_py = file.endswith(".py")
     is_php = file.endswith(".php")
     taint_sinks = _TAINT_SINKS + _PHP_SINKS if is_php else _TAINT_SINKS
     _seen: set[tuple] = set()
+
+    # PHP XSS runs through the dedicated source-classified, context-aware pass.
+    # `php_sanitizers` are project-defined encoders (found cross-file by
+    # scan_tree); default to the local ones when scan_code is called standalone.
+    if is_php:
+        sani = php_sanitizers if php_sanitizers is not None else collect_php_sanitizers([text])
+        findings.extend(_scan_php_xss(lines, file, sani))
 
     def add(vrt, rule, sev, title, i, detail, cwe="", confidence="firm"):
         # PHP and the generic rules can both match the same construct (e.g. a bare
@@ -401,17 +585,26 @@ def scan_code(text: str, file: str) -> list[CodeFinding]:
 
 def scan_tree(root: str | Path) -> list[CodeFinding]:
     root = Path(root)
-    out: list[CodeFinding] = []
+    files: list[tuple[Path, str]] = []
     for path in root.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in _SRC_EXT:
             continue
         if any(p in _SKIP_DIRS for p in path.parts):
             continue
         try:
-            text = path.read_text(errors="replace")
+            files.append((path, path.read_text(errors="replace")))
         except Exception:
             continue
-        out.extend(scan_code(text, str(path.relative_to(root))))
+
+    # First pass: harvest project-defined PHP sanitiser functions across the whole
+    # tree so a custom encoder defined in one file is recognised when used in
+    # another (e.g. functions.php's sanitize() used by index.php).
+    php_sanitizers = collect_php_sanitizers(
+        [t for p, t in files if p.suffix.lower() == ".php"])
+
+    out: list[CodeFinding] = []
+    for path, text in files:
+        out.extend(scan_code(text, str(path.relative_to(root)), php_sanitizers))
     return out
 
 

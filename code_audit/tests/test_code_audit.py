@@ -310,6 +310,74 @@ class TestPhp(unittest.TestCase):
             self.assertTrue(any(f.file.endswith(".php") for f in found))
 
 
+# A file mirroring the practical-14 pattern that produced 6 false/mislabelled
+# XSS findings: a constant $message, DB values echoed, and a tainted var name
+# ($id, $username) that collides with array-key/string-literal substrings.
+_PHP_XSS_QUALITY = '''<?php
+$id = intval($_GET["delete"]);
+$username = sanitize($_POST["username"]);
+$message = "Invalid username or password";
+$stmt = $pdo->query("SELECT * FROM users");
+$users = $stmt->fetchAll();
+echo $_GET["q"];                                   // reflected — request, unsanitised
+echo sanitize($_POST["name"]);                     // custom sanitiser — safe
+echo $message;                                     // constant — NOT xss
+foreach ($users as $user):
+  echo $user["id"];                                // stored (db) — id key collides with $id
+  echo $user["username"];                          // stored (db) — real candidate
+endforeach;
+echo $_SESSION["username"];                        // stored (session)
+?>
+<input value="<?php echo $user["email"]; ?>">
+<a href="?id=<?php echo $user["id"]; ?>">x</a>
+'''
+
+
+class TestPhpXssQuality(unittest.TestCase):
+    def _by_line(self, sanitizers=None):
+        from code_audit.scanner import collect_php_sanitizers
+        s = sanitizers if sanitizers is not None else collect_php_sanitizers([_PHP_XSS_QUALITY])
+        return {f.line: f for f in scan_code(_PHP_XSS_QUALITY, "app.php", s)}
+
+    def test_constant_message_is_not_flagged(self):
+        # the $message constant collides with the word "username" inside the
+        # literal, but is NOT user input → must not be an XSS finding
+        self.assertNotIn(9, self._by_line())
+
+    def test_reflected_request_is_high_firm(self):
+        f = self._by_line()[7]
+        self.assertEqual(f.severity, "high")
+        self.assertEqual(f.confidence, "firm")
+        self.assertEqual(f.vrt, "cross_site_scripting.reflected")
+
+    def test_custom_sanitizer_recognised(self):
+        # sanitize() is defined in another file (functions.php); simulate the
+        # cross-file collection scan_tree does by passing it in explicitly.
+        self.assertNotIn(8, self._by_line(sanitizers={"sanitize"}))
+
+    def test_db_value_is_potential_stored_low(self):
+        f = self._by_line()[12]                # echo $user["username"]
+        self.assertEqual(f.severity, "low")
+        self.assertEqual(f.confidence, "heuristic")
+        self.assertEqual(f.vrt, "cross_site_scripting.stored")
+        self.assertIn("stored", f.title.lower())
+
+    def test_session_value_is_stored_medium(self):
+        f = self._by_line()[14]                # echo $_SESSION["username"]
+        self.assertEqual(f.severity, "medium")
+        self.assertEqual(f.confidence, "tentative")
+
+    def test_attribute_and_url_contexts_detected(self):
+        by = self._by_line()
+        self.assertIn("attribute context", by[16].detail)   # value="..."
+        self.assertIn("URL context", by[17].detail)         # href="?id=..."
+
+    def test_reflected_and_stored_are_distinct_types(self):
+        vrts = {f.vrt for f in self._by_line().values()}
+        self.assertIn("cross_site_scripting.reflected", vrts)
+        self.assertIn("cross_site_scripting.stored", vrts)
+
+
 class TestPrecision(unittest.TestCase):
     def test_parameterised_query_not_flagged(self):
         self.assertNotIn("CA-SQLI", rules(scan_code(_SAFE_PY, "safe.py")))
