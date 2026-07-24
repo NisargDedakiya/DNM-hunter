@@ -435,6 +435,75 @@ class TestInsecureRngContext(unittest.TestCase):
         self.assertNotIn("CA-RANDOM", rules(scan_code(code, "a.py")))
 
 
+_MAIL_ROUTE = '''import nodemailer from "nodemailer";
+export async function POST(request) {
+  const { name, email, subject, message } = await request.json();
+  const transporter = nodemailer.createTransport({});
+  const mailOptions = {
+    from: `"${name}" <me@example.com>`,
+    to: "me@example.com",
+    replyTo: email,
+    subject: `[Portfolio] ${subject}`,
+    html: `<strong>${name}</strong><p>${message}</p>`,
+  };
+  console.log(`Message from Name: ${name}, Subject: ${subject}`);
+  await transporter.sendMail(mailOptions);
+}
+'''
+
+
+class TestDestructuringTaint(unittest.TestCase):
+    def test_destructured_request_value_is_tainted(self):
+        code = ('export async function POST(req){\n'
+                '  const { id } = await req.json();\n'
+                '  db.query("SELECT * FROM u WHERE id = " + id);\n}\n')
+        self.assertIn("CA-SQLI", rules(scan_code(code, "route.ts")))
+
+    def test_destructured_into_innerhtml(self):
+        code = ('const { html } = req.body;\n'
+                'el.innerHTML = html;\n')
+        self.assertIn("CA-XSS", rules(scan_code(code, "a.ts")))
+
+
+class TestEmailInjection(unittest.TestCase):
+    def _by_rule(self, code, file="route.ts"):
+        return {f.rule_id: f for f in scan_code(code, file)}
+
+    def test_email_header_injection_flagged(self):
+        f = self._by_rule(_MAIL_ROUTE).get("CA-EMAILHDR")
+        self.assertIsNotNone(f)
+        self.assertEqual(f.severity, "low")
+        self.assertEqual(f.line, 6)   # the `from:` field, not the console.log
+
+    def test_email_html_injection_flagged(self):
+        f = self._by_rule(_MAIL_ROUTE).get("CA-EMAILXSS")
+        self.assertIsNotNone(f)
+        self.assertEqual(f.severity, "low")
+        self.assertEqual(f.vrt, "cross_site_scripting.stored")
+
+    def test_log_line_is_not_a_mail_header(self):
+        # the console.log contains "Subject:" text but is not a header field
+        f = self._by_rule(_MAIL_ROUTE).get("CA-EMAILHDR")
+        self.assertNotEqual(f.line, 12)
+
+    def test_no_email_findings_without_mail_context(self):
+        # same shape, but no mail library → not an email sink (avoids FPs on
+        # ordinary objects / React that happen to use from:/to:/html:)
+        code = ('const { name, message } = await request.json();\n'
+                'const o = { from: name, html: `<p>${message}</p>` };\n')
+        got = rules(scan_code(code, "x.ts"))
+        self.assertNotIn("CA-EMAILHDR", got)
+        self.assertNotIn("CA-EMAILXSS", got)
+
+    def test_constant_mail_fields_are_clean(self):
+        code = ('import nodemailer from "x";\n'
+                'const o = { from: "a@b.com", html: "<p>static</p>" };\n'
+                'transporter.sendMail(o);\n')
+        got = rules(scan_code(code, "x.ts"))
+        self.assertNotIn("CA-EMAILHDR", got)
+        self.assertNotIn("CA-EMAILXSS", got)
+
+
 class TestPrecision(unittest.TestCase):
     def test_parameterised_query_not_flagged(self):
         self.assertNotIn("CA-SQLI", rules(scan_code(_SAFE_PY, "safe.py")))

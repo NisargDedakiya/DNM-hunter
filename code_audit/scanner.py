@@ -34,7 +34,7 @@ _SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", ".next",
 # ── user-input taint sources (Python + JS/TS + PHP web frameworks) ──
 _USER_INPUT = re.compile(
     r"(request\.(args|form|values|json|data|files|GET|POST|body|query|params|cookies|headers)"
-    r"|req\.(body|query|params|cookies|headers)"
+    r"|req\.(body|query|params|cookies|headers|json)"       # req.json(): Next.js App Router
     r"|\.args\.get|\.get_json|flask\.request|self\.get_argument"
     r"|params\[|query\[|body\[|\$_(GET|POST|REQUEST|COOKIE|SERVER|FILES|ENV)"
     r"|php://input|apache_request_headers|getallheaders"
@@ -252,6 +252,10 @@ _QUERY_SINKS = {"CA-SQLI", "CA-LDAP"}
 # Leading `\$?` so PHP assignments ($name = ...) are captured too; the sigil is
 # dropped from the variable name, and `_refs` matches it back inside `$name`.
 _ASSIGN_RE = re.compile(r"\s*(?:(?:const|let|var)\s+)?\$?([A-Za-z_]\w*)\s*=\s*([^=].*)$")
+# Object/array destructuring: `const { name, email } = await request.json()` —
+# every bound name inherits the RHS taint (a very common Next.js/Express idiom
+# the plain assignment regex misses).
+_DESTRUCTURE_RE = re.compile(r"(?:const|let|var)\s*[{\[]([^}\]]*)[}\]]\s*=\s*(.+)$")
 
 # PHP output-encoding functions — if one wraps the echoed value it is not XSS.
 _PHP_XSS_SANITIZERS = re.compile(
@@ -523,6 +527,56 @@ def _scan_insecure_rng(lines: list[str], file: str, is_py: bool) -> list[CodeFin
     return out
 
 
+# ── email injection: untrusted input into mail headers / HTML body ───────────
+# Contact forms that build a message from user input are the classic case (and
+# what a repo scan of a Next.js/Express app should catch). Gated on the file
+# actually sending mail, and only fired when a *tainted* value reaches the field,
+# so a constant `to:` / a normal template literal never triggers it.
+_MAIL_CONTEXT = re.compile(
+    r"nodemailer|createTransport|\.sendMail\b|@sendgrid|sgMail|mailgun|"
+    r"SendEmailCommand|ses\.sendEmail|resend\.emails|postmark|mailOptions|"
+    r"\btransporter\b|smtplib", re.IGNORECASE)
+# Anchored to the start of the (indented) line so it matches an object property
+# `from: …` — not the words "from"/"Subject:" inside a log string or template.
+_MAIL_HEADER_FIELD = re.compile(r"^\s*(from|replyTo|reply_to|sender|cc|bcc|subject)\s*:", re.IGNORECASE)
+_HTML_TAG = re.compile(r"<[a-zA-Z][a-zA-Z0-9]*[\s>/]")
+_JS_INTERP = re.compile(r"\$\{([^}]*)\}")
+
+
+def _scan_email_injection(lines: list[str], file: str, tainted: set[str]) -> list[CodeFinding]:
+    """Untrusted input placed into an email header or HTML email body — reported
+    once per class per file (header injection + HTML/content injection)."""
+    if not _MAIL_CONTEXT.search("\n".join(lines)):
+        return []
+    out: list[CodeFinding] = []
+    header_done = html_done = False
+    for i, raw in enumerate(lines, 1):
+        if not header_done:
+            hm = _MAIL_HEADER_FIELD.search(raw)
+            if hm and _refs(raw[hm.end():], tainted):
+                out.append(CodeFinding(
+                    "server_side_injection.email_header_injection", "CA-EMAILHDR", LOW,
+                    "Untrusted input placed in an email header (email header injection)",
+                    file, i,
+                    "Untrusted input reaches an email header field. A mail library usually "
+                    "neutralises CRLF here, so verify — if it doesn't, an attacker can add "
+                    "Bcc/Cc recipients or forge headers. Validate/sanitise the value.",
+                    "CWE-93", "heuristic"))
+                header_done = True
+        if not html_done and _HTML_TAG.search(raw):
+            if any(_refs(m.group(1), tainted) for m in _JS_INTERP.finditer(raw)):
+                out.append(CodeFinding(
+                    "cross_site_scripting.stored", "CA-EMAILXSS", LOW,
+                    "Untrusted input rendered in an HTML email body (HTML/content injection)",
+                    file, i,
+                    "Untrusted input is interpolated into an HTML email without escaping. When "
+                    "the recipient opens the message, attacker-controlled markup/links render "
+                    "(content spoofing / phishing). HTML-encode the value before embedding it.",
+                    "CWE-79", "tentative"))
+                html_done = True
+    return out
+
+
 def _refs(text: str, vars_: set[str]) -> bool:
     return any(re.search(r"\b" + re.escape(v) + r"\b", text) for v in vars_)
 
@@ -589,6 +643,13 @@ def scan_code(text: str, file: str, php_sanitizers: set[str] | None = None) -> l
         changed = False
         for raw in lines:
             code = raw.split("#", 1)[0] if is_py else raw
+            # destructuring: `const { name, email } = await request.json()`
+            dm = _DESTRUCTURE_RE.search(code)
+            if dm and (bool(_USER_INPUT.search(dm.group(2))) or _refs(dm.group(2), tainted)):
+                for nm in re.findall(r"[A-Za-z_]\w*", dm.group(1)):
+                    if nm not in tainted:
+                        tainted.add(nm)
+                        changed = True
             m = _ASSIGN_RE.match(code)
             if not m:
                 continue
@@ -648,6 +709,11 @@ def scan_code(text: str, file: str, php_sanitizers: set[str] | None = None) -> l
             if rx.search(line):
                 add(vrt, rule, sev, title, i, f"{title}.", cwe,
                     confidence="firm" if rule in _FIRM_STATIC else "tentative")
+
+    # Email header / HTML-body injection (mail-sending files only), using the
+    # taint set built above — catches contact-form routes a repo scan should flag.
+    if not is_php:
+        findings.extend(_scan_email_injection(lines, file, tainted))
 
     return findings
 
