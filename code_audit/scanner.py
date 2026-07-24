@@ -141,9 +141,10 @@ _STATIC_RULES = [
     ("cryptographic_weakness.broken_cryptography", "CA-CIPHER", HIGH, "CWE-327",
      "Broken/weak cipher (DES/3DES/RC4/Blowfish or ECB mode)",
      re.compile(r"\b(DES\b|TripleDES|3DES|ARC4|RC4|Blowfish|MODE_ECB|['\"]des-|['\"]rc4|/ECB/|Cipher\.getInstance\s*\(\s*['\"]DES)", re.IGNORECASE)),
-    ("cryptographic_weakness.insufficient_entropy", "CA-RANDOM", MED, "CWE-330",
-     "Insecure RNG used for a security value (use a CSPRNG)",
-     re.compile(r"\b(random\.(random|randint|randrange|choice|getrandbits|sample|shuffle)|Math\.random|mt_rand|rand\s*\()", re.IGNORECASE)),
+    # NOTE: CA-RANDOM (insecure RNG) is NOT a context-free rule — a bare
+    # Math.random() is overwhelmingly legitimate (animation, particles, jitter).
+    # It is handled by the security-context-gated pass _scan_insecure_rng below,
+    # which only fires when the value feeds a token/secret/session/key/etc.
     ("cryptographic_weakness.insecure_key_generation", "CA-RSAKEY", MED, "CWE-326",
      "Undersized asymmetric key (<2048-bit RSA/DSA)",
      re.compile(r"(key_size\s*=\s*(512|768|1024)\b|RSA\.generate\s*\(\s*(512|768|1024)\b|modulusLength\s*:\s*(512|768|1024)\b)")),
@@ -458,6 +459,68 @@ def _scan_php_xss(lines: list[str], file: str, sanitizers: set[str]) -> list[Cod
     return out
 
 
+# ── insecure RNG: security-context-gated (CWE-330) ───────────────────────────
+# A non-crypto RNG is only a weakness when its output is used for a
+# security-sensitive value. Flagging every Math.random() (animation, particles,
+# jitter, demos) is the classic false-positive generator — so this pass reports
+# only when the RNG result reaches a token/secret/session/key/… context.
+_INSECURE_RNG = re.compile(
+    r"\b(?:random\.(?:random|randint|randrange|getrandbits|choice|sample|shuffle)"
+    r"|Math\.random|mt_rand|\bmt_srand|\brand)\s*\(", re.IGNORECASE)
+# Names that make a value security-sensitive. `key` only in a compound
+# (apiKey/secretKey/…) so it never matches a React `key=` prop or a dict key.
+_SECURITY_NAME = re.compile(
+    r"token|secret|session|jwt|csrf|xsrf|\botp\b|passw|pwd|nonce|salt|"
+    r"(?:api|secret|private|public|signing|encryption|crypto|access|master|refresh)[_-]?key|"
+    r"cookie|\bpin\b|credential|verifier|challenge|\bseed\b|\biv\b|hmac|signature|"
+    r"\bmfa\b|\b2fa\b|recovery|activation|reset|\bnonce\b|passcode|auth(?!or)", re.IGNORECASE)
+# Token-string idioms: Math.random().toString(36|16) is almost always id/token gen.
+_RNG_TOKEN_IDIOM = re.compile(
+    r"\.random\s*\(\s*\)\s*\.\s*toString\s*\(\s*(?:16|36)\s*\)", re.IGNORECASE)
+# LHS of an assignment / object-literal key on the RNG line.
+_RNG_LHS = re.compile(
+    r"^\s*(?:(?:const|let|var|final|readonly|private|public|protected|static)\s+)*"
+    r"([\w.$\[\]'\"-]+?)\s*[:=](?![=>])")
+
+
+def _scan_insecure_rng(lines: list[str], file: str, is_py: bool) -> list[CodeFinding]:
+    vrt, cwe = "cryptographic_weakness.insufficient_entropy", "CWE-330"
+    title = "Insecure RNG used for a security value (use a CSPRNG)"
+    detail = (f"{title}. A non-cryptographic PRNG feeds a security-sensitive value — its "
+              f"output is predictable. Use a CSPRNG (secrets / crypto.randomBytes / os.urandom).")
+    out: list[CodeFinding] = []
+
+    # Pass 1: vars assigned directly from an insecure RNG (for light flow tracking).
+    rng_vars: set[str] = set()
+    for raw in lines:
+        code = raw.split("#", 1)[0] if is_py else raw
+        if _INSECURE_RNG.search(code):
+            m = _RNG_LHS.match(code)
+            if m:
+                name = m.group(1).split(".")[-1].strip("[]'\"")
+                if name and not _SECURITY_NAME.search(name):
+                    rng_vars.add(name)
+
+    for i, raw in enumerate(lines, 1):
+        code = raw.split("#", 1)[0] if is_py else raw
+        rng_here = bool(_INSECURE_RNG.search(code))
+        lhs = ""
+        m = _RNG_LHS.match(code)
+        if m:
+            lhs = m.group(1)
+
+        confidence = None
+        # (a) RNG on this line whose target / idiom is security-sensitive → firm.
+        if rng_here and (_RNG_TOKEN_IDIOM.search(code) or (lhs and _SECURITY_NAME.search(lhs))):
+            confidence = "firm"
+        # (b) a security-named var is assigned from an RNG-tainted var → tentative.
+        elif lhs and _SECURITY_NAME.search(lhs) and _refs(code, rng_vars):
+            confidence = "tentative"
+        if confidence:
+            out.append(CodeFinding(vrt, "CA-RANDOM", MED, title, file, i, detail, cwe, confidence))
+    return out
+
+
 def _refs(text: str, vars_: set[str]) -> bool:
     return any(re.search(r"\b" + re.escape(v) + r"\b", text) for v in vars_)
 
@@ -501,6 +564,10 @@ def scan_code(text: str, file: str, php_sanitizers: set[str] | None = None) -> l
     if is_php:
         sani = php_sanitizers if php_sanitizers is not None else collect_php_sanitizers([text])
         findings.extend(_scan_php_xss(lines, file, sani))
+
+    # Insecure RNG is context-gated (only flags security-sensitive use), across
+    # all languages — replaces the old fire-on-every-Math.random() static rule.
+    findings.extend(_scan_insecure_rng(lines, file, is_py))
 
     def add(vrt, rule, sev, title, i, detail, cwe="", confidence="firm"):
         # PHP and the generic rules can both match the same construct (e.g. a bare

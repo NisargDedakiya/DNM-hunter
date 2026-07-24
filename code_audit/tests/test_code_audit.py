@@ -56,7 +56,7 @@ app.get("/x", (req, res) => {
   child_process.exec("ls " + name);                        // command injection
   res.send("<h1>" + name + "</h1>");                       // XSS
   document.write(req.query.html);                          // XSS
-  const t = Math.random();                                 // insecure RNG
+  const sessionToken = Math.random().toString(36);         // insecure RNG (security use)
   localStorage.setItem("auth_token", jwt);                 // web storage token
 });
 '''
@@ -376,6 +376,63 @@ class TestPhpXssQuality(unittest.TestCase):
         vrts = {f.vrt for f in self._by_line().values()}
         self.assertIn("cross_site_scripting.reflected", vrts)
         self.assertIn("cross_site_scripting.stored", vrts)
+
+
+# The portfolio-website false-positive pattern: Math.random() for animation.
+_ANIM_JS = '''
+class Particle {
+  constructor() {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.radius = Math.random() * 1.5 + 1;
+    this.color = Math.random() > 0.3 ? "blue" : "red";
+  }
+}
+const key = Math.random();                       // React key-ish, not security
+setPing(prev + Math.floor(Math.random() * 7) - 3);
+'''
+
+_RNG_SECURITY_JS = '''
+const sessionToken = Math.random().toString(36).slice(2);
+this.csrfToken = Math.random();
+let apiKey = Math.random().toString(16);
+const r = Math.random();
+const resetToken = "reset-" + r;                 // rng flows into a token
+const speed = Math.random() * 5;                 // NOT security
+'''
+
+
+class TestInsecureRngContext(unittest.TestCase):
+    def test_animation_random_is_not_flagged(self):
+        # the exact portfolio-website case: particle/animation Math.random()
+        self.assertNotIn("CA-RANDOM", rules(scan_code(_ANIM_JS, "NetworkMesh.tsx")))
+
+    def test_react_key_and_ping_not_flagged(self):
+        got = [f for f in scan_code(_ANIM_JS, "Hud.tsx") if f.rule_id == "CA-RANDOM"]
+        self.assertEqual(got, [])
+
+    def test_security_token_is_flagged(self):
+        got = {f.line for f in scan_code(_RNG_SECURITY_JS, "auth.ts") if f.rule_id == "CA-RANDOM"}
+        self.assertIn(2, got)   # sessionToken = Math.random().toString(36)
+        self.assertIn(3, got)   # this.csrfToken = Math.random()
+        self.assertIn(4, got)   # apiKey = Math.random().toString(16)
+
+    def test_rng_flow_into_token_is_flagged(self):
+        got = {f.line for f in scan_code(_RNG_SECURITY_JS, "auth.ts") if f.rule_id == "CA-RANDOM"}
+        self.assertIn(6, got)   # resetToken = "reset-" + r  (r came from Math.random)
+
+    def test_non_security_rng_not_flagged(self):
+        got = {f.line for f in scan_code(_RNG_SECURITY_JS, "auth.ts") if f.rule_id == "CA-RANDOM"}
+        self.assertNotIn(7, got)   # const speed = Math.random() * 5
+
+    def test_python_token_randint_still_flagged(self):
+        code = 'token = random.randint(0, 999999)\n'
+        self.assertIn("CA-RANDOM", rules(scan_code(code, "a.py")))
+
+    def test_python_non_security_random_not_flagged(self):
+        code = 'jitter = random.random() * 0.1\n'
+        self.assertNotIn("CA-RANDOM", rules(scan_code(code, "a.py")))
 
 
 class TestPrecision(unittest.TestCase):
