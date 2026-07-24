@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react'
+import { backendUnreachableMessage } from '@/lib/serviceErrors'
 import {
   MessageType,
   ConnectionStatus,
@@ -273,7 +274,10 @@ export function useAgentWebSocket({
 
   // Handle WebSocket errors
   const handleError = useCallback((event: Event) => {
-    const error = new Error('WebSocket error occurred')
+    const error = new Error(
+      isAuthenticatedRef.current
+        ? 'WebSocket error occurred'
+        : backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
     setError(error)
     onError?.(error)
   }, [onError])

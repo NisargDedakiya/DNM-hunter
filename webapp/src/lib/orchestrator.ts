@@ -11,12 +11,26 @@
  * templates); only the function name changes from `fetch` to `orchestratorFetch`.
  * Server-side only — never import this into client components.
  */
-export function orchestratorFetch(url: string | URL, init: RequestInit = {}): Promise<Response> {
-  return fetch(url, {
-    ...init,
-    headers: {
-      ...(init.headers || {}),
-      'X-Orchestrator-Key': process.env.ORCHESTRATOR_API_KEY || 'changeme',
-    },
-  })
+import { backendUnreachableMessage, isUnreachableError } from '@/lib/serviceErrors'
+
+export async function orchestratorFetch(url: string | URL, init: RequestInit = {}): Promise<Response> {
+  try {
+    return await fetch(url, {
+      ...init,
+      headers: {
+        ...(init.headers || {}),
+        'X-Orchestrator-Key': process.env.ORCHESTRATOR_API_KEY || 'changeme',
+      },
+    })
+  } catch (err) {
+    // undici throws TypeError("fetch failed") when the orchestrator container is
+    // down/unreachable — replace it with an actionable message so the UI modal
+    // tells the user what to check instead of a cryptic "fetch failed".
+    if (isUnreachableError(err)) {
+      throw new Error(backendUnreachableMessage(
+        'recon orchestrator service', 'recon-orchestrator',
+        err instanceof Error ? err.message : undefined))
+    }
+    throw err
+  }
 }

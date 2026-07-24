@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react'
+import { backendUnreachableMessage } from '@/lib/serviceErrors'
 import {
   CypherFixCodeFixMessageType,
   type ActivityEntry,
@@ -288,11 +289,14 @@ export function useCypherFixCodeFixWS({
     }
 
     ws.onerror = () => {
-      setError('WebSocket connection error')
+      if (!isAuthenticatedRef.current) {
+        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+      }
       setStatus('error')
     }
 
     ws.onclose = () => {
+      const wasAuthenticated = isAuthenticatedRef.current
       wsRef.current = null
       isAuthenticatedRef.current = false
       if (pingIntervalRef.current) {
@@ -300,7 +304,12 @@ export function useCypherFixCodeFixWS({
         pingIntervalRef.current = null
       }
       if (status !== 'completed' && status !== 'error') {
-        setStatus('disconnected')
+        if (!wasAuthenticated) {
+          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+          setStatus('error')
+        } else {
+          setStatus('disconnected')
+        }
       }
     }
   }, [enabled, userId, projectId, getWebSocketUrl, sendMessage, pushLog, onDiffBlock, onPRCreated, onComplete, onError, status])

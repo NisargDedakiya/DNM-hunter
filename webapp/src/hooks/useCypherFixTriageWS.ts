@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react'
+import { backendUnreachableMessage } from '@/lib/serviceErrors'
 import {
   CypherFixTriageMessageType,
   type TriagePhase,
@@ -181,11 +182,16 @@ export function useCypherFixTriageWS({
     }
 
     ws.onerror = () => {
-      setError('WebSocket connection error')
+      // A WS error before we authenticate means the agent container isn't
+      // reachable — surface an actionable message, not "WebSocket connection error".
+      if (!isAuthenticatedRef.current) {
+        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+      }
       setStatus('error')
     }
 
     ws.onclose = () => {
+      const wasAuthenticated = isAuthenticatedRef.current
       wsRef.current = null
       isAuthenticatedRef.current = false
       if (pingIntervalRef.current) {
@@ -193,7 +199,13 @@ export function useCypherFixTriageWS({
         pingIntervalRef.current = null
       }
       if (status !== 'completed' && status !== 'error') {
-        setStatus('disconnected')
+        if (!wasAuthenticated) {
+          // Closed before ever connecting → the agent service is unreachable.
+          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+          setStatus('error')
+        } else {
+          setStatus('disconnected')
+        }
       }
     }
   }, [enabled, userId, projectId, getWebSocketUrl, sendMessage, onPhase, onFinding, onComplete, onError, status])
