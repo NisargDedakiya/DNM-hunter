@@ -115,8 +115,8 @@ cd DNM-hunter
 `./starthunt` is the one-command launcher — it installs on the first run and just
 starts on every run after, bringing up the whole platform (web app, PostgreSQL,
 Neo4j, docker-broker, recon-orchestrator, kali-sandbox, and the AI agent), then
-prints the URL. On **Windows** run `starthunt` from CMD/PowerShell (it hands off
-to Git Bash/WSL).
+prints the URL. On **Windows**: `starthunt` (CMD) or `.\starthunt.ps1`
+(PowerShell) — both hand off to Git Bash/WSL.
 
 ```bash
 ./starthunt          # start everything          ./starthunt stop     # stop (data kept)

@@ -61,7 +61,9 @@ cd DNM-hunter
 **One command starts everything:**
 
 ```bash
-./starthunt          # Windows (CMD/PowerShell): starthunt
+./starthunt                  # Linux / macOS / WSL / Git Bash
+starthunt                    # Windows CMD
+.\starthunt.ps1              # Windows PowerShell
 ```
 
 `starthunt` is the friendly one-command launcher: it checks Docker, creates
