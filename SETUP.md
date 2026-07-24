@@ -58,11 +58,34 @@ cd DNM-hunter
 
 ### Step 3 — Install and start
 
+**One command starts everything:**
+
+```bash
+./starthunt          # Windows (CMD/PowerShell): starthunt
+```
+
+`starthunt` is the friendly one-command launcher: it checks Docker, creates
+`.env` on first run, then **installs on the first run and just starts on every
+run after** — bringing up the *whole* platform (postgres, neo4j, docker-broker,
+recon-orchestrator, kali-sandbox, the AI agent, and the web app), not only the
+frontend/backend. When it's ready it prints the URL.
+
+```bash
+./starthunt          # start everything (install first run, else up)
+./starthunt dev      # dev mode (hot-reload)
+./starthunt status   # what's running
+./starthunt logs     # tail logs (or: ./starthunt logs webapp)
+./starthunt stop     # stop (data kept)
+```
+
+Prefer to drive the orchestrator directly? `./nisarghunter.sh install` does the
+same first-run install:
+
 ```bash
 ./nisarghunter.sh install
 ```
 
-That's it — the launcher checks prerequisites (Docker, Compose v2, git),
+Either way the launcher checks prerequisites (Docker, Compose v2, git),
 **auto-generates all required secrets** into `.env`, builds the images, starts
 the core stack, and prompts you to create an admin user. First build takes a
 while (it's compiling the web app and several scanner images).

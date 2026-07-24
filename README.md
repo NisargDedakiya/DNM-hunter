@@ -108,11 +108,24 @@ Runs everything: web app, PostgreSQL, Neo4j, the scanners, and the agent. On **W
 ```bash
 git clone https://github.com/NisargDedakiya/DNM-hunter.git
 cd DNM-hunter
-./nisarghunter.sh install          # checks prereqs, generates secrets, builds, starts core
+./starthunt                        # one command: starts the WHOLE stack
 # open http://localhost:3000
 ```
 
-`./nisarghunter.sh status | stop | update` manage the stack. Add `--gvm` for OpenVAS or `--kbase` for the local AI knowledge base.
+`./starthunt` is the one-command launcher — it installs on the first run and just
+starts on every run after, bringing up the whole platform (web app, PostgreSQL,
+Neo4j, docker-broker, recon-orchestrator, kali-sandbox, and the AI agent), then
+prints the URL. On **Windows** run `starthunt` from CMD/PowerShell (it hands off
+to Git Bash/WSL).
+
+```bash
+./starthunt          # start everything          ./starthunt stop     # stop (data kept)
+./starthunt dev      # dev mode (hot-reload)      ./starthunt status   # what's running
+./starthunt logs     # tail logs                  ./starthunt update   # pull + rebuild
+```
+
+Prefer the raw orchestrator? `./nisarghunter.sh install | up | status | stop | update`
+does the same. Add `--gvm` for OpenVAS or `--kbase` for the local AI knowledge base.
 
 ### Option B — Scanner container (zero host installs)
 
