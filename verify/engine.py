@@ -13,8 +13,10 @@ from .http import HttpClient, UrllibHttpClient
 from .oracles import (
     BooleanOracle,
     DifferentialOracle,
+    EmailHeaderInjectionOracle,
     InteractionServer,
     OastOracle,
+    RateLimitOracle,
     ReflectionOracle,
     TimingOracle,
 )
@@ -35,6 +37,8 @@ class VerificationEngine:
         self.boolean = BooleanOracle()
         self.reflection = ReflectionOracle()
         self.differential = DifferentialOracle()
+        self.rate_limit = RateLimitOracle()
+        self.email_header = EmailHeaderInjectionOracle(interaction_server)
         self.oast = OastOracle(interaction_server) if interaction_server else None
 
     def _oracles_for(self, vuln_class: str) -> list:
@@ -56,6 +60,10 @@ class VerificationEngine:
             return [self.oast] if self.oast else []
         if vc in (VulnClass.IDOR, VulnClass.BOLA, VulnClass.BFLA):
             return [self.differential]
+        if vc == VulnClass.FORM_ABUSE:
+            return [self.rate_limit]
+        if vc == VulnClass.EMAIL_HEADER_INJECTION:
+            return [self.email_header]
         return []
 
     def verify(self, cand: Candidate) -> VerificationResult:

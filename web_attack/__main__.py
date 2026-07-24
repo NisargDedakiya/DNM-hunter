@@ -7,7 +7,10 @@ demo.
 Live mode auto-scopes to the target's host — you are authorising the host you
 name. It refuses to crawl or test anything outside that scope. Out-of-band SSRF
 confirmation needs a real interaction server (see the README); without one, SSRF
-is reported as inconclusive rather than guessed.
+is reported as inconclusive rather than guessed. The same applies to email header
+injection — it is only *confirmed* by an out-of-band mail delivery, so without an
+email-capable collaborator it stays a lead. Contact-form abuse (missing rate
+limiting) is confirmed fully in-band and needs no collaborator.
 """
 
 from __future__ import annotations

@@ -34,6 +34,8 @@ class VulnClass(str, Enum):
     IDOR = "idor"                    # insecure direct object reference / BOLA
     BOLA = "bola"                    # (alias) broken object-level authorization
     BFLA = "bfla"                    # broken function-level authorization
+    EMAIL_HEADER_INJECTION = "email_header_injection"  # CRLF into mail headers (Bcc/Cc/Subject)
+    FORM_ABUSE = "form_abuse"        # state-changing form with no rate-limiting (spam / mail flood)
 
 
 @dataclass
@@ -64,6 +66,7 @@ class Candidate:
     param: str = ""                            # injection point: query key / body field / header name
     param_in: str = "query"                    # "query" | "body" | "header"
     base_value: str = ""                       # the benign value the param normally carries
+    form_fields: dict = field(default_factory=dict)  # sibling form fields (benign) to co-submit
     headers: dict = field(default_factory=dict)
     identities: list[Identity] = field(default_factory=list)  # for differential (IDOR/BOLA/BFLA)
     owner_marker: str = ""                     # a string only the owner's response should contain

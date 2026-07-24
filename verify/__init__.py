@@ -25,10 +25,12 @@ from .http import HttpClient, HttpRequest, HttpResponse, UrllibHttpClient
 from .oracles import (
     BooleanOracle,
     DifferentialOracle,
+    EmailHeaderInjectionOracle,
     InMemoryInteractionServer,
     Interaction,
     InteractionServer,
     OastOracle,
+    RateLimitOracle,
     ReflectionOracle,
     TimingOracle,
 )
@@ -47,5 +49,6 @@ __all__ = [
     "Candidate", "Identity", "Evidence", "VerificationResult", "Verdict", "VulnClass",
     "HttpClient", "HttpRequest", "HttpResponse", "UrllibHttpClient",
     "TimingOracle", "BooleanOracle", "ReflectionOracle", "OastOracle", "DifferentialOracle",
+    "RateLimitOracle", "EmailHeaderInjectionOracle",
     "InteractionServer", "InMemoryInteractionServer", "Interaction",
 ]

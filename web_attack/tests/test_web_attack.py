@@ -14,7 +14,7 @@ Run: python -m unittest web_attack.tests.test_web_attack -v
 """
 import re
 import unittest
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl, unquote_plus, urlsplit
 
 from verify import InMemoryInteractionServer, ScopeGuard, VulnClass
 from verify.http import HttpResponse
@@ -27,11 +27,21 @@ _INDEX = """<html><body>
   <a href="/search?q=hello">search</a>
   <a href="/item?id=1">item</a>
   <a href="/fetch?url=http://internal/health">fetch</a>
+  <a href="/contact">contact</a>
   <a href="https://evil.example.org/x?p=1">offsite</a>
   <form action="/login" method="post">
     <input name="user" value="">
     <input name="pass" type="password">
     <input type="submit" value="go">
+  </form>
+</body></html>"""
+
+_CONTACT = """<html><body>
+  <form action="/contact" method="post">
+    <input name="email" value="">
+    <input name="subject" value="">
+    <textarea name="message"></textarea>
+    <input type="submit" value="send">
   </form>
 </body></html>"""
 
@@ -68,6 +78,17 @@ class VulnApp:
             return HttpResponse(200, {}, "fetched", 30.0)
         if path == "/login":                        # not injectable
             return HttpResponse(200, {}, "welcome", 30.0)
+        if path == "/contact":
+            if not req.body:                        # GET → serve the form
+                return HttpResponse(200, {}, _CONTACT, 30.0)
+            # POST submission: no rate limiting (always accepts) AND a naive mailer
+            # that honours an injected Bcc header (out-of-band email delivery). The
+            # body is urlencoded, so match against a decoded copy.
+            body_dec = unquote_plus(req.body or "")
+            mm = re.search(r"(c[0-9a-f]+)@([0-9a-f]+\.oast\.local)", body_dec)
+            if mm:
+                self.server.trigger(mm.group(1), "smtp", "10.0.0.7")
+            return HttpResponse(200, {}, "Thanks, your message was sent.", 30.0)
         return HttpResponse(404, {}, "not found", 10.0)
 
 
@@ -137,6 +158,18 @@ class TestEngineFindsInjections(unittest.TestCase):
         ssrf = [f for f in report.findings if f.param == "url"][0]
         self.assertEqual(ssrf.oracle, "oast")
         self.assertEqual(ssrf.confidence, 1.0)
+
+    def test_confirms_form_abuse_and_email_header_injection(self):
+        engine, _ = _engine()
+        report = engine.run(SEED)
+        titles = {f.title for f in report.findings}
+        self.assertIn("No rate limiting on form (abuse / mail flooding)", titles)
+        self.assertIn("Email/SMTP header injection", titles)
+        # the email-header finding is out-of-band confirmed
+        eh = [f for f in report.findings if f.title == "Email/SMTP header injection"][0]
+        self.assertEqual(eh.oracle, "email-header")
+        self.assertEqual(eh.confidence, 1.0)
+        self.assertEqual(eh.param, "email")
 
     def test_no_false_positive_on_clean_login(self):
         engine, _ = _engine()

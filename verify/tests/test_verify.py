@@ -101,8 +101,42 @@ class AuthzFake:
         return HttpResponse(403, {}, "forbidden")
 
 
+class RateLimitFake:
+    """Accepts every submission (vulnerable), or starts returning 429 after `limit`
+    requests (patched — rate limiting present)."""
+    def __init__(self, limit=None):
+        self.limit = limit
+        self.count = 0
+
+    def send(self, req):
+        self.count += 1
+        if self.limit is not None and self.count > self.limit:
+            return HttpResponse(429, {}, "Too Many Requests — rate limit exceeded")
+        return HttpResponse(200, {}, "Thanks, your message was sent.")
+
+
+class EmailHeaderFake:
+    """A contact form. Vulnerable: a Bcc-injecting CRLF payload triggers an
+    out-of-band mail delivery. Validating: rejects any CRLF with a 400."""
+    def __init__(self, server=None, vulnerable=True, validating=False):
+        self.server, self.vulnerable, self.validating = server, vulnerable, validating
+
+    def send(self, req):
+        raw = urllib.parse.unquote_plus(req.body or "")   # decode as a framework would
+        has_crlf = ("\r\n" in raw or "\n" in raw)          # a *real* header break
+        if has_crlf and self.validating:
+            return HttpResponse(400, {}, "Invalid characters in input")
+        # Only a genuine CRLF actually breaks into a new header and delivers mail.
+        if has_crlf and self.vulnerable and self.server:
+            m = re.search(r"(c[0-9a-f]+)@([0-9a-f]+\.oast\.local)", raw)
+            if m:
+                self.server.trigger(m.group(1), protocol="smtp", remote_addr="10.0.0.7")
+        return HttpResponse(200, {}, "Thanks, your message was sent.")
+
+
 SCOPE = ScopeGuard({"staging.example.com"})
 URL = "https://staging.example.com/item"
+CONTACT = "https://staging.example.com/contact"
 
 
 # ── timing oracle ────────────────────────────────────────────────────────────
@@ -148,6 +182,56 @@ class TestReflectionOracle(unittest.TestCase):
     def test_inconclusive_when_absent(self):
         r = ReflectionOracle().verify(
             Candidate(VulnClass.REFLECTED_XSS, URL, param="q"), ReflectionFake("absent"))
+        self.assertEqual(r.verdict, Verdict.INCONCLUSIVE)
+
+
+# ── rate-limit oracle (form abuse) ───────────────────────────────────────────
+class TestRateLimitOracle(unittest.TestCase):
+    def test_confirms_no_rate_limiting(self):
+        from verify.oracles import RateLimitOracle
+        c = Candidate(VulnClass.FORM_ABUSE, CONTACT, method="POST", param="", param_in="body",
+                      form_fields={"email": "a@b.c", "message": "hi"})
+        r = RateLimitOracle(burst=8).verify(c, RateLimitFake(limit=None))
+        self.assertEqual(r.verdict, Verdict.CONFIRMED)
+        self.assertEqual(r.oracle, "rate-limit")
+
+    def test_refutes_when_throttled(self):
+        from verify.oracles import RateLimitOracle
+        c = Candidate(VulnClass.FORM_ABUSE, CONTACT, method="POST", param="", param_in="body")
+        r = RateLimitOracle(burst=8).verify(c, RateLimitFake(limit=3))   # 429 after 3
+        self.assertEqual(r.verdict, Verdict.REFUTED)
+
+    def test_engine_routes_form_abuse(self):
+        engine = VerificationEngine(SCOPE, client=RateLimitFake(limit=None))
+        r = engine.verify(Candidate(VulnClass.FORM_ABUSE, CONTACT, method="POST", param_in="body"))
+        self.assertEqual(r.verdict, Verdict.CONFIRMED)
+
+
+# ── email header injection oracle ────────────────────────────────────────────
+class TestEmailHeaderInjectionOracle(unittest.TestCase):
+    def test_confirms_via_out_of_band_delivery(self):
+        server = InMemoryInteractionServer()
+        engine = VerificationEngine(SCOPE, client=EmailHeaderFake(server, vulnerable=True),
+                                    interaction_server=server)
+        r = engine.verify(Candidate(VulnClass.EMAIL_HEADER_INJECTION, CONTACT, method="POST",
+                                    param="email", param_in="body", base_value="a@b.c"))
+        self.assertEqual(r.verdict, Verdict.CONFIRMED)
+        self.assertEqual(r.confidence, 1.0)
+        self.assertEqual(r.evidence[0].kind, "oob-interaction")
+
+    def test_refutes_when_crlf_rejected(self):
+        server = InMemoryInteractionServer()
+        engine = VerificationEngine(SCOPE, client=EmailHeaderFake(server, validating=True),
+                                    interaction_server=server)
+        r = engine.verify(Candidate(VulnClass.EMAIL_HEADER_INJECTION, CONTACT, method="POST",
+                                    param="email", param_in="body", base_value="a@b.c"))
+        self.assertEqual(r.verdict, Verdict.REFUTED)
+
+    def test_inconclusive_when_accepted_without_oob(self):
+        # no interaction server → can't confirm out-of-band; accepted silently → lead
+        engine = VerificationEngine(SCOPE, client=EmailHeaderFake(None, vulnerable=False))
+        r = engine.verify(Candidate(VulnClass.EMAIL_HEADER_INJECTION, CONTACT, method="POST",
+                                    param="email", param_in="body", base_value="a@b.c"))
         self.assertEqual(r.verdict, Verdict.INCONCLUSIVE)
 
 
