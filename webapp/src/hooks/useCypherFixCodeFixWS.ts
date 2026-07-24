@@ -290,7 +290,7 @@ export function useCypherFixCodeFixWS({
 
     ws.onerror = () => {
       if (!isAuthenticatedRef.current) {
-        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent', { url }))
       }
       setStatus('error')
     }
@@ -305,7 +305,7 @@ export function useCypherFixCodeFixWS({
       }
       if (status !== 'completed' && status !== 'error') {
         if (!wasAuthenticated) {
-          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent', { url }))
           setStatus('error')
         } else {
           setStatus('disconnected')

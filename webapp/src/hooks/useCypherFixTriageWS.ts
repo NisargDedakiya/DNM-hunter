@@ -185,7 +185,7 @@ export function useCypherFixTriageWS({
       // A WS error before we authenticate means the agent container isn't
       // reachable — surface an actionable message, not "WebSocket connection error".
       if (!isAuthenticatedRef.current) {
-        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+        setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent', { url }))
       }
       setStatus('error')
     }
@@ -201,7 +201,7 @@ export function useCypherFixTriageWS({
       if (status !== 'completed' && status !== 'error') {
         if (!wasAuthenticated) {
           // Closed before ever connecting → the agent service is unreachable.
-          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+          setError(backendUnreachableMessage('AI agent service (port 8090)', 'agent', { url }))
           setStatus('error')
         } else {
           setStatus('disconnected')

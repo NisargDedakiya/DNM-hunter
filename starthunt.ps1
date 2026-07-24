@@ -152,6 +152,25 @@ function Compose-Up([switch]$Build, [string[]]$Files) {
   & docker @a
 }
 
+function Git-Pull {
+  # `update` should pull the latest code THEN rebuild (that's what the docs say
+  # and what the bash launcher does). Without this, `update` only rebuilt the
+  # local — possibly stale — checkout, so pushed fixes never reached the running
+  # containers. Best-effort: warn and continue on any problem so a rebuild still
+  # happens (e.g. a downloaded ZIP that isn't a git checkout).
+  if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    Warn "git not found — skipping pull; rebuilding the current code."; return
+  }
+  if (-not (Test-Path (Join-Path $PSScriptRoot '.git'))) {
+    Warn "This folder isn't a git checkout (downloaded ZIP?) — can't pull. Download the latest release to update, then re-run."; return
+  }
+  Info "Pulling the latest changes…"
+  & git -C $PSScriptRoot pull --ff-only
+  if ($LASTEXITCODE -ne 0) {
+    Warn "git pull failed (local changes or a diverged branch). Rebuilding the current code. To update manually: 'git stash' then 'git pull', or resolve the conflict, and re-run '.\starthunt.ps1 update'."
+  } else { Ok "Updated to the latest code." }
+}
+
 function Start-Stack([switch]$Build) {
   Ensure-Env; Ensure-AuthSecrets; Ensure-DbSecrets
   $first = -not @(& docker ps -a --filter 'name=nisarghunter-' -q 2>$null)
@@ -175,7 +194,7 @@ switch ($Command.ToLower()) {
   'restart' { Preflight; & docker compose down; Banner; Start-Stack }
   'status'  { Preflight; & docker compose ps }
   'logs'    { Preflight; if ($Arg1) { & docker compose logs -f $Arg1 } else { & docker compose logs -f } }
-  'update'  { Banner; Preflight; Info "Rebuilding + restarting…"; Start-Stack -Build }
+  'update'  { Banner; Preflight; Git-Pull; Info "Rebuilding + restarting…"; Start-Stack -Build }
   'reinstall' { Banner; Preflight; Start-Stack -Build }
   { $_ -in @('help', '-h', '--help') } { Banner; Get-Help $PSCommandPath -Detailed | Out-Host }
   default { Die "Unknown command: $Command  (try: .\starthunt.ps1 help)" }

@@ -29,7 +29,7 @@ export async function orchestratorFetch(url: string | URL, init: RequestInit = {
     if (isUnreachableError(err)) {
       throw new Error(backendUnreachableMessage(
         'recon orchestrator service', 'recon-orchestrator',
-        err instanceof Error ? err.message : undefined))
+        { url: String(url), detail: err instanceof Error ? err.message : String(err) }))
     }
     throw err
   }

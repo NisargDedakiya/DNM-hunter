@@ -277,10 +277,10 @@ export function useAgentWebSocket({
     const error = new Error(
       isAuthenticatedRef.current
         ? 'WebSocket error occurred'
-        : backendUnreachableMessage('AI agent service (port 8090)', 'agent'))
+        : backendUnreachableMessage('AI agent service (port 8090)', 'agent', { url: getWebSocketUrl() }))
     setError(error)
     onError?.(error)
-  }, [onError])
+  }, [onError, getWebSocketUrl])
 
   // Handle WebSocket close
   const handleClose = useCallback((event: CloseEvent) => {

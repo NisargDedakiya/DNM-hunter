@@ -25,12 +25,22 @@ export function isUnreachableError(err: unknown): boolean {
 /**
  * @param service  human name, e.g. "AI agent service (port 8090)"
  * @param logsName compose service to tail, e.g. "agent" or "recon-orchestrator"
- * @param extra    optional underlying detail to append in parentheses
+ * @param opts.url     the exact endpoint that was tried (shown as "where")
+ * @param opts.detail  the underlying error text (shown as "what")
  */
-export function backendUnreachableMessage(service: string, logsName: string, extra?: string): string {
-  const base =
-    `The ${service} isn't reachable. It may still be starting after a rebuild, or not running. ` +
-    `Check it with "starthunt status" (Windows: .\\starthunt.ps1 status) and view its logs with ` +
+export function backendUnreachableMessage(
+  service: string,
+  logsName: string,
+  opts?: { url?: string; detail?: string } | string,
+): string {
+  // Back-compat: a bare string is treated as `detail`.
+  const o = typeof opts === 'string' ? { detail: opts } : (opts || {})
+  const where = o.url ? `\nEndpoint: ${o.url}` : ''
+  const what = o.detail ? `\nUnderlying error: ${o.detail}` : ''
+  return (
+    `The ${service} isn't reachable, so this feature can't run.${where}${what}\n\n` +
+    `Fix: it may still be starting after a rebuild, or not running. Check it with ` +
+    `"starthunt status" (Windows: .\\starthunt.ps1 status) and view its logs with ` +
     `"starthunt logs ${logsName}". These AI features also need an LLM API key configured in .env.`
-  return extra ? `${base} (${extra})` : base
+  )
 }
