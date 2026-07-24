@@ -109,14 +109,36 @@ def _get_host_path(mount_map: dict[str, str], container_path: str, env_var: str)
 # Auto-detect host mount paths from this container's own mounts
 _host_mounts = _detect_host_mounts()
 
-# Configuration — resolved dynamically, no hardcoded machine paths
-RECON_PATH = _get_host_path(_host_mounts, "/app/recon", "RECON_PATH")
+
+def _optional_host_path(container_path: str, env_var: str, feature: str) -> str:
+    """Resolve a host path, but NEVER crash the process if it can't be resolved.
+
+    The orchestrator spawns sibling containers with `-v <hostpath>:...` bind
+    mounts, so it needs the *host* path of its own mounts. Auto-detection can
+    fail (e.g. the Docker socket inspect misbehaves on some Docker Desktop / WSL2
+    setups). Previously a failure raised at import time and took the WHOLE
+    service down — the webapp then saw "fetch failed" because the orchestrator
+    container was crash-looping. Instead we degrade: the service still boots and
+    serves /health, and the individual feature reports a clear error (see the
+    start routes) only when it actually needs the missing path. Set the env var
+    (e.g. RECON_PATH) to override detection."""
+    try:
+        return _get_host_path(_host_mounts, container_path, env_var)
+    except RuntimeError as e:
+        logger.warning(f"{feature}: host path unresolved — {e} "
+                       f"(the orchestrator still starts; this feature needs it)")
+        return ""
+
+
+# Configuration — resolved dynamically, no hardcoded machine paths. Resolution
+# failures degrade gracefully (empty string) so the API stays reachable.
+RECON_PATH = _optional_host_path("/app/recon", "RECON_PATH", "Recon")
 RECON_IMAGE = os.getenv("RECON_IMAGE", "nisarghunter-recon:latest")
-GVM_SCAN_PATH = _get_host_path(_host_mounts, "/app/gvm_scan", "GVM_SCAN_PATH")
+GVM_SCAN_PATH = _optional_host_path("/app/gvm_scan", "GVM_SCAN_PATH", "GVM scan")
 GVM_IMAGE = os.getenv("GVM_IMAGE", "nisarghunter-vuln-scanner:latest")
-GITHUB_HUNT_PATH = _get_host_path(_host_mounts, "/app/github_secret_hunt", "GITHUB_HUNT_PATH")
+GITHUB_HUNT_PATH = _optional_host_path("/app/github_secret_hunt", "GITHUB_HUNT_PATH", "GitHub hunt")
 GITHUB_HUNT_IMAGE = os.getenv("GITHUB_HUNT_IMAGE", "nisarghunter-github-hunter:latest")
-TRUFFLEHOG_PATH = _get_host_path(_host_mounts, "/app/trufflehog_scan", "TRUFFLEHOG_PATH")
+TRUFFLEHOG_PATH = _optional_host_path("/app/trufflehog_scan", "TRUFFLEHOG_PATH", "TruffleHog")
 TRUFFLEHOG_IMAGE = os.getenv("TRUFFLEHOG_IMAGE", "nisarghunter-trufflehog:latest")
 try:
     AI_ATTACK_SURFACE_PATH = _get_host_path(_host_mounts, "/app/ai_attack_surface_scan", "AI_ATTACK_SURFACE_PATH")
@@ -506,6 +528,19 @@ async def start_recon(project_id: str, request: ReconStartRequest):
     """
     if not container_manager:
         raise HTTPException(status_code=503, detail="Service not initialized")
+
+    # The recon container is spawned with a `-v <RECON_PATH>:/app/recon` bind
+    # mount, so RECON_PATH must resolve to a real host path. If host-mount
+    # auto-detection failed at boot (empty), fail here with an actionable
+    # message instead of spawning a container with a broken mount.
+    if not RECON_PATH:
+        raise HTTPException(
+            status_code=503,
+            detail="Recon can't start: the orchestrator could not determine the host "
+                   "path for its /app/recon mount (Docker host-mount auto-detection "
+                   "failed). Set RECON_PATH in the recon-orchestrator environment to the "
+                   "host path of the repo's ./recon folder, or check "
+                   "'starthunt logs recon-orchestrator'.")
 
     # RoE time window check: fetch project settings and verify
     if request.webapp_api_url:
